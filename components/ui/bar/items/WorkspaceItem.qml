@@ -1,6 +1,9 @@
 import QtQuick
+import qs.config
 
 Text {
     text: "Workspace"
-    color: "white"
+    color: Theme.textPrimary
+    font.family: Typography.fontFamily
+    font.pixelSize: Typography.sizeMD
 }

@@ -2,13 +2,17 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.components.widgets.misc
+import qs.components.elements
+import qs.components.widgets.media.nowplaying
 
 Scope {
     Variants {
         model: Quickshell.screens
 
         PanelWindow {
+            required property var modelData
             id: overlay
+
             screen: modelData
             color: "transparent"
 
@@ -21,6 +25,7 @@ Scope {
 
             Component.onCompleted: {
                 if (overlay.WlrLayershell != null) {
+                    overlay.WlrLayershell.exclusiveZone = -1
                     overlay.WlrLayershell.layer = WlrLayer.Background
                     overlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
                 }
@@ -34,9 +39,12 @@ Scope {
             }
             
             LabelBoxWidget {
-                text: "Goodbye world"
+                text: "Rang"
                 posLeft: 10
                 posBottom: 10
+            }
+
+            NowPlayingWidget {
             }
         }
     }
