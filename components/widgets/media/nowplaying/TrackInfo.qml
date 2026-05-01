@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Shapes
 import qs.config
 import Quickshell.Services.Mpris
 
@@ -7,11 +8,12 @@ Item {
 
     property real s
     property color primary
-
     required property var player
 
     property string trackTitle: ""
     property string artist: ""
+
+    property bool isPlaying: false
 
     function updateTrack() {
         let t = player && player.trackTitle ? player.trackTitle : "No Track"
@@ -28,54 +30,120 @@ Item {
         }
     }
 
-    onPlayerChanged: updateTrack()
+    function syncPlayback() {
+    if (!player) {
+        isPlaying = false
+        return
+    }
+
+    let newState = player.isPlaying === true
+
+    if (isPlaying !== newState) {
+        isPlaying = newState
+    }
+}
+
+    onPlayerChanged: {
+        playerConn.target = null
+        playerConn.target = root.player
+
+        updateTrack()
+        syncPlayback()
+    }
 
     Connections {
-        target: root.player ? root.player : null
+        id: playerConn
+        target: root.player
+
+        ignoreUnknownSignals: true
+
         function onTrackChanged() { root.updateTrack() }
-        function onPostTrackChanged() { root.updateTrack() }
-        function onPlaybackStateChanged() { root.updateTrack() }
+
+        function onPlaybackStateChanged() {
+            root.syncPlayback()
+        }
     }
 
     Timer {
         interval: 500
         running: true
         repeat: true
-        onTriggered: root.updateTrack()
+        onTriggered: root.syncPlayback()
     }
 
-    Component.onCompleted: updateTrack()
+    Component.onCompleted: {
+        updateTrack()
+        syncPlayback()
+    }
 
-    Rectangle {
-        id: coverBox
+    Item {
+        id: controlBox
+
         x: 212 * s
         y: 38 * s
 
         width: 20 * s
         height: 20 * s
-        color: primary
 
-        opacity: 0.9
+        MouseArea {
+            anchors.fill: parent
 
-        SequentialAnimation on opacity {
-            running: true
-            loops: Animation.Infinite
+            onClicked: {
+                if (!root.player || !root.player.canControl)
+                    return
 
-            // offset supaya tidak bareng dengan arrow
-            PauseAnimation { duration: 450 }
+                if (root.isPlaying)
+                    root.player.pause()
+                else
+                    root.player.play()
 
-            NumberAnimation {
-                from: 0.9
-                to: 0.55
-                duration: 1200
-                easing.type: Easing.InOutQuad
+                root.syncPlayback()
+            }
+        }
+
+        Item {
+            width: 12 * s
+            height: 12 * s
+
+            x: (controlBox.width - width) / 2
+            y: (controlBox.height - height) / 2
+
+            Canvas {
+                anchors.fill: parent
+                visible: !root.isPlaying
+
+                onPaint: {
+                    var ctx = getContext("2d")
+                    ctx.clearRect(0, 0, width, height)
+
+                    ctx.fillStyle = Theme.textPrimary
+                    ctx.beginPath()
+                    ctx.moveTo(0, 0)
+                    ctx.lineTo(width, height / 2)
+                    ctx.lineTo(0, height)
+                    ctx.closePath()
+                    ctx.fill()
+                }
             }
 
-            NumberAnimation {
-                from: 0.55
-                to: 0.9
-                duration: 1200
-                easing.type: Easing.InOutQuad
+            Row {
+                anchors.fill: parent
+                spacing: width * 0.2
+                visible: root.isPlaying
+
+                Rectangle {
+                    width: parent.width * 0.35
+                    height: parent.height
+                    color: Theme.textPrimary
+                    radius: 1 * s
+                }
+
+                Rectangle {
+                    width: parent.width * 0.35
+                    height: parent.height
+                    color: Theme.textPrimary
+                    radius: 1 * s
+                }
             }
         }
     }
@@ -167,6 +235,7 @@ Item {
             easing.type: Easing.Linear
         }
     }
+
     property real contentWidth: {
         let t = title1.width
         let a = artist1.width

@@ -18,7 +18,6 @@ Item {
         }
     ]
 
-    // ROTATION
     RotationAnimation on rotation {
         running: root.animate
         loops: Animation.Infinite
@@ -28,7 +27,6 @@ Item {
         easing.type: Easing.InOutQuad
     }
 
-    // SCALE
     SequentialAnimation {
         running: root.animate
         loops: Animation.Infinite

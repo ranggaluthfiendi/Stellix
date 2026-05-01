@@ -19,9 +19,6 @@ Item {
     width: 90
     height: 24
 
-    // =========================
-    // CLIENT DATA (REAL SOURCE)
-    // =========================
     Process {
         id: clientsProc
         command: ["hyprctl", "clients", "-j"]
@@ -61,9 +58,6 @@ Item {
         return workspacesWithClients.includes(wsId)
     }
 
-    // =========================
-    // SCROLL
-    // =========================
     MouseArea {
         anchors.fill: parent
         acceptedButtons: Qt.NoButton
@@ -128,9 +122,6 @@ Item {
                     anchors.fill: parent
                     radius: 0
 
-                    // =========================
-                    // COLOR LOGIC (4 STATE)
-                    // =========================
                     color: {
                         if (active && hasWin)
                             return Theme.accent
@@ -142,7 +133,7 @@ Item {
                                 0.4
                             )
                         if (!active && hasWin)
-                            return Theme.textPrimary   // ⬅ state 3 (full warna border)
+                            return Theme.textPrimary
                         return "transparent"
                     }
 
@@ -151,11 +142,8 @@ Item {
 
                     opacity: (!active && !hasWin) ? 0.35 : 1
 
-                    // =========================
-                    // BLINK (STATE 1 & 2)
-                    // =========================
                     SequentialAnimation on opacity {
-                        running: active   // ⬅ sekarang state 1 & 2 blink
+                        running: active
                         loops: Animation.Infinite
 
                         NumberAnimation { from: 1; to: 0.6; duration: 500 }
@@ -164,6 +152,7 @@ Item {
                 }
 
                 MouseArea {
+                    cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     onClicked: Hyprland.dispatch(`workspace ${wsId}`)
                 }

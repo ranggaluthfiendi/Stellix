@@ -14,15 +14,13 @@ Scope {
     property bool autoHideEnabled: true
 
     readonly property bool expanded: (
-        !autoHideEnabled
-        || root.hovering
-        || root.pinned
+        pinned || (autoHideEnabled && hovering)
     )
 
     PanelWindow {
-        id: barWindow
+        id: trigger
 
-        implicitHeight: expanded ? Dimens.barHeight : 2
+        implicitHeight: 2
         color: "transparent"
 
         anchors {
@@ -31,58 +29,88 @@ Scope {
             right: true
         }
 
+        visible: !root.expanded
+
         Component.onCompleted: {
-            if (barWindow.WlrLayershell) {
-                barWindow.WlrLayershell.layer = WlrLayer.Overlay
-                barWindow.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
+            if (trigger.WlrLayershell) {
+                trigger.WlrLayershell.layer = WlrLayer.Overlay
+                trigger.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
             }
-        }
-
-        property real offset: expanded ? 0 : -Dimens.barHeight
-        property real contentOpacity: expanded ? 1 : 0
-
-        Behavior on implicitHeight {
-            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-        }
-
-        Behavior on offset {
-            NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-        }
-
-        Behavior on contentOpacity {
-            NumberAnimation { duration: 140; easing.type: Easing.InOutQuad }
-        }
-
-        HoverHandler {
-            onHoveredChanged: root.hovering = hovered
         }
 
         MouseArea {
             anchors.fill: parent
+            hoverEnabled: true
 
-            onClicked: {
-                root.pinned = !root.pinned
+            onEntered: {
+                if (!root.pinned)
+                    root.hovering = true
             }
+        }
+    }
 
-            onDoubleClicked: {
-                root.autoHideEnabled = !root.autoHideEnabled
+    PanelWindow {
+        id: bar
+
+        implicitHeight: Dimens.barHeight
+        color: Theme.bgPrimary
+
+        anchors {
+            top: true
+            left: true
+            right: true
+        }
+
+        margins.top: root.expanded ? 0 : -Dimens.barHeight
+
+        Behavior on margins.top {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
             }
         }
 
-        Item {
-            anchors.fill: parent
-            y: barWindow.offset
-            opacity: barWindow.contentOpacity
-
-            RowLayout {
-                anchors.fill: parent
-
-                BarLeft {}
-                Item { Layout.fillWidth: true }
-                BarCenter {}
-                Item { Layout.fillWidth: true }
-                BarRight {}
+        Component.onCompleted: {
+            if (bar.WlrLayershell) {
+                bar.WlrLayershell.layer = WlrLayer.Overlay
+                bar.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
             }
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            acceptedButtons: Qt.RightButton
+
+            onPressed: function(mouse) {
+                if (mouse.button === Qt.RightButton)
+                    root.pinned = !root.pinned
+            }
+
+            onDoubleClicked: function(mouse) {
+                if (mouse.button === Qt.RightButton)
+                    root.autoHideEnabled = !root.autoHideEnabled
+            }
+
+            onEntered: {
+                if (!root.pinned)
+                    root.hovering = true
+            }
+
+            onExited: {
+                if (!root.pinned)
+                    root.hovering = false
+            }
+        }
+
+        RowLayout {
+            anchors.fill: parent
+
+            BarLeft {}
+            Item { Layout.fillWidth: true }
+            BarCenter {}
+            Item { Layout.fillWidth: true }
+            BarRight {}
         }
     }
 }

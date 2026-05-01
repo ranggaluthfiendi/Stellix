@@ -6,45 +6,38 @@ import qs.config
 
 Singleton {
 
-    // Helper
     function dp(x) { return Math.round(x * Appearance.scaleFactor) }
 
-    // Base Colors (editable)
-    property color bgPrimary: "#1e1e2e"
-    property color bgSecondary: "#313244"
-    property color surface: "#45475a"
+    property color accent: "#d7d1b8"
+    property color accentAlt: "#cfc8ad"
 
-    // Text Colors
-    property color textPrimary: "#cdd6f4"
-    property color textSecondary: "#bac2de"
-    property color textMuted: "#6c7086"
+    property color bgPrimary: "#1c1b18"
+    property color bgSecondary: "#26241f"
+    property color surface: "#34322c"
 
-    // Accent
-    property color accent: "#89b4fa"
-    property color accentAlt: "#f5c2e7"
+    property color textPrimary: "#e8e4d6"
+    property color textSecondary: "#d7d1b8"
+    property color textMuted: "#8e8a7a"
 
-    // Status Colors
-    property color success: "#a6e3a1"
-    property color warning: "#f9e2af"
-    property color danger: "#f38ba8"
+    property color border: "#4f4b42"
 
-    // Transparency
+    property color accentSoft: "#bdb79f"
+
+    property color success: "#9fd19a"
+    property color warning: "#e6c97a"
+    property color danger: "#d98c8c"
+
     property real opacityPanel: 0.9
     property real opacityOverlay: 0.75
 
-    // Radius (BASE editable)
     property int radiusSmallBase: 6
     property int radiusMediumBase: 10
     property int radiusLargeBase: 16
 
-    // Radius (COMPUTED scaled)
     readonly property int radiusSmall: dp(radiusSmallBase)
     readonly property int radiusMedium: dp(radiusMediumBase)
     readonly property int radiusLarge: dp(radiusLargeBase)
 
-    // Border
     property int borderWidthBase: 1
     readonly property int borderWidth: dp(borderWidthBase)
-
-    property color border: "#585b70"
 }

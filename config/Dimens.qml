@@ -5,29 +5,23 @@ import qs.config
 
 Singleton {
 
-    // Helper biar rapi
     function dp(x) { return Math.round(x * Appearance.scaleFactor) }
 
-    // === Bar ===
     readonly property int barHeight: dp(32)
     readonly property int barPadding: dp(10)
 
-    // === Spacing ===
     readonly property int spacingXS: dp(4)
     readonly property int spacingSM: dp(8)
     readonly property int spacingMD: dp(12)
     readonly property int spacingLG: dp(16)
 
-    // === Margin ===
     readonly property int marginScreen: dp(8)
 
-    // === Icon ===
     readonly property int iconXS: dp(12)
     readonly property int iconSM: dp(16)
     readonly property int iconMD: dp(20)
     readonly property int iconLG: dp(24)
 
-    // === Widget ===
     readonly property int widgetHeight: dp(26)
     readonly property int widgetMinWidth: dp(40)
 }

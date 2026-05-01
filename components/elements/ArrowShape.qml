@@ -11,7 +11,6 @@ Item {
     width: 42 * s
     height: 37 * s
 
-    // ===== LEFT TRIANGLE (CLOSED) =====
     Shape {
         anchors.fill: parent
 
@@ -24,11 +23,10 @@ Item {
 
             PathLine { x: 10.5 * s; y: 7.675 * s }
             PathLine { x: 10.5 * s; y: 29.325 * s }
-            PathLine { x: 0 * s; y: 18.5 * s }   // CLOSE MANUAL
+            PathLine { x: 0 * s; y: 18.5 * s }
         }
     }
 
-    // ===== RIGHT TRIANGLE (CLOSED) =====
     Shape {
         anchors.fill: parent
 
@@ -41,11 +39,10 @@ Item {
 
             PathLine { x: 10.5 * s; y: 29.325 * s }
             PathLine { x: 10.5 * s; y: 7.675 * s }
-            PathLine { x: 41.25 * s; y: 18.5 * s }  // CLOSE MANUAL
+            PathLine { x: 41.25 * s; y: 18.5 * s }
         }
     }
 
-    // ===== CIRCLE (HOLE SIMULATION) =====
     Rectangle {
         width: 4 * s
         height: 4 * s
@@ -57,7 +54,6 @@ Item {
         color: root.background
     }
 
-    // ===== TOP SQUARE =====
     Rectangle {
         x: 36 * s
         y: 0
@@ -66,7 +62,6 @@ Item {
         color: root.primary
     }
 
-    // ===== BOTTOM SQUARE =====
     Rectangle {
         x: 36 * s
         y: 32 * s
