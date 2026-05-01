@@ -31,21 +31,7 @@ Scope {
                 }
             }
 
-            LabelBoxWidget {
-                text: "Hello world"
-                posLeft: 10
-                posTop: 10
-                backgroundColor: "#800000"
-            }
-            
-            LabelBoxWidget {
-                text: "Rang"
-                posLeft: 10
-                posBottom: 10
-            }
-
-            NowPlayingWidget {
-            }
+            NowPlayingWidget {}
         }
     }
 }
