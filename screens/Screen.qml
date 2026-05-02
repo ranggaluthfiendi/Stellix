@@ -5,6 +5,7 @@ import qs.components.widgets.misc
 import qs.components.elements
 import qs.components.widgets.media.nowplaying
 import qs.components.widgets.system
+import qs.services
 
 Scope {
     Variants {
@@ -34,6 +35,37 @@ Scope {
 
             NowPlayingWidget {}
             ClockWidget{}
+
+            Item {
+                anchors.fill: parent
+                z: 9999
+
+                visible: SysTrayState.openedMenu !== null
+
+                MouseArea {
+                    anchors.fill: parent
+                    acceptedButtons: Qt.AllButtons
+
+                    onPressed: (mouse) => {
+                        if (SysTrayState.openedMenu) {
+                            const p = SysTrayState.openedMenu.mapFromItem(
+                                parent,
+                                mouse.x,
+                                mouse.y
+                            )
+
+                            if (
+                                p.x < 0 ||
+                                p.y < 0 ||
+                                p.x > SysTrayState.openedMenu.width ||
+                                p.y > SysTrayState.openedMenu.height
+                            ) {
+                                SysTrayState.closeAll()
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

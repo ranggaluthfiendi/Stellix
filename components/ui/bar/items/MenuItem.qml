@@ -9,7 +9,6 @@ RowLayout {
 
     property real s: Scales.uiScale
 
-    spacing: 20 * s
 
     BatteryWidget {
         s: 1.2 * root.s

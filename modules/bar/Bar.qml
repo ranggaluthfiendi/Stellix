@@ -135,5 +135,21 @@ Scope {
             Item { Layout.fillWidth: true }
             BarRight {  }
         }
+
+        Item {
+            anchors.fill: parent
+            z: 9999
+
+            visible: SysTrayState.openedMenu !== null
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.AllButtons
+
+                onPressed: {
+                    SysTrayState.closeAll()
+                }
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.components.ui.bar.items
+import qs.components.widgets.systemtray
 import qs.config
 
 RowLayout {
@@ -14,4 +15,6 @@ RowLayout {
 
     WorkspaceItem {
     }
+
+    SysTray {}
 }

@@ -11,7 +11,7 @@ Item {
     property real s: Scales.uiScale
     property bool showLabel: true
 
-    width: showLabel ? 36 * s : 16 * s
+    width: showLabel ? 56 * s : 16 * s
     height: 16 * s
 
     readonly property var battery: UPower.displayDevice
@@ -34,24 +34,46 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        spacing: 5 * root.s
+        spacing: 2 * root.s
 
-        Text {
-            visible: root.showLabel
-
-            text: root.ready
-                  ? (root.charging ? "⚡ " : "") + root.percentageInt + "%"
-                  : "--"
-
-            color: Theme.textPrimary
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeXS * root.s
-            font.weight: Typography.weightNormal
-
-            verticalAlignment: Text.AlignVCenter
-            Layout.alignment: Qt.AlignVCenter
-
+        Item {
+            Layout.preferredWidth: 36 * root.s
+            Layout.minimumWidth: 36 * root.s
+            Layout.maximumWidth: 36 * root.s
             Layout.preferredHeight: parent.height
+
+            Text {
+                id: label
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+
+                text: root.ready ? root.percentageInt + "%" : "--"
+
+                color: Theme.textPrimary
+                font.family: Typography.fontFamily
+                font.pixelSize: Typography.sizeXS * root.s
+                font.weight: Typography.weightNormal
+            }
+
+            LightningShape {
+                id: lightning
+                visible: root.charging
+                s: root.s * 0.7
+
+                anchors.verticalCenter: label.verticalCenter
+                anchors.right: label.left
+                anchors.rightMargin: 0
+
+                opacity: root.charging ? 1 : 0
+
+                SequentialAnimation on opacity {
+                    running: root.charging
+                    loops: Animation.Infinite
+
+                    NumberAnimation { from: 1; to: 0.2; duration: 800 }
+                    NumberAnimation { from: 0.2; to: 1; duration: 500 }
+                }
+            }
         }
 
         BatteryShape {
@@ -61,6 +83,8 @@ Item {
             strokeColor: Theme.textPrimary
 
             Layout.preferredWidth: 16 * root.s
+            Layout.minimumWidth: 16 * root.s
+            Layout.maximumWidth: 16 * root.s
             Layout.preferredHeight: 16 * root.s
             Layout.alignment: Qt.AlignVCenter
         }

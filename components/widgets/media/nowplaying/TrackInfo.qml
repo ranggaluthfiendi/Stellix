@@ -6,7 +6,7 @@ import Quickshell.Services.Mpris
 Item {
     id: root
 
-    property real s: Scales.uiScale
+    property real s: Scales.uiScale * 0.6
     property color primary
     required property var player
 
@@ -46,7 +46,6 @@ Item {
     onPlayerChanged: {
         playerConn.target = null
         playerConn.target = root.player
-
         updateTrack()
         syncPlayback()
     }
@@ -54,7 +53,6 @@ Item {
     Connections {
         id: playerConn
         target: root.player
-
         ignoreUnknownSignals: true
 
         function onTrackChanged() { root.updateTrack() }
@@ -147,10 +145,12 @@ Item {
 
     Item {
         id: titleWrap
+
         x: 245 * s
         y: 24 * s
+
         width: 350 * s
-        height: 24 * s
+        height: 28 * s
         clip: true
 
         property real scroll: 0
@@ -165,7 +165,7 @@ Item {
             text: trackTitle
             color: primary
             font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeLG * s
+            font.pixelSize: Typography.sizeSM
             x: -titleWrap.scroll
         }
 
@@ -173,7 +173,7 @@ Item {
             text: trackTitle
             color: primary
             font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeLG * s
+            font.pixelSize: Typography.sizeSM
             x: title1.width + titleWrap.gap - titleWrap.scroll
             visible: titleWrap.overflow
         }
@@ -190,10 +190,12 @@ Item {
 
     Item {
         id: artistWrap
+
         x: 245 * s
-        y: 50 * s
+        y: 52 * s
+
         width: 350 * s
-        height: 20 * s
+        height: 24 * s
         clip: true
 
         property real scroll: 0
@@ -208,7 +210,7 @@ Item {
             text: artist
             color: primary
             font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeMD * s
+            font.pixelSize: Typography.sizeXS
             font.weight: Typography.weightBold
             x: -artistWrap.scroll
         }
@@ -217,7 +219,7 @@ Item {
             text: artist
             color: primary
             font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeMD * s
+            font.pixelSize: Typography.sizeXS
             font.weight: Typography.weightBold
             x: artist1.width + artistWrap.gap - artistWrap.scroll
             visible: artistWrap.overflow
@@ -234,9 +236,7 @@ Item {
     }
 
     property real contentWidth: {
-        let t = title1.width
-        let a = artist1.width
-        let w = Math.max(t, a)
+        let w = Math.max(title1.width, artist1.width)
         return (w > 0 ? w : 200 * s) + 100 * s
     }
 }
