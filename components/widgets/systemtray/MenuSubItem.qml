@@ -10,6 +10,9 @@ ColumnLayout {
 
     spacing: Theme.dp(2)
 
+    implicitWidth: childrenRect.width
+    implicitHeight: childrenRect.height
+
     QsMenuOpener {
         id: opener
         menu: root.menu
@@ -27,7 +30,8 @@ ColumnLayout {
                 ? sep
                 : item
 
-            Layout.fillWidth: true
+            Layout.fillWidth: false
+            Layout.preferredWidth: implicitWidth
         }
     }
 
@@ -36,9 +40,12 @@ ColumnLayout {
 
         Rectangle {
             height: Theme.dp(1)
+            width: implicitWidth
             color: Theme.textMuted
             opacity: 0.3
-            Layout.fillWidth: true
+
+            Layout.fillWidth: false
+            Layout.preferredWidth: implicitWidth
         }
     }
 
@@ -47,6 +54,9 @@ ColumnLayout {
 
         MenuSubItemDelegate {
             entry: modelData
+
+            Layout.fillWidth: false
+            Layout.preferredWidth: implicitWidth
         }
     }
 }

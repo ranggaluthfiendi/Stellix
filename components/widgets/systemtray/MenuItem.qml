@@ -14,11 +14,15 @@ Item {
 
     readonly property bool isEnabled: entry && entry.enabled
 
-    readonly property bool isActiveSubmenu:
-        SysTrayState.openedSubmenuEntry === entry
+    readonly property bool isActiveSubmenu: SysTrayState.openedSubmenuEntry === entry
 
     implicitHeight: Theme.dp(28)
-    implicitWidth: row.implicitWidth + Theme.dp(12)
+    implicitWidth: row.implicitWidth + Theme.dp(16)
+
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+    }
 
     scale: isEnabled && mouse.containsMouse ? 1.02 : 1.0
 
@@ -34,16 +38,16 @@ Item {
         radius: 0
 
         color: {
-            if (!isEnabled)
-                return "transparent"
+            if (!isEnabled) return "transparent"
 
-            if (isActiveSubmenu)
+            if (isActiveSubmenu) {
                 return Qt.rgba(
                     Theme.accentSoft.r,
                     Theme.accentSoft.g,
                     Theme.accentSoft.b,
                     0.22
                 )
+            }
 
             return mouse.containsMouse
                 ? Qt.rgba(
@@ -71,22 +75,19 @@ Item {
 
         Text {
             text: entry && entry.text ? entry.text : ""
-            color: isEnabled
-                   ? Theme.textPrimary
-                   : Theme.textMuted
+            color: isEnabled ? Theme.textPrimary : Theme.textMuted
 
-            Layout.fillWidth: true
-            elide: Text.ElideRight
+            Layout.fillWidth: false
+            wrapMode: Text.NoWrap
+            elide: Text.ElideNone
+            horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
         }
 
         Text {
             text: entry && entry.hasChildren ? "▶" : ""
 
-            color: isActiveSubmenu
-                   ? Theme.accent
-                   : Theme.textMuted
-
+            color: isActiveSubmenu ? Theme.accent : Theme.textMuted
             visible: entry && entry.hasChildren
         }
     }
@@ -97,8 +98,7 @@ Item {
         repeat: false
 
         onTriggered: {
-            if (!isEnabled || !entry || !entry.hasChildren)
-                return
+            if (!isEnabled || !entry || !entry.hasChildren) return
 
             if (SysTrayState.openedSubmenuEntry !== entry) {
                 root.requestSubmenu(entry, root)
@@ -111,32 +111,26 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
 
-        cursorShape: isEnabled
-            ? Qt.PointingHandCursor
-            : Qt.ArrowCursor
-
+        cursorShape: isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
         enabled: isEnabled
 
         onEntered: {
-            if (entry && entry.hasChildren) {
-                hoverTimer.start()
-            }
+            if (entry && entry.hasChildren) hoverTimer.start()
         }
 
         onExited: {
+            hoverTimer.stop()
         }
 
         onClicked: {
             if (!entry) return
 
             if (entry.hasChildren) {
-
                 if (SysTrayState.openedSubmenuEntry === entry) {
                     root.requestSubmenu(null, null)
                 } else {
                     root.requestSubmenu(entry, root)
                 }
-
             } else {
                 try { entry.triggered() } catch(e) {}
                 root.close()

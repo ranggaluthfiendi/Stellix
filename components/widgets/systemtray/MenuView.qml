@@ -6,6 +6,9 @@ import qs.config
 
 ColumnLayout {
     id: root
+    width: implicitWidth
+    implicitWidth: childrenRect.width
+    implicitHeight: childrenRect.height
 
     property var menu
 

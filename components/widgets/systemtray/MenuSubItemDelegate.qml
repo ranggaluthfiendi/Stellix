@@ -10,26 +10,26 @@ Item {
     property bool expanded: false
 
     implicitHeight: Theme.dp(28)
-    implicitWidth: row.implicitWidth + Theme.dp(12)
+    implicitWidth: row.implicitWidth + Theme.dp(16)
 
     ColumnLayout {
-        anchors.fill: parent
         spacing: 0
+        width: implicitWidth
 
         Rectangle {
             id: bg
+
             height: Theme.dp(28)
-            Layout.fillWidth: true
-            radius: 0
+            width: implicitWidth
 
             color: mouse.containsMouse
-                   ? Qt.rgba(
-                        Theme.accentSoft.r,
-                        Theme.accentSoft.g,
-                        Theme.accentSoft.b,
-                        0.15
-                     )
-                   : "transparent"
+                ? Qt.rgba(
+                    Theme.accentSoft.r,
+                    Theme.accentSoft.g,
+                    Theme.accentSoft.b,
+                    0.15
+                  )
+                : "transparent"
 
             RowLayout {
                 id: row
@@ -39,13 +39,17 @@ Item {
                 spacing: Theme.dp(6)
 
                 Text {
+                    id: label
+
                     text: entry && entry.text ? entry.text : ""
                     color: entry && entry.enabled
-                           ? Theme.textPrimary
-                           : Theme.textMuted
+                        ? Theme.textPrimary
+                        : Theme.textMuted
 
-                    Layout.fillWidth: true
-                    elide: Text.ElideRight
+                    wrapMode: Text.NoWrap
+                    elide: Text.ElideNone
+
+                    Layout.fillWidth: false
                     verticalAlignment: Text.AlignVCenter
                 }
 
@@ -66,10 +70,7 @@ Item {
 
                     if (entry.hasChildren) {
                         root.expanded = !root.expanded
-
-                        try {
-                            entry.showChildren = root.expanded
-                        } catch(e) {}
+                        try { entry.showChildren = root.expanded } catch(e) {}
                     } else {
                         try { entry.triggered() } catch(e) {}
                     }
@@ -79,6 +80,8 @@ Item {
 
         Loader {
             active: root.expanded && entry && entry.hasChildren
+            visible: active
+
             sourceComponent: submenu
         }
     }
