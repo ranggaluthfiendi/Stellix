@@ -2,20 +2,23 @@ import QtQuick
 import QtQuick.Layouts
 import qs.components.elements
 import qs.config
+import qs.components.widgets.system
 
 RowLayout {
-    spacing: 6
+    id: root
 
-    Text {
-        text: "Menu"
-        color: Theme.textPrimary
-        font.family: Typography.fontFamily
-        font.pixelSize: Typography.sizeMD
+    property real s: Scales.uiScale
+
+    spacing: 20 * s
+
+    BatteryWidget {
+        s: 1.2 * root.s
     }
 
     StarShape {
-        width: 16
-        height: 16
+        s: root.s
+        width: 16 * s
+        height: 16 * s
         color: Theme.textPrimary
     }
 }

@@ -5,6 +5,7 @@ import Quickshell
 import qs.config
 
 Singleton {
+    id: root
 
     property string fontFamily: "JetBrainsMono Nerd Font"
 
@@ -13,10 +14,12 @@ Singleton {
     property int sizeMDBase: 14
     property int sizeLGBase: 16
 
-    readonly property int sizeXS: Math.round(sizeXSBase * Appearance.scaleFactor)
-    readonly property int sizeSM: Math.round(sizeSMBase * Appearance.scaleFactor)
-    readonly property int sizeMD: Math.round(sizeMDBase * Appearance.scaleFactor)
-    readonly property int sizeLG: Math.round(sizeLGBase * Appearance.scaleFactor)
+    function sp(x) { return Math.round(x * Scales.uiScale) }
+
+    readonly property int sizeXS: sp(sizeXSBase)
+    readonly property int sizeSM: sp(sizeSMBase)
+    readonly property int sizeMD: sp(sizeMDBase)
+    readonly property int sizeLG: sp(sizeLGBase)
 
     property int weightNormal: Font.Normal
     property int weightBold: Font.DemiBold

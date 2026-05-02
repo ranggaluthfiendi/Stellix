@@ -16,8 +16,8 @@ Item {
 
     property var workspacesWithClients: []
 
-    width: 90
-    height: 24
+    width: Scales.dp(90)
+    height: Scales.dp(24)
 
     Process {
         id: clientsProc
@@ -82,7 +82,7 @@ Item {
 
     Row {
         anchors.centerIn: parent
-        spacing: 6
+        spacing: Scales.dp(6)
 
         Repeater {
             model: root.wsCount
@@ -97,8 +97,8 @@ Item {
                 property bool active: workspace?.active ?? false
                 property bool hasWin: root.hasWindows(wsId)
 
-                width: 14
-                height: 14
+                width: Scales.dp(14)
+                height: Scales.dp(14)
 
                 Component.onCompleted: {
                     const ws = Hyprland.workspaces.values.find(w => w.id === wsId)
@@ -137,7 +137,7 @@ Item {
                         return "transparent"
                     }
 
-                    border.width: (!active && !hasWin) ? 1 : 0
+                    border.width: (!active && !hasWin) ? Scales.dp(1) : 0
                     border.color: Theme.textPrimary
 
                     opacity: (!active && !hasWin) ? 0.35 : 1

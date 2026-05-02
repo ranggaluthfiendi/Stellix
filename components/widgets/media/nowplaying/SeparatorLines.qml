@@ -1,9 +1,10 @@
 import QtQuick
+import qs.config
 
 Item {
     id: root
 
-    property real s
+    property real s: Scales.uiScale
     property color secondary
 
     property real contentWidth: 300 * s

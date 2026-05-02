@@ -4,6 +4,7 @@ import Quickshell.Wayland
 import qs.components.widgets.misc
 import qs.components.elements
 import qs.components.widgets.media.nowplaying
+import qs.components.widgets.system
 
 Scope {
     Variants {
@@ -32,6 +33,7 @@ Scope {
             }
 
             NowPlayingWidget {}
+            ClockWidget{}
         }
     }
 }

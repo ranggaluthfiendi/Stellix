@@ -5,22 +5,44 @@ import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.components.ui.bar.sections
 import qs.config
+import qs.services
 
 Scope {
     id: root
 
+    property real s: Scales.uiScale
+
     property bool hovering: false
-    property bool pinned: false
+    property bool pinned: true
     property bool autoHideEnabled: true
 
     readonly property bool expanded: (
         pinned || (autoHideEnabled && hovering)
     )
 
+    BarState {
+        id: state
+    }
+
+    Component.onCompleted: {
+        state.loadState()
+    }
+
+    Connections {
+        target: state
+        function onStateLoaded(p, a) {
+            root.pinned = p
+            root.autoHideEnabled = a
+        }
+    }
+
+    onPinnedChanged: state.applyState(root.pinned, root.autoHideEnabled)
+    onAutoHideEnabledChanged: state.applyState(root.pinned, root.autoHideEnabled)
+
     PanelWindow {
         id: trigger
 
-        implicitHeight: 2
+        implicitHeight: 2 * s
         color: "transparent"
 
         anchors {
@@ -52,7 +74,7 @@ Scope {
     PanelWindow {
         id: bar
 
-        implicitHeight: Dimens.barHeight
+        implicitHeight: Dimens.barHeight * s
         color: Theme.bgPrimary
 
         anchors {
@@ -61,7 +83,7 @@ Scope {
             right: true
         }
 
-        margins.top: root.expanded ? 0 : -Dimens.barHeight
+        margins.top: root.expanded ? 0 : -(Dimens.barHeight * s)
 
         Behavior on margins.top {
             NumberAnimation {
@@ -105,12 +127,13 @@ Scope {
 
         RowLayout {
             anchors.fill: parent
+            spacing: 0
 
             BarLeft {}
             Item { Layout.fillWidth: true }
-            BarCenter {}
+            BarCenter { }
             Item { Layout.fillWidth: true }
-            BarRight {}
+            BarRight {  }
         }
     }
 }

@@ -1,9 +1,13 @@
 import QtQuick
+import qs.config
 
 Item {
     id: root
-    width: 16
-    height: 16
+
+    property real s: Scales.uiScale
+
+    width: 16 * s
+    height: 16 * s
 
     property color color: "white"
     property bool animate: true
@@ -69,8 +73,8 @@ Item {
             var ctx = getContext("2d")
             ctx.reset()
 
-            var s = Math.min(width, height) / 60
-            ctx.scale(s, s)
+            var scaleFactor = Math.min(width, height) / 60
+            ctx.scale(scaleFactor, scaleFactor)
 
             ctx.fillStyle = root.color
 

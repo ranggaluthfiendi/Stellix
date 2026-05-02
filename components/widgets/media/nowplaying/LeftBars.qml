@@ -1,7 +1,10 @@
 import QtQuick
+import qs.config
 
 Item {
-    property real s
+    id: root
+
+    property real s: Scales.uiScale
     property color primary
 
     Rectangle {

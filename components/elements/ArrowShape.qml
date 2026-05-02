@@ -4,7 +4,7 @@ import QtQuick.Shapes
 Item {
     id: root
 
-    property real s: 0.6
+    property real s: Scales.uiScale * 0.6
     property color primary: "#d7d1b8"
     property color background: "#47443b"
 
@@ -48,8 +48,8 @@ Item {
         height: 4 * s
         radius: 2 * s
 
-        x: (8 - 2) * s
-        y: (19 - 2) * s
+        x: 6 * s
+        y: 17 * s
 
         color: root.background
     }

@@ -7,8 +7,7 @@ import qs.services
 Item {
     id: root
 
-    property real scale: Appearance.scaleFactor
-    property real s: scale * 0.6
+    property real s: Scales.uiScale * 0.6
 
     property real contentOffsetX: 20 * s
     property real rightOffset: 120 * s

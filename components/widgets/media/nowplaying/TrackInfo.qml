@@ -6,7 +6,7 @@ import Quickshell.Services.Mpris
 Item {
     id: root
 
-    property real s
+    property real s: Scales.uiScale
     property color primary
     required property var player
 
@@ -31,17 +31,17 @@ Item {
     }
 
     function syncPlayback() {
-    if (!player) {
-        isPlaying = false
-        return
-    }
+        if (!player) {
+            isPlaying = false
+            return
+        }
 
-    let newState = player.isPlaying === true
+        let newState = player.isPlaying === true
 
-    if (isPlaying !== newState) {
-        isPlaying = newState
+        if (isPlaying !== newState) {
+            isPlaying = newState
+        }
     }
-}
 
     onPlayerChanged: {
         playerConn.target = null
@@ -58,10 +58,7 @@ Item {
         ignoreUnknownSignals: true
 
         function onTrackChanged() { root.updateTrack() }
-
-        function onPlaybackStateChanged() {
-            root.syncPlayback()
-        }
+        function onPlaybackStateChanged() { root.syncPlayback() }
     }
 
     Timer {

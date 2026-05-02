@@ -4,8 +4,9 @@ import Quickshell
 import qs.config
 
 Singleton {
+    id: root
 
-    function dp(x) { return Math.round(x * Appearance.scaleFactor) }
+    function dp(x) { return Math.round(x * Scales.uiScale) }
 
     readonly property int barHeight: dp(32)
     readonly property int barPadding: dp(10)

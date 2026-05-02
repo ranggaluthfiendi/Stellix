@@ -5,8 +5,9 @@ import Quickshell
 import qs.config
 
 Singleton {
+    id: root
 
-    function dp(x) { return Math.round(x * Appearance.scaleFactor) }
+    function dp(x) { return Math.round(x * Scales.uiScale) }
 
     property color accent: "#d7d1b8"
     property color accentAlt: "#cfc8ad"

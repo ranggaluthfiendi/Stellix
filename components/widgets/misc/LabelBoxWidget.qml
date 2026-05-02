@@ -5,7 +5,9 @@ import qs.config
 Item {
     id: root
 
-    function dp(x) { return Math.round(x * Appearance.scaleFactor) }
+    property real s: Scales.uiScale
+
+    function dp(x) { return Math.round(x * s) }
 
     property string text: "Label"
 
@@ -53,7 +55,7 @@ Item {
             color: root.textColor
 
             font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeSM
+            font.pixelSize: Typography.sizeSM * root.s
 
             anchors.centerIn: parent
         }
