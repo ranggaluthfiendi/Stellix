@@ -9,21 +9,18 @@ Item {
         function onRawEvent(event) {
             if (!event) return
 
-            let name = event.name
+            const name = event.name
 
-            if (name === "activewindow" || name === "activewindowv2") {
-                if (SysTrayState.openedMenu !== null) {
+            if (name === "pointer_button") {
+                if (!SysTrayState.blockClose) {
                     SysTrayState.closeAll()
                 }
                 return
             }
 
-            if (name === "mouse" || name === "pointer_button") {
-                if (SysTrayState.openedMenu !== null) {
-                    if (!SysTrayState.blockClose) {
-                        SysTrayState.closeAll()
-                    }
-                }
+            if (name === "activewindow" || name === "activewindowv2") {
+                SysTrayState.closeAll()
+                return
             }
         }
     }

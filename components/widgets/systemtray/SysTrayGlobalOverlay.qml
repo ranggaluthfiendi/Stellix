@@ -13,7 +13,7 @@ PanelWindow {
         right: true
     }
 
-    visible: SysTrayState.openedMenu !== null
+    visible: SysTrayState.openedMenu !== null || SysTrayState.openedOverflow !== null
     color: "transparent"
 
     Component.onCompleted: {

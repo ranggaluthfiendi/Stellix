@@ -5,6 +5,7 @@ QtObject {
     property var openedMenu: null
     property var openedSubmenuEntry: null
     property var openedSubmenuPopup: null
+    property var openedOverflow: null
 
     property bool blockClose: false
 
@@ -19,9 +20,14 @@ QtObject {
             openedSubmenuPopup.menuData = null
         }
 
+        if (openedOverflow && openedOverflow.open !== undefined) {
+            openedOverflow.open = false
+        }
+
         openedMenu = null
         openedSubmenuEntry = null
         openedSubmenuPopup = null
+        openedOverflow = null
     }
 
     function forceCloseAll() {
@@ -33,9 +39,14 @@ QtObject {
             openedSubmenuPopup.menuData = null
         }
 
+        if (openedOverflow && openedOverflow.open !== undefined) {
+            openedOverflow.open = false
+        }
+
         openedMenu = null
         openedSubmenuEntry = null
         openedSubmenuPopup = null
+        openedOverflow = null
         blockClose = false
     }
 }
