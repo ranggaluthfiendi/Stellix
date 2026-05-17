@@ -42,19 +42,19 @@ Item {
 
             if (isActiveSubmenu) {
                 return Qt.rgba(
-                    Theme.accentSoft.r,
-                    Theme.accentSoft.g,
-                    Theme.accentSoft.b,
-                    0.22
+                    Theme.textPrimary.r,
+                    Theme.textPrimary.g,
+                    Theme.textPrimary.b,
+                    0.10
                 )
             }
 
             return mouse.containsMouse
                 ? Qt.rgba(
-                    Theme.accentSoft.r,
-                    Theme.accentSoft.g,
-                    Theme.accentSoft.b,
-                    0.15
+                    Theme.textPrimary.r,
+                    Theme.textPrimary.g,
+                    Theme.textPrimary.b,
+                    0.08
                   )
                 : "transparent"
         }

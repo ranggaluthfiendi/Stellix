@@ -4,6 +4,7 @@ import QtQuick.Shapes
 import Quickshell.Services.UPower
 import qs.config
 import qs.components.elements
+import qs.components.widgets.rightbar
 
 Item {
     id: root
@@ -87,6 +88,16 @@ Item {
             Layout.maximumWidth: 16 * root.s
             Layout.preferredHeight: 16 * root.s
             Layout.alignment: Qt.AlignVCenter
+        }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+
+        onClicked: {
+            RightBarState.toggle()
         }
     }
 }

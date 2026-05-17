@@ -1,3 +1,7 @@
 /.qmlls.ini
 /savedata
 savedata/
+AGENTS.md
+.codex
+.agents
+savedata/time-position.json

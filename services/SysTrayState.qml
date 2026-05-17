@@ -6,6 +6,7 @@ QtObject {
     property var openedSubmenuEntry: null
     property var openedSubmenuPopup: null
     property var openedOverflow: null
+    property var openedTrayPanel: null
 
     property bool blockClose: false
 
@@ -24,10 +25,15 @@ QtObject {
             openedOverflow.open = false
         }
 
+        if (openedTrayPanel && openedTrayPanel.open !== undefined) {
+            openedTrayPanel.open = false
+        }
+
         openedMenu = null
         openedSubmenuEntry = null
         openedSubmenuPopup = null
         openedOverflow = null
+        openedTrayPanel = null
     }
 
     function forceCloseAll() {
@@ -43,10 +49,15 @@ QtObject {
             openedOverflow.open = false
         }
 
+        if (openedTrayPanel && openedTrayPanel.open !== undefined) {
+            openedTrayPanel.open = false
+        }
+
         openedMenu = null
         openedSubmenuEntry = null
         openedSubmenuPopup = null
         openedOverflow = null
+        openedTrayPanel = null
         blockClose = false
     }
 }

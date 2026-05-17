@@ -13,12 +13,14 @@ PanelWindow {
         right: true
     }
 
-    visible: SysTrayState.openedMenu !== null || SysTrayState.openedOverflow !== null
+    visible: SysTrayState.openedMenu !== null
+        || SysTrayState.openedOverflow !== null
+        || SysTrayState.openedTrayPanel !== null
     color: "transparent"
 
     Component.onCompleted: {
         if (overlay.WlrLayershell) {
-            overlay.WlrLayershell.layer = WlrLayer.Overlay
+            overlay.WlrLayershell.layer = WlrLayer.Top
             overlay.WlrLayershell.exclusiveZone = -1
             overlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
         }

@@ -1,10 +1,10 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import qs.components.widgets.misc
 import qs.components.elements
 import qs.components.widgets.media.nowplaying
 import qs.components.widgets.system
+import qs.components.widgets.rightbar
 import qs.services
 
 Scope {
@@ -33,14 +33,24 @@ Scope {
                 }
             }
 
+            Image {
+                anchors.fill: parent
+                source: "file:///home/rang/Pictures/Wallpapers/Wallpaper2.png"
+                fillMode: Image.PreserveAspectCrop
+                cache: false
+                asynchronous: true
+            }
+
             NowPlayingWidget {}
             ClockWidget{}
+
+            BatteryRightBar {}
 
             Item {
                 anchors.fill: parent
                 z: 9999
 
-                visible: SysTrayState.openedMenu !== null
+                visible: SysTrayState.openedMenu !== null || RightBarState.calendarOpen
 
                 MouseArea {
                     anchors.fill: parent
@@ -62,6 +72,10 @@ Scope {
                             ) {
                                 SysTrayState.closeAll()
                             }
+                        }
+
+                        if (RightBarState.calendarOpen) {
+                            RightBarState.calendarOpen = false
                         }
                     }
                 }

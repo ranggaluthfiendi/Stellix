@@ -82,7 +82,7 @@ Item {
 
     Row {
         anchors.centerIn: parent
-        spacing: Scales.dp(6)
+        spacing: Scales.dp(5)
 
         Repeater {
             model: root.wsCount
@@ -97,8 +97,8 @@ Item {
                 property bool active: workspace?.active ?? false
                 property bool hasWin: root.hasWindows(wsId)
 
-                width: Scales.dp(14)
-                height: Scales.dp(14)
+                width: Scales.dp(12)
+                height: Scales.dp(12)
 
                 Component.onCompleted: {
                     const ws = Hyprland.workspaces.values.find(w => w.id === wsId)
@@ -119,8 +119,10 @@ Item {
 
                 Rectangle {
                     id: box
-                    anchors.fill: parent
-                    radius: 0
+                    anchors.centerIn: parent
+                    width: Scales.dp(active ? 12 : 6)
+                    height: Scales.dp(active ? 12 : 6)
+                    radius: Scales.dp(3)
 
                     color: {
                         if (active && hasWin)
@@ -140,20 +142,24 @@ Item {
                     border.width: (!active && !hasWin) ? Scales.dp(1) : 0
                     border.color: Theme.textPrimary
 
-                    opacity: (!active && !hasWin) ? 0.35 : 1
-
-                    SequentialAnimation on opacity {
-                        running: active
-                        loops: Animation.Infinite
-
-                        NumberAnimation { from: 1; to: 0.6; duration: 500 }
-                        NumberAnimation { from: 0.6; to: 1; duration: 500 }
+                    Behavior on width {
+                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on height {
+                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on color {
+                        ColorAnimation { duration: 250; easing.type: Easing.OutCubic }
+                    }
+                    Behavior on radius {
+                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                     }
                 }
 
                 MouseArea {
                     cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
                     onClicked: Hyprland.dispatch(`workspace ${wsId}`)
                 }
             }

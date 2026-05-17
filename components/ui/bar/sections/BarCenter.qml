@@ -1,9 +1,15 @@
 import QtQuick
-import QtQuick.Layouts
 import qs.components.ui.bar.items
+import qs.config
 
-RowLayout {
-    Layout.alignment: Qt.AlignCenter
+Item {
+    id: root
 
-    ClockItem {}
+    implicitHeight: Dimens.barHeight * Scales.uiScale
+    implicitWidth: clockItem.implicitWidth + Theme.dp(8)
+
+    ClockItem {
+        id: clockItem
+        anchors.centerIn: parent
+    }
 }

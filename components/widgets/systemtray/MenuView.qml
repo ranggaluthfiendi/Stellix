@@ -6,6 +6,7 @@ import qs.config
 
 ColumnLayout {
     id: root
+    width: implicitWidth
     implicitWidth: childrenRect.width
     implicitHeight: childrenRect.height
 
@@ -100,8 +101,7 @@ ColumnLayout {
 
         Rectangle {
             height: Theme.dp(1)
-            color: Theme.textMuted
-            opacity: 0.25
+            color: Theme.border
             Layout.fillWidth: true
         }
     }

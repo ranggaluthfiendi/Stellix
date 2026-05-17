@@ -12,27 +12,69 @@ import qs.services
 Item {
     id: root
 
-    property int visibleLimit: 0
+    property int visibleLimit: 8
+    property bool hidePassiveItems: true
 
     property var trayItems: SystemTray.items && SystemTray.items.values
         ? SystemTray.items.values
         : []
 
-    property var visibleItems: trayItems.slice(0, visibleLimit)
-    property var overflowItems: trayItems.slice(visibleLimit)
+    function statusRank(item) {
+        if (!item) return 99
+        if (item.status === Status.NeedsAttention) return 0
+        if (item.status === Status.Active) return 1
+        if (item.status === Status.Passive) return 2
+        return 3
+    }
+
+    function categoryRank(item) {
+        if (!item) return 99
+        if (item.category === Category.Hardware) return 0
+        if (item.category === Category.Communications) return 1
+        if (item.category === Category.SystemServices) return 2
+        if (item.category === Category.ApplicationStatus) return 3
+        return 4
+    }
+
+    function sortAndFilterItems(items) {
+        var list = (items || []).filter(function(it) {
+            if (!it) return false
+            if (hidePassiveItems && it.status === Status.Passive) return false
+            return true
+        })
+
+        list.sort(function(a, b) {
+            var sr = statusRank(a) - statusRank(b)
+            if (sr !== 0) return sr
+
+            var cr = categoryRank(a) - categoryRank(b)
+            if (cr !== 0) return cr
+
+            var at = (a.title || a.id || "").toLowerCase()
+            var bt = (b.title || b.id || "").toLowerCase()
+            return at.localeCompare(bt)
+        })
+
+        return list
+    }
+
+    property var processedTrayItems: sortAndFilterItems(trayItems)
+    property var visibleItems: visibleLimit > 0
+        ? processedTrayItems.slice(0, visibleLimit)
+        : processedTrayItems
+    property var overflowItems: visibleLimit > 0
+        ? processedTrayItems.slice(visibleLimit)
+        : []
 
     property real itemSize: Theme.dp(26)
     property real spacing: Theme.dp(6)
 
+    property bool hasAnyTrayItems: processedTrayItems.length > 0
     property bool hasOverflow: overflowItems.length > 0
+    property bool trayPanelOpen: trayPopup.open
 
     implicitHeight: itemSize
-
-    implicitWidth: {
-        var count = visibleItems.length + (hasOverflow ? 1 : 0)
-        if (count <= 0) return 0
-        return (count * itemSize) + ((count - 1) * spacing)
-    }
+    implicitWidth: hasAnyTrayItems ? itemSize : 0
 
     PopupWindow {
         id: menuPopup
@@ -44,12 +86,12 @@ Item {
         visible: internalVisible && ready
 
         implicitWidth: menuLoader.item && menuLoader.item.implicitWidth
-    ? Math.max(menuLoader.item.implicitWidth, Theme.dp(80))
-    : Theme.dp(80)
+            ? Math.max(menuLoader.item.implicitWidth, Theme.dp(80))
+            : Theme.dp(80)
 
-implicitHeight: menuLoader.item && menuLoader.item.implicitHeight
-    ? Math.max(menuLoader.item.implicitHeight, Theme.dp(30))
-    : Theme.dp(30)
+        implicitHeight: menuLoader.item && menuLoader.item.implicitHeight
+            ? Math.max(menuLoader.item.implicitHeight, Theme.dp(30))
+            : Theme.dp(30)
 
         anchor.item: root
         anchor.rect: Qt.rect(0, root.height + Theme.dp(6), 0, 0)
@@ -57,7 +99,6 @@ implicitHeight: menuLoader.item && menuLoader.item.implicitHeight
         Rectangle {
             anchors.fill: parent
             color: Theme.bgSecondary
-            opacity: Theme.opacityPanel
 
             Loader {
                 id: menuLoader
@@ -98,94 +139,332 @@ implicitHeight: menuLoader.item && menuLoader.item.implicitHeight
     }
 
     PopupWindow {
-    id: overflowPopup
+        id: trayPopup
 
-    property bool open: false
+        property bool open: false
 
-    visible: open && overflowItems.length > 0
+        visible: open && hasAnyTrayItems
 
-    property real itemSize: Theme.dp(26)
-    property int cols: Math.min(overflowItems.length, 4)
-    property int rows: Math.ceil(overflowItems.length / cols)
+        implicitWidth: {
+            var cols = Math.min(Math.max(visibleItems.length, 1), 6)
+            return (cols * itemSize) + (Math.max(cols - 1, 0) * spacing) + Theme.dp(16)
+        }
 
-    implicitWidth: cols * itemSize
-    implicitHeight: rows * itemSize
+        implicitHeight: {
+            var cols = Math.min(Math.max(visibleItems.length, 1), 6)
+            var rows = Math.ceil(Math.max(visibleItems.length, 1) / cols)
+            return (rows * itemSize) + (Math.max(rows - 1, 0) * spacing) + Theme.dp(16)
+                + (hasOverflow ? (itemSize + spacing) : 0)
+        }
 
-    anchor.item: overflowButton
-    anchor.rect: Qt.rect(
-        0,
-        overflowButton.height + Theme.dp(6),
-        0,
-        0
-    )
+        anchor.item: launcher
+        anchor.rect: Qt.rect(0, launcher.height + Theme.dp(6), 0, 0)
 
-    onVisibleChanged: {
-        if (!visible) {
-            open = false
-            if (SysTrayState.openedOverflow === overflowPopup) {
-                SysTrayState.openedOverflow = null
+        onVisibleChanged: {
+            if (!visible) {
+                open = false
             }
         }
-    }
 
-    Rectangle {
-        anchors.fill: parent
-        color: Theme.bgSecondary
-        opacity: Theme.opacityPanel
+        Rectangle {
+            anchors.fill: parent
+            radius: 0
+            color: Theme.bgPrimary
+            opacity: 1
 
-        GridLayout {
-            anchors.centerIn: parent
-            columns: Math.min(overflowItems.length, 4)
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: Theme.dp(8)
+                spacing: Theme.dp(8)
 
-            Repeater {
-                model: overflowItems
+                GridLayout {
+                    id: trayGrid
+                    Layout.fillWidth: true
+                    columns: Math.min(Math.max(visibleItems.length, 1), 6)
+                    columnSpacing: spacing
+                    rowSpacing: spacing
 
-                delegate: Item {
-                    width: Theme.dp(26)
-                    height: Theme.dp(26)
+                    Repeater {
+                        model: visibleItems
 
-                    required property var modelData
+                        delegate: Item {
+                            width: itemSize
+                            height: itemSize
+
+                            required property var modelData
+                            property bool needsAttention: modelData && modelData.status === Status.NeedsAttention
+
+                            Rectangle {
+                                anchors.fill: parent
+                                radius: 0
+                                color: iconMouse.containsMouse
+                                    ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
+                                    : (needsAttention ? Qt.rgba(1, 0.35, 0.2, 0.16) : "transparent")
+                                border.width: iconMouse.containsMouse || needsAttention ? 1 : 0
+                                border.color: iconMouse.containsMouse
+                                    ? Theme.textPrimary
+                                    : (needsAttention ? Qt.rgba(1, 0.4, 0.2, 0.7) : "transparent")
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
+                                }
+
+                                Image {
+                                    anchors.centerIn: parent
+                                    source: modelData.icon ?? ""
+                                    width: Theme.dp(18)
+                                    height: Theme.dp(18)
+                                    fillMode: Image.PreserveAspectFit
+                                }
+
+                                MouseArea {
+                                    id: iconMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+
+                                    function openItemMenu(item) {
+                                        if (!item || !item.hasMenu) return
+
+                                        SysTrayState.blockClose = true
+                                        SysTrayState.closeAll()
+
+                                        menuPopup.menuModel = null
+                                        menuLoader.active = false
+
+                                        menuPopup.menuModel = item.menu
+                                        menuLoader.active = true
+                                        menuPopup.internalVisible = true
+
+                                        SysTrayState.openedMenu = menuPopup
+                                        overflowPopup.open = false
+
+                                        Qt.callLater(function() {
+                                            SysTrayState.blockClose = false
+                                        })
+                                    }
+
+                                    onClicked: (mouseEvent) => {
+                                        if (!modelData) return
+
+                                        if (mouseEvent.button === Qt.RightButton) {
+                                            if (modelData.hasMenu) openItemMenu(modelData)
+                                            return
+                                        }
+
+                                        if (mouseEvent.button === Qt.MiddleButton) {
+                                            try {
+                                                modelData.secondaryActivate()
+                                            } catch(e) {
+                                            }
+                                            return
+                                        }
+
+                                        if (modelData.onlyMenu || modelData.hasMenu) {
+                                            openItemMenu(modelData)
+                                        } else {
+                                            try {
+                                                modelData.activate()
+                                            } catch(e) {
+                                            }
+                                        }
+                                    }
+
+                                    onWheel: (wheel) => {
+                                        if (!modelData) return
+                                        try {
+                                            modelData.scroll(wheel.angleDelta.y, wheel.angleDelta.x !== 0)
+                                        } catch(e) {
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Item {
+                    id: overflowButton
+                    Layout.alignment: Qt.AlignHCenter
+                    width: itemSize
+                    height: itemSize
+                    visible: hasOverflow
 
                     Rectangle {
                         anchors.fill: parent
-                        color: mouse.containsMouse ? Theme.accentSoft : "transparent"
+                        radius: 0
+                        color: mouseOverflow.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : "transparent"
 
-                        Image {
-                            anchors.centerIn: parent
-                            source: modelData.icon ?? ""
-                            width: Theme.dp(18)
-                            height: Theme.dp(18)
-                            fillMode: Image.PreserveAspectFit
+                        Behavior on color {
+                            ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
                         }
 
                         MouseArea {
-                            id: mouse
+                            id: mouseOverflow
                             anchors.fill: parent
                             hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
+                            acceptedButtons: Qt.LeftButton
 
                             onClicked: {
-                                if (!modelData) return
+                                if (overflowPopup.open) {
+                                    SysTrayState.closeAll()
+                                    return
+                                }
 
                                 SysTrayState.blockClose = true
-
                                 SysTrayState.closeAll()
 
-                                menuPopup.menuModel = null
-                                menuLoader.active = false
-
-                                menuPopup.menuModel = modelData.menu
-                                menuLoader.active = true
-                                menuPopup.internalVisible = true
-
-                                SysTrayState.openedMenu = menuPopup
-                                SysTrayState.openedOverflow = null
-
-                                overflowPopup.open = false
+                                overflowPopup.open = true
+                                SysTrayState.openedOverflow = overflowPopup
 
                                 Qt.callLater(function() {
                                     SysTrayState.blockClose = false
                                 })
+                            }
+                        }
+
+                        ChevronShape {
+                            anchors.centerIn: parent
+                            width: Theme.dp(18)
+                            height: Theme.dp(18)
+                            direction: overflowPopup.open ? "up" : "down"
+                            color: Theme.textPrimary
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    PopupWindow {
+        id: overflowPopup
+
+        property bool open: false
+
+        visible: open && overflowItems.length > 0
+
+        property int cols: Math.min(overflowItems.length, 4)
+        property int rows: Math.ceil(overflowItems.length / cols)
+
+        implicitWidth: cols * itemSize
+        implicitHeight: rows * itemSize
+
+        anchor.window: trayPopup
+        anchor.rect: Qt.rect(trayPopup.width + Theme.dp(6), 0, 0, 0)
+
+        onVisibleChanged: {
+            if (!visible) {
+                open = false
+                if (SysTrayState.openedOverflow === overflowPopup) {
+                    SysTrayState.openedOverflow = null
+                }
+            }
+        }
+
+        Rectangle {
+            anchors.fill: parent
+            color: Theme.bgSecondary
+            opacity: Theme.opacityPanel
+
+            GridLayout {
+                anchors.centerIn: parent
+                columns: Math.min(overflowItems.length, 4)
+
+                Repeater {
+                    model: overflowItems
+
+                    delegate: Item {
+                        width: itemSize
+                        height: itemSize
+
+                        required property var modelData
+                        property bool needsAttention: modelData && modelData.status === Status.NeedsAttention
+
+                        Rectangle {
+                            anchors.fill: parent
+                            radius: 0
+                            color: overMouse.containsMouse
+                                ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
+                                : (needsAttention ? Qt.rgba(1, 0.35, 0.2, 0.16) : "transparent")
+                            border.width: overMouse.containsMouse || needsAttention ? 1 : 0
+                            border.color: overMouse.containsMouse
+                                ? Theme.textPrimary
+                                : (needsAttention ? Qt.rgba(1, 0.4, 0.2, 0.7) : "transparent")
+
+                            Behavior on color {
+                                ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
+                            }
+
+                            Image {
+                                anchors.centerIn: parent
+                                source: modelData.icon ?? ""
+                                width: Theme.dp(18)
+                                height: Theme.dp(18)
+                                fillMode: Image.PreserveAspectFit
+                            }
+
+                            MouseArea {
+                                id: overMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                acceptedButtons: Qt.LeftButton | Qt.RightButton | Qt.MiddleButton
+
+                                function openItemMenu(item) {
+                                    if (!item || !item.hasMenu) return
+
+                                    SysTrayState.blockClose = true
+                                    SysTrayState.closeAll()
+
+                                    menuPopup.menuModel = null
+                                    menuLoader.active = false
+
+                                    menuPopup.menuModel = item.menu
+                                    menuLoader.active = true
+                                    menuPopup.internalVisible = true
+
+                                    SysTrayState.openedMenu = menuPopup
+                                    SysTrayState.openedOverflow = null
+
+                                    overflowPopup.open = false
+
+                                    Qt.callLater(function() {
+                                        SysTrayState.blockClose = false
+                                    })
+                                }
+
+                                onClicked: (mouseEvent) => {
+                                    if (!modelData) return
+
+                                    if (mouseEvent.button === Qt.RightButton) {
+                                        if (modelData.hasMenu) openItemMenu(modelData)
+                                        return
+                                    }
+
+                                    if (mouseEvent.button === Qt.MiddleButton) {
+                                        try {
+                                            modelData.secondaryActivate()
+                                        } catch(e) {
+                                        }
+                                        return
+                                    }
+
+                                    if (modelData.onlyMenu || modelData.hasMenu) {
+                                        openItemMenu(modelData)
+                                    } else {
+                                        try {
+                                            modelData.activate()
+                                        } catch(e) {
+                                        }
+                                    }
+                                }
+
+                                onWheel: (wheel) => {
+                                    if (!modelData) return
+                                    try {
+                                        modelData.scroll(wheel.angleDelta.y, wheel.angleDelta.x !== 0)
+                                    } catch(e) {
+                                    }
+                                }
                             }
                         }
                     }
@@ -193,7 +472,6 @@ implicitHeight: menuLoader.item && menuLoader.item.implicitHeight
             }
         }
     }
-}
 
     PopupWindow {
         id: subMenuPopup
@@ -219,7 +497,6 @@ implicitHeight: menuLoader.item && menuLoader.item.implicitHeight
         Rectangle {
             anchors.fill: parent
             color: Theme.bgSecondary
-            opacity: Theme.opacityPanel
 
             Loader {
                 id: subMenuLoader
@@ -237,116 +514,57 @@ implicitHeight: menuLoader.item && menuLoader.item.implicitHeight
             }
         }
     }
-    
 
-    RowLayout {
-        id: row
-        spacing: Theme.dp(6)
+    Item {
+        id: launcher
+        width: itemSize
+        height: itemSize
+        visible: hasAnyTrayItems
 
-        Repeater {
-            model: visibleItems
+        Rectangle {
+            anchors.fill: parent
+            radius: 0
+            color: launcherMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : (trayPopup.open ? Theme.bgSecondary : "transparent")
+            border.width: launcherMouse.containsMouse ? 1 : 0
+            border.color: launcherMouse.containsMouse ? Theme.textPrimary : "transparent"
 
-            delegate: Item {
-                id: trayItem
-                required property var modelData
-
-                width: Theme.dp(26)
-                height: Theme.dp(26)
-
-                Rectangle {
-                    anchors.fill: parent
-                    color: mouse.containsMouse ? Theme.accentSoft : "transparent"
-
-                    Image {
-                        anchors.centerIn: parent
-                        source: modelData.icon ?? ""
-                        width: Theme.dp(18)
-                        height: Theme.dp(18)
-                        fillMode: Image.PreserveAspectFit
-                    }
-
-                    MouseArea {
-                        id: mouse
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-
-                        onClicked: {
-                            if (!modelData) return
-
-                            if (modelData.hasMenu) {
-                                SysTrayState.closeAll()
-
-                                menuPopup.menuModel = null
-                                menuLoader.active = false
-
-                                menuPopup.menuModel = modelData.menu
-                                menuLoader.active = true
-                                menuPopup.internalVisible = true
-
-                                SysTrayState.openedMenu = menuPopup
-                            } else {
-                                try { modelData.activate() } catch(e) {}
-                            }
-                        }
-                    }
-                }
+            Behavior on color {
+                ColorAnimation { duration: 150; easing.type: Easing.OutCubic }
             }
-        }
 
-        Item {
-            id: overflowButton
-            width: root.itemSize
-            height: root.itemSize
-            visible: overflowItems.length > 0
-
-            Rectangle {
+            MouseArea {
+                id: launcherMouse
                 anchors.fill: parent
-                color: mouseOverflow.containsMouse ? Theme.accentSoft : "transparent"
+                hoverEnabled: true
+                acceptedButtons: Qt.LeftButton
 
-                MouseArea {
-                    id: mouseOverflow
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-
-                    onClicked: {
-                        if (overflowPopup.open) {
-                            SysTrayState.closeAll()
-                            return
-                        }
-
-                        SysTrayState.blockClose = true
-
-                        SysTrayState.closeAll()
-
-                        overflowPopup.open = true
-                        SysTrayState.openedOverflow = overflowPopup
-
-                        Qt.callLater(function() {
-                            SysTrayState.blockClose = false
-                        })
+                onClicked: {
+                    if (trayPopup.open) {
+                        SysTrayState.forceCloseAll()
+                        trayPopup.open = false
+                        overflowPopup.open = false
+                        return
                     }
-                }
 
-                ChevronShape {
-                    anchors.centerIn: parent
-                    width: Theme.dp(18)
-                    height: Theme.dp(18)
-                    direction: overflowPopup.open ? "up" : "down"
+                    SysTrayState.blockClose = true
+                    SysTrayState.closeAll()
+
+                    trayPopup.open = true
+                    SysTrayState.openedTrayPanel = trayPopup
+
+                    Qt.callLater(function() {
+                        SysTrayState.blockClose = false
+                    })
                 }
             }
-        }
-    }
 
-    MouseArea {
-        anchors.fill: parent
-        z: 9999
-
-        visible: SysTrayState.openedMenu !== null || overflowPopup.open
-        enabled: visible
-
-        onPressed: {
-            SysTrayState.forceCloseAll()
-            overflowPopup.open = false
+            ChevronShape {
+                anchors.centerIn: parent
+                width: Theme.dp(16)
+                height: Theme.dp(16)
+                direction: trayPopup.open ? "up" : "down"
+                color: Theme.textPrimary
+            }
         }
     }
 }
