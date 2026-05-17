@@ -146,6 +146,11 @@ Scope {
         visible: RightBarState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen
         color: "transparent"
 
+        // FIXED: Use Top layer so it doesn't block the sidebar in Overlay
+        WlrLayershell.layer: WlrLayer.Top
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.exclusiveZone: -1
+
         // Allow the main bar buttons (like battery) to remain interactive
         margins.top: Dimens.barHeight * root.s
 
@@ -154,14 +159,6 @@ Scope {
             left: true
             right: true
             bottom: true
-        }
-
-        Component.onCompleted: {
-            if (outsideOverlay.WlrLayershell) {
-                outsideOverlay.WlrLayershell.layer = WlrLayer.Top
-                outsideOverlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
-                outsideOverlay.WlrLayershell.exclusiveZone = -1
-            }
         }
 
         MouseArea {
@@ -184,6 +181,10 @@ Scope {
         visible: RightBarState.open
         color: "transparent"
 
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.exclusiveZone: 0
+
         anchors {
             top: true
             right: true
@@ -199,11 +200,6 @@ Scope {
         margins.bottom: Theme.dp(5)
 
         Component.onCompleted: {
-            if (panel.WlrLayershell) {
-                panel.WlrLayershell.layer = WlrLayer.Top
-                panel.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
-                panel.WlrLayershell.exclusiveZone = 0
-            }
             brightnessSvc.init()
         }
 
@@ -264,6 +260,10 @@ Scope {
         visible: true
         color: "transparent"
 
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.exclusiveZone: 0
+
         anchors {
             top: true
             right: true
@@ -274,14 +274,6 @@ Scope {
 
         margins.top: Theme.dp(5)
         margins.right: Theme.dp(5)
-
-        Component.onCompleted: {
-            if (popupAnchor.WlrLayershell) {
-                popupAnchor.WlrLayershell.layer = WlrLayer.Top
-                popupAnchor.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
-                popupAnchor.WlrLayershell.exclusiveZone = 0
-            }
-        }
     }
 
     // ── Power popup (top) ──

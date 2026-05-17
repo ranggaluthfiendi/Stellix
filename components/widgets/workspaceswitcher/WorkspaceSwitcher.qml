@@ -4,10 +4,15 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.config
-import qs.components.widgets.rightbar
 
 PanelWindow {
     id: root
+    
+    signal closeRequested()
+
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
+    WlrLayershell.exclusiveZone: -1
 
     property real s: Scales.uiScale
     property int pageStart: 1
@@ -52,7 +57,7 @@ PanelWindow {
     readonly property real navH: Theme.dp(32)
     readonly property real overlayH: previewH + navH + Theme.dp(64)
 
-    // ── Successful Auto-Fit Logic (The one you liked) ──
+    // ── Restored Auto-Fit Logic (The one you liked) ──
     function getFitParams(id) {
         var wins = root.windowsForWorkspace(id);
         if (wins.length === 0) return { scale: 1.0, offsetX: 0, offsetY: 0, minX: 0, minY: 0 };
@@ -76,15 +81,12 @@ PanelWindow {
         var contentW = Math.max(1, maxX - minX);
         var contentH = Math.max(1, maxY - minY);
         
-        // Add 10dp padding for the "lega" look
         var padding = Theme.dp(10);
         var availableW = Math.max(1, root.previewW - padding * 2);
         var availableH = Math.max(1, root.previewH - padding * 2);
 
-        // Scale to fit content while preserving aspect ratio
         var s = Math.min(availableW / contentW, availableH / contentH);
         
-        // Center the entire content group
         var ox = (root.previewW - (contentW * s)) / 2;
         var oy = (root.previewH - (contentH * s)) / 2;
 
@@ -193,7 +195,6 @@ PanelWindow {
         rightDragPageTimer.stop();
     }
 
-    visible: false
     color: "transparent"
     onVisibleChanged: {
         if (visible) {
@@ -206,14 +207,7 @@ PanelWindow {
             clearDrag();
         }
     }
-    Component.onCompleted: {
-        if (root.WlrLayershell) {
-            root.WlrLayershell.layer = WlrLayer.Overlay;
-            root.WlrLayershell.keyboardFocus = WlrKeyboardFocus.Exclusive;
-            root.WlrLayershell.exclusiveZone = -1;
-        }
-    }
-
+    
     anchors {
         top: true
         left: true
@@ -251,9 +245,10 @@ PanelWindow {
 
     MouseArea {
         anchors.fill: parent
+        enabled: root.visible
         acceptedButtons: Qt.AllButtons
         onPressed: {
-            root.visible = false
+            root.closeRequested()
         }
     }
 
@@ -524,8 +519,8 @@ PanelWindow {
 
                     Text {
                         anchors.centerIn: parent
-                        text: ">"
-                        color: Theme.textPrimary
+                        text: "<"
+                        color: root.pageStart > 1 ? Theme.textPrimary : Theme.textMuted
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round((Typography.sizeSM || 12) * root.s)
                         font.weight: Typography.weightBold || Font.Bold
@@ -589,7 +584,7 @@ PanelWindow {
         Keys.enabled: true
         Keys.onPressed: function(event) {
             if (event.key === Qt.Key_Escape) {
-                root.visible = false
+                root.closeRequested()
                 event.accepted = true;
             } else if (event.key === Qt.Key_Left) {
                 root.pageStart = Math.max(1, root.pageStart - 1);

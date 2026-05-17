@@ -62,7 +62,7 @@ Scope {
 
         Component.onCompleted: {
             if (trigger.WlrLayershell) {
-                trigger.WlrLayershell.layer = WlrLayer.Top
+                trigger.WlrLayershell.layer = WlrLayer.Overlay
                 trigger.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
                 trigger.WlrLayershell.exclusiveZone = -1
             }
@@ -99,7 +99,7 @@ Scope {
 
         Component.onCompleted: {
             if (bar.WlrLayershell) {
-                bar.WlrLayershell.layer = WlrLayer.Top
+                bar.WlrLayershell.layer = WlrLayer.Overlay
                 bar.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
             }
         }
@@ -170,6 +170,7 @@ Scope {
 
         Component.onCompleted: {
             if (calendarOutsideOverlay.WlrLayershell) {
+                // FIXED: Use Top layer so it doesn't block SysTray in Overlay
                 calendarOutsideOverlay.WlrLayershell.layer = WlrLayer.Top
                 calendarOutsideOverlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
                 calendarOutsideOverlay.WlrLayershell.exclusiveZone = -1
