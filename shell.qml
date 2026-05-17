@@ -29,8 +29,8 @@ ShellRoot {
         id: wsSwitcher
         visible: RightBarState.workspaceSwitcherOpen
         
-        // onCloseRequested: {
-        //     RightBarState.workspaceSwitcherOpen = false
-        // }
+        onCloseRequested: {
+            RightBarState.workspaceSwitcherOpen = false
+        }
     }
 }

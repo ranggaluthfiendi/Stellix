@@ -22,7 +22,7 @@ PopupWindow {
 
     readonly property real itemH: Theme.dp(32)
     readonly property real headerH: Theme.dp(36)
-    readonly property real maxListH: Theme.dp(200)
+    readonly property real maxListH: itemH * 2 // Limiting to 2 items height
 
     property var btAdapter: Bluetooth.defaultAdapter
 

@@ -23,7 +23,7 @@ PopupWindow {
 
     readonly property real itemH: Theme.dp(32)
     readonly property real headerH: Theme.dp(36)
-    readonly property real maxAvailableH: Theme.dp(168)
+    readonly property real maxAvailableH: itemH * 2 // Limiting to 2 items height
 
     property var wifiDevice: null
     property var selectedNetwork: null

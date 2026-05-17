@@ -111,9 +111,23 @@ Scope {
     }
 
     function togglePopup(name) {
-        if (name === "wifi")      wifiPopupOpen  = !wifiPopupOpen
-        else if (name === "bluetooth") btPopupOpen = !btPopupOpen
-        else if (name === "power")    powerPopupOpen = !powerPopupOpen
+        if (name === "wifi") {
+            wifiPopupOpen  = !wifiPopupOpen
+            if (wifiPopupOpen) {
+                powerPopupOpen = false
+            }
+        } else if (name === "bluetooth") {
+            btPopupOpen = !btPopupOpen
+            if (btPopupOpen) {
+                powerPopupOpen = false
+            }
+        } else if (name === "power") {
+            powerPopupOpen = !powerPopupOpen
+            if (powerPopupOpen) {
+                wifiPopupOpen = false
+                btPopupOpen = false
+            }
+        }
     }
 
     function closeAllPopups() {

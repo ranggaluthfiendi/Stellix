@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.config
+import qs.components.elements
 
 PanelWindow {
     id: root
@@ -25,6 +26,18 @@ PanelWindow {
     property real dragStartY: 0
     property real animY: -Theme.dp(12)
     property int refreshTrigger: 0
+
+    function closeAllAndReset() {
+        for (var i = 0; i < root.toplevels.length; i++) {
+            var tl = root.toplevels[i];
+            if (tl && tl.address) {
+                Hyprland.dispatch("closewindow address:" + tl.address);
+            }
+        }
+        Hyprland.dispatch("workspace 1");
+        root.pageStart = 1;
+        forceRefreshTimer.restart();
+    }
 
     Timer {
         id: forceRefreshTimer
@@ -49,13 +62,13 @@ PanelWindow {
     readonly property real monH: Math.max(1, focusedMonitor ? focusedMonitor.height : 1080)
     readonly property real monitorAspect: monH > 0 ? monW / monH : 16 / 9
 
-    readonly property real overlayW: Math.min(width - Theme.dp(64), Theme.dp(1300))
-    readonly property real previewGap: Theme.dp(16)
-    readonly property real previewW: Math.min((overlayW - Theme.dp(40) - (visibleCount - 1) * previewGap) / visibleCount, Theme.dp(240))
+    readonly property real overlayW: Math.min(width - Theme.dp(64), Theme.dp(750))
+    readonly property real previewGap: Theme.dp(10)
+    readonly property real previewW: Math.min((overlayW - Theme.dp(40) - (visibleCount - 1) * previewGap) / visibleCount, Theme.dp(130))
     readonly property real previewH: previewW / monitorAspect
 
     readonly property real navH: Theme.dp(32)
-    readonly property real overlayH: previewH + navH + Theme.dp(64)
+    readonly property real overlayH: previewH + navH + Theme.dp(40)
 
     // ── Restored Auto-Fit Logic (The one you liked) ──
     function getFitParams(id) {
@@ -137,6 +150,13 @@ PanelWindow {
         Hyprland.dispatch("workspace " + id);
     }
 
+    function formatAddr(addr) {
+        if (!addr) return "";
+        var a = String(addr);
+        if (a.indexOf("0x") === 0) return a;
+        return "0x" + a;
+    }
+
     function addWorkspace() {
         var nextId = Math.max(root.maxWorkspaceId + 1, root.pageStart + root.visibleCount);
         root.pageStart = Math.max(1, nextId - root.visibleCount + 1);
@@ -184,6 +204,63 @@ PanelWindow {
                 return item.workspaceId;
         }
         return -1;
+    }
+
+    function getOrientation(addr1, addr2) {
+        var w1 = null, w2 = null;
+        for (var i = 0; i < root.toplevels.length; i++) {
+            var t = root.toplevels[i];
+            var a = t.address || (t.lastIpcObject ? t.lastIpcObject.address : "");
+            if (a === addr1) w1 = t;
+            if (a === addr2) w2 = t;
+        }
+        if (!w1 || !w2) return "none";
+        var at1 = (w1.lastIpcObject ? w1.lastIpcObject.at : [0,0]) || [0,0];
+        var at2 = (w2.lastIpcObject ? w2.lastIpcObject.at : [0,0]) || [0,0];
+        // If X coordinates are nearly same, they are stacked vertically
+        if (Math.abs(at1[0] - at2[0]) < 30) return "vertical";
+        // If Y coordinates are nearly same, they are side-by-side
+        if (Math.abs(at1[1] - at2[1]) < 30) return "horizontal";
+        return "none";
+    }
+
+    function findWindowAtWithDetails(workspaceId, globalX, globalY, excludeAddress) {
+        for (var i = 0; i < previewsRepeater.count; i++) {
+            var previewItem = previewsRepeater.itemAt(i);
+            if (!previewItem || previewItem.workspaceId !== workspaceId) continue;
+
+            var localP = previewItem.mapFromItem(popup, globalX, globalY);
+            var wins = root.windowsForWorkspace(workspaceId);
+            var fit = root.getFitParams(workspaceId);
+
+            for (var j = 0; j < wins.length; j++) {
+                var tl = wins[j];
+                var addr = tl.address || (tl.lastIpcObject ? tl.lastIpcObject.address : "");
+                if (addr === excludeAddress || !addr) continue;
+
+                var ipc = tl.lastIpcObject || {};
+                var at = ipc.at || [0, 0];
+                var sz = ipc.size || [400, 300];
+
+                var relX = (at[0] - root.monX) - fit.minX;
+                var relY = (at[1] - root.monY) - fit.minY;
+
+                var x = (relX * fit.scale) + fit.offsetX;
+                var y = (relY * fit.scale) + fit.offsetY;
+                var w = sz[0] * fit.scale;
+                var h = sz[1] * fit.scale;
+
+                if (localP.x >= x && localP.x <= x + w && localP.y >= y && localP.y <= y + h) {
+                    var dx = (localP.x - x) / w;
+                    var dy = (localP.y - y) / h;
+                    
+                    // vertical intent if dragging to top/bottom 30%
+                    var intent = Math.abs(dy - 0.5) > Math.abs(dx - 0.5) ? "vertical" : "horizontal";
+                    return { address: addr, intent: intent };
+                }
+            }
+        }
+        return null;
     }
 
     function clearDrag() {
@@ -254,11 +331,10 @@ PanelWindow {
 
     Rectangle {
         id: popup
-        anchors.centerIn: parent
-        y: root.animY
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: (parent.height * 0.7) - (height / 2) + root.animY
         width: root.overlayW
-        height: root.overlayH
-        
+        height: root.overlayH        
         // glass effect
         color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, 0.82)
         border.width: 1
@@ -375,11 +451,53 @@ PanelWindow {
                                         live: root.visible && !winTile.isDragging
                                     }
 
+                                    // ── App Name Label (High Contrast) ──
+                                    Rectangle {
+                                        anchors.left: parent.left
+                                        anchors.top: parent.top
+                                        width: Math.min(parent.width, nameText.implicitWidth + Theme.dp(8))
+                                        height: Theme.dp(12)
+                                        
+                                        // Use solid background from theme for guaranteed contrast
+                                        color: modelData.activated ? Theme.accent : Theme.bgSecondary
+                                        
+                                        // Add a subtle border for separation from the screencopy
+                                        border.width: 1
+                                        border.color: modelData.activated ? Theme.accent : Theme.border
+                                        
+                                        radius: 0 
+                                        z: 10
+
+                                        Text {
+                                            id: nameText
+                                            anchors.centerIn: parent
+                                            text: {
+                                                let t = modelData.title || modelData.initialClass || modelData.initialTitle || "App"
+                                                if (t.toLowerCase().includes("vscodium")) return "VSCodium"
+                                                if (t.toLowerCase().includes("visual studio code")) return "VS Code"
+                                                if (t.toLowerCase().includes("mozilla firefox")) return "Firefox"
+                                                if (t.toLowerCase().includes("foot")) return "Terminal"
+                                                if (t.toLowerCase().includes("kitty")) return "Terminal"
+                                                return t
+                                            }
+                                            // Text color follows the background logic for maximum contrast
+                                            color: modelData.activated ? Theme.bgPrimary : Theme.textPrimary
+                                            font.pixelSize: Theme.dp(7)
+                                            font.family: Typography.fontFamily
+                                            font.weight: modelData.activated ? Font.Bold : Font.Normal
+                                            elide: Text.ElideRight
+                                            width: parent.width - Theme.dp(4)
+                                        }
+                                    }
+
                                     MouseArea {
                                         id: dragMouse
                                         preventStealing: true
                                         propagateComposedEvents: false
                                         property bool dragArmed: false
+                                        
+                                        // Capture unique ID at the very start
+                                        property string capturedSourceAddr: ""
 
                                         anchors.fill: parent
                                         hoverEnabled: true
@@ -392,6 +510,11 @@ PanelWindow {
                                             root.targetWorkspaceDuringDrag = -1;
                                             root.dragStartX = mouse.x;
                                             root.dragStartY = mouse.y;
+                                            
+                                            // LOCK the unique identifier immediately
+                                            var raw = modelData.address || (modelData.lastIpcObject ? modelData.lastIpcObject.address : "");
+                                            capturedSourceAddr = root.formatAddr(raw);
+                                            
                                             holdDragTimer.restart();
                                         }
 
@@ -399,9 +522,11 @@ PanelWindow {
                                             if (!dragArmed) return;
                                             var dx = mouse.x - root.dragStartX;
                                             var dy = mouse.y - root.dragStartY;
-                                            if (!root.draggingMoved && (Math.abs(dx) > Theme.dp(3) || Math.abs(dy) > Theme.dp(3))) {
+                                            
+                                            if (!root.draggingMoved && (Math.abs(dx) > Theme.dp(5) || Math.abs(dy) > Theme.dp(5))) {
                                                 root.draggingMoved = true;
                                             }
+                                            
                                             if (root.draggingMoved) {
                                                 winTile.dragOffset = Qt.point(winTile.dragOffset.x + dx, winTile.dragOffset.y + dy);
                                                 var p = popup.mapFromItem(winTile, winTile.width / 2, winTile.height / 2);
@@ -415,14 +540,38 @@ PanelWindow {
                                             if (dragArmed && root.draggingMoved) {
                                                 var p = popup.mapFromItem(winTile, winTile.width / 2, winTile.height / 2);
                                                 var targetWs = root.dropWorkspaceAtPopup(p.x, p.y);
-                                                if (targetWs > 0 && targetWs !== root.dragSourceWorkspace) {
-                                                    root.moveWindowToWorkspace(modelData, targetWs);
+                                                
+                                                if (targetWs > 0 && capturedSourceAddr !== "" && capturedSourceAddr !== "0x") {
+                                                    if (targetWs !== root.dragSourceWorkspace) {
+                                                        // MOVE: Using the LOCKED captured address
+                                                        Hyprland.dispatch("movetoworkspacesilent " + targetWs + ",address:" + capturedSourceAddr);
+                                                        forceRefreshTimer.restart();
+                                                    } else {
+                                                        // SWAP: In the same workspace
+                                                        var targetInfo = root.findWindowAtWithDetails(targetWs, p.x, p.y, capturedSourceAddr);
+                                                        if (targetInfo && targetInfo.address) {
+                                                            var tAddr = root.formatAddr(targetInfo.address);
+
+                                                            // Execute strictly on the locked IDs
+                                                            Hyprland.dispatch("focuswindow address:" + capturedSourceAddr);
+                                                            
+                                                            var currentOrient = root.getOrientation(capturedSourceAddr, targetInfo.address);
+                                                            if (targetInfo.intent !== currentOrient && currentOrient !== "none") {
+                                                                Hyprland.dispatch("layoutmsg togglesplit");
+                                                            }
+                                                            
+                                                            Hyprland.dispatch("swapwindow address:" + tAddr);
+                                                            forceRefreshTimer.restart();
+                                                        }
+                                                    }
                                                 }
                                             } else if (!root.draggingMoved) {
+                                                // ONLY switch workspace if it was a simple click (no drag)
                                                 root.activateWorkspace(preview.workspaceId);
                                             }
 
                                             dragArmed = false;
+                                            capturedSourceAddr = "";
                                             winTile.dragOffset = Qt.point(0, 0);
                                             root.clearDrag();
                                         }
@@ -457,6 +606,60 @@ PanelWindow {
                 Layout.preferredHeight: root.navH
                 spacing: Theme.dp(6)
 
+                // ── Reset/Close All Button ──
+                Rectangle {
+                    Layout.preferredWidth: Theme.dp(30)
+                    Layout.preferredHeight: Theme.dp(28)
+                    color: closeAllMouse.containsMouse ? Theme.danger : Qt.rgba(Theme.bgPrimary.r, Theme.bgPrimary.g, Theme.bgPrimary.b, 0.42)
+                    border.width: 1
+                    border.color: Theme.border
+                    radius: Theme.dp(4)
+
+                    IconClose {
+                        anchors.centerIn: parent
+                        iconSize: Theme.dp(14)
+                        iconColor: closeAllMouse.containsMouse ? "#ffffff" : Theme.textPrimary
+                    }
+
+                    MouseArea {
+                        id: closeAllMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.closeAllAndReset()
+                    }
+                }
+
+                // ── Go to First Button ──
+                Rectangle {
+                    Layout.preferredWidth: Theme.dp(36)
+                    Layout.preferredHeight: Theme.dp(28)
+                    color: firstWsMouse.containsMouse ? Theme.bgPrimary : Qt.rgba(Theme.bgPrimary.r, Theme.bgPrimary.g, Theme.bgPrimary.b, 0.42)
+                    border.width: 1
+                    border.color: Theme.border
+                    radius: Theme.dp(4)
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "First"
+                        color: root.focusedId === 1 ? Theme.accent : Theme.textPrimary
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round((Typography.sizeXXS || 10) * root.s)
+                        font.weight: root.focusedId === 1 ? Font.Bold : Font.Normal
+                    }
+
+                    MouseArea {
+                        id: firstWsMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            root.activateWorkspace(1)
+                            root.pageStart = 1
+                        }
+                    }
+                }
+
                 Rectangle {
                     Layout.preferredWidth: Theme.dp(30)
                     Layout.preferredHeight: Theme.dp(28)
@@ -465,21 +668,21 @@ PanelWindow {
                     border.color: Theme.border
                     radius: Theme.dp(4)
 
-                    Text {
+                    IconChevronLeft {
                         anchors.centerIn: parent
-                        text: "<"
-                        color: root.pageStart > 1 ? Theme.textPrimary : Theme.textMuted
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeSM || 12) * root.s)
-                        font.weight: Typography.weightBold || Font.Bold
+                        iconSize: Theme.dp(14)
+                        iconColor: root.pageStart > 1 ? Theme.textPrimary : Theme.textMuted
                     }
 
                     MouseArea {
                         id: leftMouse
                         anchors.fill: parent
                         hoverEnabled: true
-                        cursorShape: root.pageStart > 1 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: root.pageStart = Math.max(1, root.pageStart - 1)
+                        cursorShape: root.focusedId > 1 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                        onClicked: {
+                            if (root.focusedId > 1)
+                                root.activateWorkspace(root.focusedId - 1)
+                        }
                         onEntered: {
                             if (root.draggingToplevel && root.pageStart > 1)
                                 leftDragPageTimer.restart();
@@ -490,17 +693,25 @@ PanelWindow {
 
                 Repeater {
                     model: root.workspaceIds()
-                    delegate: Text {
+                    delegate: Rectangle {
                         required property int modelData
                         readonly property bool active: modelData === root.focusedId
-                        Layout.preferredWidth: Theme.dp(20)
+                        Layout.preferredWidth: Theme.dp(24)
+                        Layout.preferredHeight: Theme.dp(24)
                         Layout.alignment: Qt.AlignVCenter
-                        text: String(modelData)
-                        color: active ? Theme.accent : Theme.textPrimary
-                        horizontalAlignment: Text.AlignHCenter
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeSM || 12) * root.s)
-                        font.weight: active ? (Typography.weightBold || Font.Bold) : (Typography.weightMedium || Font.Normal)
+                        radius: Theme.dp(4)
+                        color: active ? Theme.accent : "transparent"
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: String(modelData)
+                            color: active ? Theme.bgPrimary : Theme.textPrimary
+                            horizontalAlignment: Text.AlignHCenter
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round((Typography.sizeSM || 12) * root.s)
+                            font.weight: active ? (Typography.weightBold || Font.Bold) : (Typography.weightMedium || Font.Normal)
+                        }
+
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
@@ -517,13 +728,10 @@ PanelWindow {
                     border.color: Theme.border
                     radius: Theme.dp(4)
 
-                    Text {
+                    IconChevronRight {
                         anchors.centerIn: parent
-                        text: "<"
-                        color: root.pageStart > 1 ? Theme.textPrimary : Theme.textMuted
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeSM || 12) * root.s)
-                        font.weight: Typography.weightBold || Font.Bold
+                        iconSize: Theme.dp(14)
+                        iconColor: Theme.textPrimary
                     }
 
                     MouseArea {
@@ -531,7 +739,12 @@ PanelWindow {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: root.pageStart = root.pageStart + 1
+                        onClicked: {
+                            if (root.focusedId < root.maxWorkspaceId)
+                                root.activateWorkspace(root.focusedId + 1)
+                            else
+                                root.addWorkspace()
+                        }
                         onEntered: {
                             if (root.draggingToplevel)
                                 rightDragPageTimer.restart();
@@ -544,7 +757,7 @@ PanelWindow {
                     Layout.preferredWidth: Theme.dp(18)
                     Layout.alignment: Qt.AlignVCenter
                     text: "-"
-                    color: root.maxWorkspaceId > root.visibleCount ? Theme.textPrimary : Theme.textMuted
+                    color: root.maxWorkspaceId > 5 ? Theme.textPrimary : Theme.textMuted
                     horizontalAlignment: Text.AlignHCenter
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round((Typography.sizeSM || 12) * root.s)
@@ -552,7 +765,7 @@ PanelWindow {
 
                     MouseArea {
                         anchors.fill: parent
-                        enabled: root.maxWorkspaceId > root.visibleCount
+                        enabled: root.maxWorkspaceId > 5
                         cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                         onClicked: root.removeWorkspace()
                     }
@@ -591,6 +804,10 @@ PanelWindow {
                 event.accepted = true;
             } else if (event.key === Qt.Key_Right) {
                 root.pageStart = root.pageStart + 1;
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
+                root.activateWorkspace(root.focusedId);
+                root.closeRequested();
                 event.accepted = true;
             }
         }

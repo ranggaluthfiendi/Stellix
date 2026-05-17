@@ -9,8 +9,14 @@ import qs.config
 Item {
     id: root
 
-    property int wsBaseIndex: 1
-    property int wsCount: 5
+    readonly property int focusedId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
+    readonly property int wsCount: 5
+
+    property int wsBaseIndex: {
+        if (focusedId <= wsCount) return 1;
+        return focusedId - wsCount + 1;
+    }
+    
     property int scrollAccumulator: 0
     property int currentIndex: 1
 
