@@ -1,4 +1,6 @@
 import QtQuick
+import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Services.Mpris
 
 Item {
@@ -7,9 +9,12 @@ Item {
     property var player: null
     property string title: ""
     property string artUrl: ""
+    property string identity: ""
 
     property bool hasMedia: title.length > 0
     property bool hasArt: artUrl !== ""
+
+    property int targetWorkspace: 0
 
     function pickPlayer() {
         let found = null
@@ -26,12 +31,22 @@ Item {
         }
 
         root.player = found
+        root.updateIdentity()
+    }
+
+    function updateIdentity() {
+        if (root.player) {
+            root.identity = root.player.identity || ""
+        } else {
+            root.identity = ""
+        }
     }
 
     function updateState() {
         if (!root.player) {
             if (root.title !== "") root.title = ""
             if (root.artUrl !== "") root.artUrl = ""
+            root.targetWorkspace = 0
             return
         }
 
@@ -43,6 +58,36 @@ Item {
 
         if (root.artUrl !== newArt)
             root.artUrl = newArt
+
+        root.findMediaWorkspace()
+    }
+
+    function findMediaWorkspace() {
+        root.targetWorkspace = 0
+        if (!root.player || !root.identity) return
+
+        let appName = root.identity.toLowerCase()
+        let toplevels = Hyprland.toplevels ? Hyprland.toplevels.values : []
+
+        for (let i = 0; i < toplevels.length; i++) {
+            let tl = toplevels[i]
+            if (!tl || !tl.workspace) continue
+
+            let tlClass = (tl.initialClass || "").toLowerCase()
+            let tlTitle = (tl.title || "").toLowerCase()
+            let tlApp = (tl.appId || "").toLowerCase()
+
+            if (tlClass.indexOf(appName) >= 0 || tlTitle.indexOf(appName) >= 0 || tlApp.indexOf(appName) >= 0) {
+                root.targetWorkspace = tl.workspace.id
+                return
+            }
+        }
+    }
+
+    function goToMediaWorkspace() {
+        if (root.targetWorkspace > 0) {
+            Hyprland.dispatch("workspace " + root.targetWorkspace)
+        }
     }
 
     Timer {
@@ -62,6 +107,11 @@ Item {
         function onPostTrackChanged() { root.updateState() }
         function onTrackArtUrlChanged() { root.updateState() }
         function onPlaybackStateChanged() { root.pickPlayer() }
+    }
+
+    Connections {
+        target: Hyprland
+        function onToplevelsChanged() { root.findMediaWorkspace() }
     }
 
     Component.onCompleted: {

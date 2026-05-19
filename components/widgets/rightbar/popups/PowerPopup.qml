@@ -21,11 +21,11 @@ PopupWindow {
     grabFocus: false
 
     property bool slideIn: false
-    property real slideY: -Theme.dp(15)
+    property real slideY: -Theme.dp(25)
 
     onVisibleChanged: {
         if (visible) {
-            slideY = -Theme.dp(15)
+            slideY = -Theme.dp(25)
             slideIn = true
         }
     }
@@ -84,13 +84,19 @@ PopupWindow {
 
                 Text {
                     text: "Close"
-                    color: Theme.textMuted
+                    color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
 
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
+
                     MouseArea {
+                        id: closeMouse
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
                         onClicked: { if (root.closeCallback) root.closeCallback() }
                     }
                 }
@@ -104,17 +110,17 @@ PopupWindow {
 
             Repeater {
                 model: [
-                    { label: "Logout", icon: "↩", cmd: ["loginctl", "terminate-user", "--no-ask-password", "rang"], danger: false },
-                    { label: "Sleep", icon: "☾", cmd: ["systemctl", "suspend"], danger: false },
-                    { label: "Reboot", icon: "↻", cmd: ["systemctl", "reboot"], danger: true },
-                    { label: "Shutdown", icon: "⏻", cmd: ["systemctl", "poweroff"], danger: true }
+                    { label: "Logout", icon: "↩", cmd: ["loginctl", "terminate-user", "--no-ask-password", "rang"], colorType: "warning" },
+                    { label: "Sleep", icon: "☾", cmd: ["systemctl", "suspend"], colorType: "info" },
+                    { label: "Reboot", icon: "↻", cmd: ["systemctl", "reboot"], colorType: "danger" },
+                    { label: "Shutdown", icon: "⏻", cmd: ["systemctl", "poweroff"], colorType: "danger" }
                 ]
 
                 delegate: PowerButton {
                     required property var modelData
                     Layout.fillWidth: true
                     s: root.s
-                    danger: modelData.danger
+                    colorType: modelData.colorType
                     buttonLabel: modelData.label
                     buttonIcon: modelData.icon
                     onExecute: root.runCommand(modelData.cmd)

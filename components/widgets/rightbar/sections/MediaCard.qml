@@ -123,72 +123,34 @@ Rectangle {
         }
     }
 
-    Item {
+    MarqueeText {
+        id: titleMarquee
         x: root.rightX
         y: root.pad
         width: root.rightW
         height: root.rowH
-        clip: true
-
-        Text {
-            id: titleText
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            text: root.hasMedia ? root.displayTitle : "🎵 Play something — try Spotify, YouTube Music, or your favorite tunes!"
-            color: root.hasMedia ? Theme.textPrimary : Theme.accent
-            font.family: Typography.fontFamily
-            font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
-            font.weight: Typography.weightMedium || Font.Normal
-            elide: Text.ElideNone
-        }
-
-        NumberAnimation {
-            id: titleScroll
-            target: titleText
-            property: "x"
-            from: 0
-            to: -(titleText.implicitWidth - parent.width + Theme.dp(4))
-            duration: Math.max(4000, titleText.implicitWidth * 60)
-            easing.type: Easing.Linear
-            loops: Animation.Infinite
-            running: root.hasMedia && titleText.implicitWidth > parent.width
-        }
-        onWidthChanged: {
-            titleScroll.stop()
-            titleText.x = 0
-            if (titleText.implicitWidth > width)
-                titleScroll.start()
-        }
+        text: root.hasMedia ? root.displayTitle : "🎵 Play something — try Spotify, YouTube Music, or your favorite tunes!"
+        textColor: root.hasMedia ? Theme.textPrimary : Theme.accent
+        fontSize: 10
+        fontScale: s
+        fontWeight: Typography.weightMedium || Font.Normal
+        scrolling: true
+        textPadding: 0
     }
 
-    Item {
+    MarqueeText {
+        id: artistMarquee
         x: root.rightX
         y: root.pad + root.rowH
         width: root.rightW
         height: root.rowH
-        clip: true
-
-        Text {
-            id: artistText
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            text: root.hasMedia ? root.displayArtist : "Your music, your vibe — hit play!"
-            color: root.hasMedia ? Theme.textMuted : Theme.textMuted
-            font.family: Typography.fontFamily
-            font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-            elide: Text.ElideNone
-        }
-
-        NumberAnimation {
-            target: artistText
-            property: "x"
-            from: 0
-            to: -(artistText.implicitWidth - parent.width + Theme.dp(4))
-            duration: Math.max(4000, artistText.implicitWidth * 60)
-            easing.type: Easing.Linear
-            loops: Animation.Infinite
-            running: root.hasMedia && artistText.implicitWidth > parent.width
-        }
+        text: root.hasMedia ? root.displayArtist : "Your music, your vibe — hit play!"
+        textColor: Theme.textMuted
+        fontSize: 9
+        fontScale: s
+        fontWeight: Font.Normal
+        scrolling: true
+        textPadding: 0
     }
 
     Item {
@@ -276,32 +238,41 @@ Rectangle {
         width: root.rightW
         height: root.rowH
 
-        readonly property int ctrlW: Math.round(root.btnSz * 1.6)
+        readonly property int ctrlW: Math.round(root.btnSz * 1.5)
         readonly property int ctrlH: root.btnSz
 
         Row {
             anchors.centerIn: parent
             spacing: Math.max(Theme.dp(2),
-                (controlRow.width - 5 * controlRow.ctrlW) / 6)
+                (controlRow.width - 6 * controlRow.ctrlW) / 7)
 
             Rectangle {
                 width: controlRow.ctrlW; height: controlRow.ctrlH
-                color: root.activePlayer && root.activePlayer.shuffleSupported && root.activePlayer.shuffle
-                    ? Theme.accentSoft : Theme.bgSecondary
+                color: shuffleMouse.containsMouse
+                    ? (root.activePlayer && root.activePlayer.shuffleSupported && root.activePlayer.shuffle
+                        ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35)
+                        : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                    : (root.activePlayer && root.activePlayer.shuffleSupported && root.activePlayer.shuffle
+                        ? Theme.accentSoft : Theme.bgSecondary)
                 border.width: 1
                 border.color: root.activePlayer && root.activePlayer.shuffleSupported && root.activePlayer.shuffle
                     ? Theme.accent : Theme.border
                 radius: 0
                 opacity: root.activePlayer && root.activePlayer.shuffleSupported ? 1.0 : 0.35
 
-                Text {
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
+
+                IconShuffle {
                     anchors.centerIn: parent
-                    text: "⇄"
-                    color: root.activePlayer && root.activePlayer.shuffle ? Theme.accent : Theme.textPrimary
-                    font.pixelSize: Math.round(8 * s)
+                    iconColor: root.activePlayer && root.activePlayer.shuffle ? Theme.accent : Theme.textPrimary
+                    iconSize: root.iconSz
                 }
                 MouseArea {
+                    id: shuffleMouse
                     anchors.fill: parent; cursorShape: Qt.PointingHandCursor
+                    hoverEnabled: true
                     enabled: root.activePlayer && root.activePlayer.shuffleSupported && root.activePlayer.canControl
                     onClicked: root.activePlayer.shuffle = !root.activePlayer.shuffle
                 }
@@ -309,9 +280,13 @@ Rectangle {
 
             Rectangle {
                 width: controlRow.ctrlW; height: controlRow.ctrlH
-                color: Theme.bgSecondary
-                border.width: 1; border.color: Theme.border; radius: 0
+                color: prevMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
+                border.width: 1; border.color: prevMouse.containsMouse ? Theme.textPrimary : Theme.border; radius: 0
                 opacity: root.activePlayer && root.activePlayer.canGoPrevious ? 1.0 : 0.35
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
 
                 IconSkipPrev {
                     anchors.centerIn: parent
@@ -319,7 +294,9 @@ Rectangle {
                     iconSize: root.iconSz
                 }
                 MouseArea {
+                    id: prevMouse
                     anchors.fill: parent
+                    hoverEnabled: true
                     cursorShape: root.activePlayer && root.activePlayer.canGoPrevious ? Qt.PointingHandCursor : Qt.ArrowCursor
                     enabled: root.activePlayer && root.activePlayer.canGoPrevious
                     onClicked: root.activePlayer.previous()
@@ -328,26 +305,34 @@ Rectangle {
 
             Rectangle {
                 width: controlRow.ctrlW; height: controlRow.ctrlH
-                color: root.activePlayer ? Theme.accent : Theme.bgSecondary
+                color: playMouse.containsMouse
+                    ? (root.activePlayer ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                    : (root.activePlayer ? Theme.accent : Theme.bgSecondary)
                 border.width: 1
-                border.color: root.activePlayer ? Theme.accent : Theme.border
+                border.color: root.activePlayer ? Theme.accent : (playMouse.containsMouse ? Theme.textPrimary : Theme.border)
                 radius: 0
                 opacity: root.activePlayer && root.activePlayer.canTogglePlaying ? 1.0 : 0.35
 
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
+
                 IconPlay {
                     anchors.centerIn: parent
-                    iconColor: "white"
+                    iconColor: root.activePlayer ? Theme.bgPrimary : Theme.textPrimary
                     iconSize: root.iconSz
                     visible: !root.activePlayer || !root.activePlayer.isPlaying
                 }
                 IconPause {
                     anchors.centerIn: parent
-                    iconColor: "white"
+                    iconColor: root.activePlayer ? Theme.bgPrimary : Theme.textPrimary
                     iconSize: root.iconSz
                     visible: root.activePlayer && root.activePlayer.isPlaying
                 }
                 MouseArea {
+                    id: playMouse
                     anchors.fill: parent
+                    hoverEnabled: true
                     cursorShape: root.activePlayer && root.activePlayer.canTogglePlaying ? Qt.PointingHandCursor : Qt.ArrowCursor
                     enabled: root.activePlayer && root.activePlayer.canTogglePlaying
                     onClicked: root.activePlayer.togglePlaying()
@@ -356,9 +341,13 @@ Rectangle {
 
             Rectangle {
                 width: controlRow.ctrlW; height: controlRow.ctrlH
-                color: Theme.bgSecondary
-                border.width: 1; border.color: Theme.border; radius: 0
+                color: nextMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
+                border.width: 1; border.color: nextMouse.containsMouse ? Theme.textPrimary : Theme.border; radius: 0
                 opacity: root.activePlayer && root.activePlayer.canGoNext ? 1.0 : 0.35
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
 
                 IconSkipNext {
                     anchors.centerIn: parent
@@ -366,7 +355,9 @@ Rectangle {
                     iconSize: root.iconSz
                 }
                 MouseArea {
+                    id: nextMouse
                     anchors.fill: parent
+                    hoverEnabled: true
                     cursorShape: root.activePlayer && root.activePlayer.canGoNext ? Qt.PointingHandCursor : Qt.ArrowCursor
                     enabled: root.activePlayer && root.activePlayer.canGoNext
                     onClicked: root.activePlayer.next()
@@ -375,9 +366,14 @@ Rectangle {
 
             Rectangle {
                 width: controlRow.ctrlW; height: controlRow.ctrlH
-                color: root.activePlayer && root.activePlayer.loopSupported
-                    && root.activePlayer.loopState !== MprisLoopState.None
-                    ? Theme.accentSoft : Theme.bgSecondary
+                color: loopMouse.containsMouse
+                    ? (root.activePlayer && root.activePlayer.loopSupported
+                        && root.activePlayer.loopState !== MprisLoopState.None
+                        ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35)
+                        : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                    : (root.activePlayer && root.activePlayer.loopSupported
+                        && root.activePlayer.loopState !== MprisLoopState.None
+                        ? Theme.accentSoft : Theme.bgSecondary)
                 border.width: 1
                 border.color: root.activePlayer && root.activePlayer.loopSupported
                     && root.activePlayer.loopState !== MprisLoopState.None
@@ -385,17 +381,20 @@ Rectangle {
                 radius: 0
                 opacity: root.activePlayer && root.activePlayer.loopSupported ? 1.0 : 0.35
 
-                Text {
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
+
+                IconLoop {
                     anchors.centerIn: parent
-                    text: root.activePlayer && root.activePlayer.loopState === MprisLoopState.Track
-                        ? "1↺" : "↺"
-                    color: root.activePlayer && root.activePlayer.loopState !== MprisLoopState.None
+                    iconColor: root.activePlayer && root.activePlayer.loopState !== MprisLoopState.None
                         ? Theme.accent : Theme.textPrimary
-                    font.pixelSize: Math.round(8 * s)
-                    font.bold: root.activePlayer && root.activePlayer.loopState === MprisLoopState.Track
+                    iconSize: root.iconSz
                 }
                 MouseArea {
+                    id: loopMouse
                     anchors.fill: parent
+                    hoverEnabled: true
                     cursorShape: root.activePlayer && root.activePlayer.loopSupported && root.activePlayer.canControl ? Qt.PointingHandCursor : Qt.ArrowCursor
                     enabled: root.activePlayer && root.activePlayer.loopSupported && root.activePlayer.canControl
                     onClicked: {
@@ -404,6 +403,35 @@ Rectangle {
                             case MprisLoopState.None:     root.activePlayer.loopState = MprisLoopState.Playlist; break
                             case MprisLoopState.Playlist: root.activePlayer.loopState = MprisLoopState.Track;    break
                             default:                       root.activePlayer.loopState = MprisLoopState.None;    break
+                        }
+                    }
+                }
+            }
+
+            Rectangle {
+                width: controlRow.ctrlW; height: controlRow.ctrlH
+                color: refreshMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
+                border.width: 1; border.color: refreshMouse.containsMouse ? Theme.textPrimary : Theme.border; radius: 0
+                opacity: root.activePlayer ? 1.0 : 0.35
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
+
+                IconRefresh {
+                    anchors.centerIn: parent
+                    iconColor: Theme.textPrimary
+                    iconSize: root.iconSz
+                }
+                MouseArea {
+                    id: refreshMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: root.activePlayer ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    enabled: root.activePlayer != null
+                    onClicked: {
+                        if (root.mprisService) {
+                            try { root.mprisService.refresh() } catch(e) {}
                         }
                     }
                 }

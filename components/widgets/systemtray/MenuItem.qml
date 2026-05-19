@@ -16,7 +16,9 @@ Item {
 
     readonly property bool isActiveSubmenu: SysTrayState.openedSubmenuEntry === entry
 
-    implicitHeight: Theme.dp(28)
+    property real s: Scales.uiScale
+
+    implicitHeight: Theme.dp(24)
     implicitWidth: row.implicitWidth + Theme.dp(16)
 
     Rectangle {
@@ -76,6 +78,8 @@ Item {
         Text {
             text: entry && entry.text ? entry.text : ""
             color: isEnabled ? Theme.textPrimary : Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round((Typography.sizeXXS || 9) * root.s)
 
             Layout.fillWidth: false
             wrapMode: Text.NoWrap
@@ -89,6 +93,8 @@ Item {
 
             color: isActiveSubmenu ? Theme.accent : Theme.textMuted
             visible: entry && entry.hasChildren
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round((Typography.sizeXXS || 9) * root.s)
         }
     }
 

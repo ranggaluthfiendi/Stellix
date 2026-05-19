@@ -4,8 +4,8 @@ import qs.config
 Rectangle {
     property var checkState: Qt.Unchecked
 
-    width: Theme.dp(14)
-    height: Theme.dp(14)
+    width: Theme.dp(12)
+    height: Theme.dp(12)
     radius: width / 2
 
     color: Qt.rgba(
@@ -17,8 +17,8 @@ Rectangle {
 
     Rectangle {
         anchors.centerIn: parent
-        width: Theme.dp(6)
-        height: Theme.dp(6)
+        width: Theme.dp(5)
+        height: Theme.dp(5)
         radius: width / 2
 
         visible: checkState === Qt.Checked

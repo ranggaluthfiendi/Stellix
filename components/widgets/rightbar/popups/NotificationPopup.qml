@@ -16,7 +16,11 @@ PopupWindow {
     visible: false
 
     property bool slideIn: false
-    property real slideY: -Theme.dp(20)
+    property real slideY: -Theme.dp(30)
+
+    // ── Clear All animation state ──
+    property bool clearAllActive: false
+    property int clearAllProgress: 0
 
     readonly property int filteredCount: root.filteredNotifs().length
     readonly property real itemH: Theme.dp(72)
@@ -37,7 +41,7 @@ PopupWindow {
 
     onVisibleChanged: {
         if (visible) {
-            slideY = -Theme.dp(20)
+            slideY = -Theme.dp(30)
             slideIn = true
         }
     }
@@ -46,7 +50,7 @@ PopupWindow {
         var arr = (root.trackedNotifs || []).slice()
         if (root.filterCategory !== "all") {
             arr = arr.filter(function(n) {
-                return n && n.appName && n.appName.toLowerCase().indexOf(root.filterCategory) >= 0
+                return n && n.appName && n.appName === root.filterCategory
             })
         }
         arr.sort(function(a, b) {
@@ -69,10 +73,30 @@ PopupWindow {
     }
 
     function dismissAll() {
-        var arr = root.trackedNotifs || []
-        for (var i = 0; i < arr.length; i++) {
-            if (!arr[i]) continue
-            try { arr[i].dismiss() } catch (e) {}
+        if (root.clearAllActive) return
+        var arr = root.filteredNotifs()
+        if (arr.length === 0) return
+        root.clearAllActive = true
+        root.clearAllProgress = 0
+        clearAllTimer.start()
+    }
+
+    Timer {
+        id: clearAllTimer
+        interval: 80
+        repeat: true
+        onTriggered: {
+            root.clearAllProgress++
+            if (root.clearAllProgress >= root.filteredCount) {
+                stop()
+                var arr = root.trackedNotifs || []
+                for (var i = 0; i < arr.length; i++) {
+                    if (!arr[i]) continue
+                    try { arr[i].dismiss() } catch (e) {}
+                }
+                root.clearAllActive = false
+                root.clearAllProgress = 0
+            }
         }
     }
 
@@ -136,16 +160,15 @@ PopupWindow {
                     visible: root.filteredCount > 0
                     implicitWidth: countLabel.implicitWidth + Theme.dp(8)
                     implicitHeight: Theme.dp(18)
-                    color: Theme.accentSoft
-                    border.width: 1
-                    border.color: Theme.accent
+                    color: Theme.danger
+                    border.width: 0
                     radius: Theme.dp(9)
 
                     Text {
                         id: countLabel
                         anchors.centerIn: parent
                         text: String(root.filteredCount)
-                        color: Theme.accent
+                        color: "#ffffff"
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                         font.weight: Typography.weightBold || Font.Bold
@@ -157,10 +180,16 @@ PopupWindow {
                 Rectangle {
                     implicitWidth: dndLabel.implicitWidth + Theme.dp(16)
                     implicitHeight: Theme.dp(22)
-                    color: RightBarState.dndEnabled ? Theme.accent : Theme.bgPrimary
+                    color: dndMouse.containsMouse
+                        ? (RightBarState.dndEnabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                        : (RightBarState.dndEnabled ? Theme.accent : Theme.bgPrimary)
                     border.width: 1
                     border.color: RightBarState.dndEnabled ? Theme.accent : Theme.border
                     radius: 0
+
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
 
                     Text {
                         id: dndLabel
@@ -175,8 +204,10 @@ PopupWindow {
                     }
 
                     MouseArea {
+                        id: dndMouse
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
+                        hoverEnabled: true
                         onClicked: RightBarState.toggleDnd()
                     }
                 }
@@ -191,15 +222,21 @@ PopupWindow {
 
                 Text {
                     text: "✕"
-                    color: Theme.textMuted
+                    color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
                     Layout.alignment: Qt.AlignVCenter
 
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
+
                     MouseArea {
+                        id: closeMouse
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         anchors.margins: -Theme.dp(4)
+                        hoverEnabled: true
                         onClicked: { if (root.closeCallback) root.closeCallback() }
                     }
                 }
@@ -214,24 +251,32 @@ PopupWindow {
                 Rectangle {
                     Layout.preferredHeight: Theme.dp(18)
                     Layout.preferredWidth: catAllLabel.implicitWidth + Theme.dp(10)
-                    color: root.filterCategory === "all" ? Theme.accentSoft : Theme.bgPrimary
+                    color: catAllMouse.containsMouse && root.filterCategory !== "all"
+                        ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
+                        : (root.filterCategory === "all" ? Theme.accentSoft : Theme.bgPrimary)
                     border.width: 1
                     border.color: root.filterCategory === "all" ? Theme.accent : Theme.border
                     radius: 0
+
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
 
                     Text {
                         id: catAllLabel
                         anchors.centerIn: parent
                         text: "All"
-                        color: root.filterCategory === "all" ? Theme.accent : Theme.textMuted
+                        color: root.filterCategory === "all" ? Theme.bgPrimary : Theme.textMuted
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                         font.weight: root.filterCategory === "all" ? (Typography.weightBold || Font.Bold) : (Typography.weightRegular || Font.Normal)
                     }
 
                     MouseArea {
+                        id: catAllMouse
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
                         onClicked: root.filterCategory = "all"
                     }
                 }
@@ -243,24 +288,32 @@ PopupWindow {
                         required property var modelData
                         Layout.preferredHeight: Theme.dp(18)
                         Layout.preferredWidth: catLbl.implicitWidth + Theme.dp(10)
-                        color: root.filterCategory === modelData.name ? Theme.accentSoft : Theme.bgPrimary
+                        color: catMouse.containsMouse && root.filterCategory !== modelData.name
+                            ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
+                            : (root.filterCategory === modelData.name ? Theme.accentSoft : Theme.bgPrimary)
                         border.width: 1
                         border.color: root.filterCategory === modelData.name ? Theme.accent : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Text {
                             id: catLbl
                             anchors.centerIn: parent
                             text: modelData.name + " (" + modelData.count + ")"
-                            color: root.filterCategory === modelData.name ? Theme.accent : Theme.textMuted
+                            color: root.filterCategory === modelData.name ? Theme.bgPrimary : Theme.textMuted
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                             font.weight: root.filterCategory === modelData.name ? (Typography.weightBold || Font.Bold) : (Typography.weightRegular || Font.Normal)
                         }
 
                         MouseArea {
+                            id: catMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
                             onClicked: root.filterCategory = modelData.name
                         }
                     }
@@ -326,28 +379,61 @@ PopupWindow {
 
                     delegate: Item {
                         required property var modelData
+                        required property int index
                         width: ListView.view.width
-                        height: root.itemH
+                        height: modelData.body && modelData.body.length > 0 ? Theme.dp(96) : root.itemH
 
                         property bool dismissPending: false
 
+                        // Exit animation for Clear All
+                        property real exitX: 0
+                        property real exitOpacity: 1
+
+                        states: State {
+                            name: "exiting"
+                            when: root.clearAllActive && index < root.clearAllProgress
+                            PropertyChanges { target: delegateItem; exitX: delegateItem.width + Theme.dp(20); exitOpacity: 0 }
+                        }
+
+                        transitions: Transition {
+                            to: "exiting"
+                            NumberAnimation { properties: "exitX,exitOpacity"; duration: 280; easing.type: Easing.InCubic }
+                        }
+
+                        id: delegateItem
+                        transform: Translate { x: delegateItem.exitX }
+                        opacity: delegateItem.exitOpacity
+
                         Rectangle {
                             anchors.fill: parent
-                            color: parent.dismissPending ? Theme.danger : "transparent"
-                            Behavior on color { ColorAnimation { duration: 150 } }
+                            color: Math.abs(swipeRect.x) > Theme.dp(50) ? Theme.danger : "transparent"
+                            opacity: Math.min(1.0, Math.abs(swipeRect.x) / Theme.dp(80))
+                            z: 1
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: "Dismiss"
+                                color: "white"
+                                font.family: Typography.fontFamily
+                                font.pixelSize: Math.round((Typography.sizeSM || 12) * s)
+                                font.weight: Font.Bold
+                                visible: Math.abs(swipeRect.x) > Theme.dp(30)
+                            }
                         }
 
                         Rectangle {
                             id: swipeRect
                             x: 0
-                            width: parent.width - Math.abs(x)
+                            width: parent.width
                             height: parent.height
                             color: Theme.bgPrimary
                             border.width: 1
                             border.color: Theme.border
                             radius: 0
+                            z: 2
 
                             Behavior on x {
+                                enabled: !dragMouse.drag.active && !root.clearAllActive
                                 NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                             }
 
@@ -369,7 +455,7 @@ PopupWindow {
                                         id: notifAppIcon
                                         anchors.fill: parent
                                         anchors.margins: Theme.dp(4)
-                                        source: modelData.appIcon || ""
+                                        source: modelData.appIcon ? "image://icon/" + modelData.appIcon : ""
                                         fillMode: Image.PreserveAspectFit
                                         visible: (modelData.appIcon || "").length > 0 && status === Image.Ready
                                         asynchronous: true
@@ -398,14 +484,15 @@ PopupWindow {
                                         Layout.fillWidth: true
                                         spacing: Theme.dp(4)
 
-                                        Text {
+                                        MarqueeText {
                                             Layout.fillWidth: true
                                             text: modelData.appName || ""
-                                            color: Theme.accent
-                                            font.family: Typography.fontFamily
-                                            font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
-                                            font.weight: Typography.weightMedium || Font.Normal
-                                            elide: Text.ElideRight
+                                            textColor: Theme.accent
+                                            fontSize: 7
+                                            fontScale: s
+                                            fontWeight: Typography.weightMedium || Font.Normal
+                                            scrolling: true
+                                            textPadding: 0
                                         }
 
                                         Text {
@@ -416,13 +503,14 @@ PopupWindow {
                                         }
                                     }
 
-                                    Text {
+                                    MarqueeText {
                                         text: modelData.summary || "Notification"
-                                        color: Theme.textPrimary
-                                        font.family: Typography.fontFamily
-                                        font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
-                                        font.weight: Typography.weightMedium || Font.Normal
-                                        elide: Text.ElideRight
+                                        textColor: Theme.textPrimary
+                                        fontSize: 10
+                                        fontScale: s
+                                        fontWeight: Typography.weightMedium || Font.Normal
+                                        scrolling: true
+                                        textPadding: 0
                                         Layout.fillWidth: true
                                     }
 
@@ -431,46 +519,28 @@ PopupWindow {
                                         color: Theme.textMuted
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                                        font.weight: Font.Normal
+                                        wrapMode: Text.Wrap
+                                        maximumLineCount: 2
                                         elide: Text.ElideRight
+                                        lineHeight: 1.2
+                                        lineHeightMode: Text.ProportionalHeight
                                         Layout.fillWidth: true
                                         visible: modelData.body && modelData.body.length > 0
-                                        maximumLineCount: 2
-                                        wrapMode: Text.Wrap
-                                    }
-                                }
-
-                                Rectangle {
-                                    Layout.preferredWidth: Theme.dp(22)
-                                    Layout.preferredHeight: Theme.dp(22)
-                                    Layout.alignment: Qt.AlignTop
-                                    color: Theme.bgSecondary
-                                    border.width: 1
-                                    border.color: Theme.border
-                                    radius: 0
-
-                                    IconClose {
-                                        anchors.centerIn: parent
-                                        iconColor: Theme.textMuted
-                                        iconSize: Theme.dp(9)
-                                    }
-
-                                    MouseArea {
-                                        cursorShape: Qt.PointingHandCursor
-                                        anchors.fill: parent
-                                        onClicked: root.dismissOne(modelData)
                                     }
                                 }
                             }
 
                             MouseArea {
+                                id: dragMouse
                                 anchors.fill: parent
                                 drag.target: swipeRect
-                                drag.axis: MouseArea.XAxis
-                                drag.minimumX: -Theme.dp(80)
-                                drag.maximumX: Theme.dp(80)
+                                drag.axis: Drag.XAxis
+                                drag.minimumX: -Theme.dp(100)
+                                drag.maximumX: Theme.dp(100)
 
                                 onReleased: {
-                                    if (Math.abs(swipeRect.x) > Theme.dp(50)) {
+                                    if (Math.abs(swipeRect.x) > Theme.dp(60)) {
                                         root.dismissOne(modelData)
                                     } else {
                                         swipeRect.x = 0

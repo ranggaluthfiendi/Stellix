@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Shapes
 import qs.config
+import qs.components.elements
 import Quickshell.Services.Mpris
 
 Item {
@@ -16,18 +17,8 @@ Item {
     property bool isPlaying: false
 
     function updateTrack() {
-        let t = player && player.trackTitle ? player.trackTitle : "No Track"
-        let a = player && player.trackArtist ? player.trackArtist : "No Artist"
-
-        if (trackTitle !== t) {
-            trackTitle = t
-            titleWrap.scroll = 0
-        }
-
-        if (artist !== a) {
-            artist = a
-            artistWrap.scroll = 0
-        }
+        trackTitle = player && player.trackTitle ? player.trackTitle : "No Track"
+        artist = player && player.trackArtist ? player.trackArtist : "No Artist"
     }
 
     function syncPlayback() {
@@ -80,8 +71,21 @@ Item {
         width: 20 * s
         height: 20 * s
 
-        MouseArea {
+        Rectangle {
             anchors.fill: parent
+            color: ctrlMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent"
+            radius: 4 * s
+
+            Behavior on color {
+                ColorAnimation { duration: 120 }
+            }
+        }
+
+        MouseArea {
+            id: ctrlMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
 
             onClicked: {
                 if (!root.player || !root.player.canControl)
@@ -111,7 +115,7 @@ Item {
                     var ctx = getContext("2d")
                     ctx.clearRect(0, 0, width, height)
 
-                    ctx.fillStyle = Theme.textPrimary
+                    ctx.fillStyle = ctrlMouse.containsMouse ? Theme.accent : Theme.textPrimary
                     ctx.beginPath()
                     ctx.moveTo(0, 0)
                     ctx.lineTo(width, height / 2)
@@ -129,114 +133,87 @@ Item {
                 Rectangle {
                     width: parent.width * 0.35
                     height: parent.height
-                    color: Theme.textPrimary
+                    color: ctrlMouse.containsMouse ? Theme.accent : Theme.textPrimary
                     radius: 1 * s
                 }
 
                 Rectangle {
                     width: parent.width * 0.35
                     height: parent.height
-                    color: Theme.textPrimary
+                    color: ctrlMouse.containsMouse ? Theme.accent : Theme.textPrimary
                     radius: 1 * s
                 }
             }
         }
     }
 
-    Item {
-        id: titleWrap
-
+    MarqueeText {
+        id: titleMarquee
         x: 245 * s
         y: 24 * s
-
         width: 350 * s
         height: 28 * s
-        clip: true
-
-        property real scroll: 0
-        property real speed: 20
-        property real gap: 60 * s
-
-        readonly property bool overflow: title1.width > width
-        readonly property real total: title1.width + gap
-
-        Text {
-            id: title1
-            text: trackTitle
-            color: primary
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeSM
-            x: -titleWrap.scroll
-        }
-
-        Text {
-            text: trackTitle
-            color: primary
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeSM
-            x: title1.width + titleWrap.gap - titleWrap.scroll
-            visible: titleWrap.overflow
-        }
-
-        NumberAnimation on scroll {
-            running: titleWrap.overflow
-            loops: Animation.Infinite
-            from: 0
-            to: titleWrap.total
-            duration: (titleWrap.total / titleWrap.speed) * 1000
-            easing.type: Easing.Linear
-        }
+        text: root.trackTitle
+        textColor: root.primary
+        fontSize: 12
+        fontScale: Scales.uiScale
+        fontWeight: Font.Normal
+        scrolling: true
+        textPadding: 0
     }
 
-    Item {
-        id: artistWrap
-
+    MarqueeText {
+        id: artistMarquee
         x: 245 * s
         y: 52 * s
-
         width: 350 * s
         height: 24 * s
-        clip: true
-
-        property real scroll: 0
-        property real speed: 20
-        property real gap: 60 * s
-
-        readonly property bool overflow: artist1.width > width
-        readonly property real total: artist1.width + gap
-
-        Text {
-            id: artist1
-            text: artist
-            color: primary
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeXS
-            font.weight: Typography.weightBold
-            x: -artistWrap.scroll
-        }
-
-        Text {
-            text: artist
-            color: primary
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeXS
-            font.weight: Typography.weightBold
-            x: artist1.width + artistWrap.gap - artistWrap.scroll
-            visible: artistWrap.overflow
-        }
-
-        NumberAnimation on scroll {
-            running: artistWrap.overflow
-            loops: Animation.Infinite
-            from: 0
-            to: artistWrap.total
-            duration: (artistWrap.total / artistWrap.speed) * 1000
-            easing.type: Easing.Linear
-        }
+        text: root.artist
+        textColor: root.primary
+        fontSize: 10
+        fontScale: Scales.uiScale
+        fontWeight: Font.Bold
+        scrolling: true
+        textPadding: 0
     }
 
     property real contentWidth: {
-        let w = Math.max(title1.width, artist1.width)
-        return (w > 0 ? w : 200 * s) + 100 * s
+        let w = Math.max(titleMarquee.textWidth, artistMarquee.textWidth)
+        return (w > 0 ? w : 200 * s) + 140 * s
+    }
+
+    // ── App Launcher Button ──
+    Rectangle {
+        x: 245 * s + Math.max(titleMarquee.textWidth, artistMarquee.textWidth) + 20 * s
+        y: 30 * s
+        width: appLbl.implicitWidth + 16 * s
+        height: 22 * s
+        color: appBtnMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.6)
+        border.width: 1
+        border.color: appBtnMouse.containsMouse ? Theme.accent : Theme.border
+        radius: 4 * s
+        visible: root.player && root.player.identity && root.player.identity !== ""
+
+        Text {
+            id: appLbl
+            anchors.centerIn: parent
+            text: "▶ " + root.player.identity
+            color: appBtnMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Typography.sizeXXS
+            font.weight: Font.Bold
+        }
+
+        MouseArea {
+            id: appBtnMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            onClicked: {
+                if (root.player && root.player.canRaise) {
+                    root.player.raise()
+                }
+            }
+        }
     }
 }

@@ -58,7 +58,7 @@ Scope {
             right: true
         }
 
-        implicitHeight: Theme.dp(4)
+        implicitHeight: Theme.dp(12)
 
         Component.onCompleted: {
             if (trigger.WlrLayershell) {
@@ -170,7 +170,6 @@ Scope {
 
         Component.onCompleted: {
             if (calendarOutsideOverlay.WlrLayershell) {
-                // FIXED: Use Top layer so it doesn't block SysTray in Overlay
                 calendarOutsideOverlay.WlrLayershell.layer = WlrLayer.Top
                 calendarOutsideOverlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
                 calendarOutsideOverlay.WlrLayershell.exclusiveZone = -1

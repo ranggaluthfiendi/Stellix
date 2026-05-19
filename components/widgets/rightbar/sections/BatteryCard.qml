@@ -66,22 +66,28 @@ Rectangle {
         Rectangle {
             Layout.preferredWidth: Theme.dp(24)
             Layout.preferredHeight: Theme.dp(24)
-            color: Theme.bgSecondary
+            color: powerMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Theme.bgSecondary
             border.width: 1
-            border.color: Theme.border
+            border.color: powerMouse.containsMouse ? Theme.accent : Theme.border
             radius: 0
+
+            Behavior on color {
+                ColorAnimation { duration: 120 }
+            }
 
             Text {
                 anchors.centerIn: parent
                 text: "⏻"
-                color: Theme.textPrimary
+                color: powerMouse.containsMouse ? Theme.accent : Theme.textPrimary
                 font.family: Typography.fontFamily
                 font.pixelSize: Math.round((Typography.sizeSM || 13) * root.s)
             }
 
             MouseArea {
+                id: powerMouse
                 cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
+                hoverEnabled: true
                 onClicked: root.powerClicked()
             }
         }

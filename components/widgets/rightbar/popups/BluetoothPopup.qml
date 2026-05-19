@@ -18,7 +18,7 @@ PopupWindow {
     property real s: Scales.uiScale
 
     property bool slideIn: false
-    property real slideX: Theme.dp(20)
+    property real slideY: -Theme.dp(20)
 
     readonly property real itemH: Theme.dp(32)
     readonly property real headerH: Theme.dp(36)
@@ -41,7 +41,7 @@ PopupWindow {
 
     onVisibleChanged: {
         if (visible) {
-            slideX = Theme.dp(20)
+            slideY = -Theme.dp(20)
             slideIn = true
         }
     }
@@ -93,14 +93,14 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
-        x: -root.slideX
+        y: root.slideY
         color: Theme.bgSecondary
         border.width: 1
         border.color: Theme.border
         radius: 0
         clip: true
 
-        Behavior on x {
+        Behavior on y {
             NumberAnimation {
                 duration: 250
                 easing.type: Easing.OutCubic
@@ -135,24 +135,31 @@ PopupWindow {
                         iconSize: Theme.dp(12)
                     }
 
-                    Text {
+                    MarqueeText {
                         Layout.fillWidth: true
                         text: root.btAdapter && root.btAdapter.enabled ? "Bluetooth — On" : "Bluetooth — Off"
-                        color: root.btAdapter && root.btAdapter.enabled ? Theme.accent : Theme.textPrimary
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
-                        font.weight: Typography.weightMedium || Font.Normal
-                        elide: Text.ElideRight
+                        textColor: root.btAdapter && root.btAdapter.enabled ? Theme.accent : Theme.textPrimary
+                        fontSize: 10
+                        fontScale: s
+                        fontWeight: Typography.weightMedium || Font.Normal
+                        scrolling: true
+                        textPadding: 0
                     }
 
                     Rectangle {
                         Layout.preferredWidth: Theme.dp(36)
                         Layout.preferredHeight: Theme.dp(22)
                         Layout.alignment: Qt.AlignVCenter
-                        color: root.btAdapter && root.btAdapter.enabled ? Theme.accent : Theme.bgSecondary
+                        color: btToggleMouse.containsMouse
+                            ? (root.btAdapter && root.btAdapter.enabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                            : (root.btAdapter && root.btAdapter.enabled ? Theme.accent : Theme.bgSecondary)
                         border.width: 1
                         border.color: root.btAdapter && root.btAdapter.enabled ? Theme.accent : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Text {
                             anchors.centerIn: parent
@@ -166,8 +173,10 @@ PopupWindow {
                         }
 
                         MouseArea {
+                            id: btToggleMouse
                             cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
+                            hoverEnabled: true
                             enabled: root.btAdapter
                             onClicked: { if (root.btAdapter) root.btAdapter.enabled = !root.btAdapter.enabled }
                         }
@@ -186,10 +195,19 @@ PopupWindow {
                         property var dd: modelData
                         width: parent.width
                         height: isHeader(dd) ? Theme.dp(20) : root.itemH
-                        color: isHeader(dd) ? "transparent" : (isDevConnected(dd) ? Theme.bgPrimary : "transparent")
+                        color: {
+                            if (isHeader(dd)) return "transparent"
+                            if (devRowMouse.containsMouse) return isDevConnected(dd) ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.12) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.04)
+                            return isDevConnected(dd) ? Theme.bgPrimary : "transparent"
+                        }
                         border.width: isHeader(dd) ? 0 : 1
                         border.color: isHeader(dd) ? "transparent" : (isDevConnected(dd) ? Theme.accent : Theme.border)
                         radius: 0
+
+                        Behavior on color {
+                            enabled: !isHeader(dd)
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Text {
                             visible: isHeader(dd)
@@ -218,15 +236,16 @@ PopupWindow {
                                     : (isDevBonded(dd) ? Theme.accentSoft : Theme.border)
                             }
 
-                            Text {
+                            MarqueeText {
                                 text: dd.device.name || dd.device.deviceName || "Unknown"
-                                color: Theme.textPrimary
-                                font.family: Typography.fontFamily
-                                font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                                font.weight: isDevConnected(dd)
+                                textColor: Theme.textPrimary
+                                fontSize: 9
+                                fontScale: s
+                                fontWeight: isDevConnected(dd)
                                     ? (Typography.weightBold || Font.Bold)
                                     : (Typography.weightRegular || Font.Normal)
-                                elide: Text.ElideRight
+                                scrolling: true
+                                textPadding: 0
                                 Layout.fillWidth: true
                             }
 
@@ -240,11 +259,17 @@ PopupWindow {
                             Rectangle {
                                 Layout.preferredWidth: Theme.dp(50)
                                 Layout.preferredHeight: Theme.dp(20)
-                                color: isDevConnected(dd) ? Theme.bgPrimary : Theme.accentSoft
+                                color: devBtnMouse.containsMouse
+                                    ? (isDevConnected(dd) ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85))
+                                    : (isDevConnected(dd) ? Theme.bgPrimary : Theme.accentSoft)
                                 border.width: 1
                                 border.color: isDevConnected(dd) ? Theme.border : Theme.accent
                                 radius: 0
                                 visible: !dd.device.pairing
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
+                                }
 
                                 Text {
                                     anchors.centerIn: parent
@@ -258,8 +283,10 @@ PopupWindow {
                                 }
 
                                 MouseArea {
+                                    id: devBtnMouse
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
                                     enabled: root.btAdapter && root.btAdapter.enabled
                                     onClicked: {
                                         if (isDevConnected(dd)) dd.device.disconnect()
@@ -268,6 +295,15 @@ PopupWindow {
                                     }
                                 }
                             }
+                        }
+
+                        MouseArea {
+                            id: devRowMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            visible: !isHeader(dd)
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {}
                         }
                     }
                 }

@@ -131,6 +131,15 @@ Item {
                     radius: Scales.dp(3)
 
                     color: {
+                        if (wsMouse.containsMouse) {
+                            if (active && hasWin)
+                                return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85)
+                            if (active && !hasWin)
+                                return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.6)
+                            if (!active && hasWin)
+                                return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35)
+                            return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.15)
+                        }
                         if (active && hasWin)
                             return Theme.accent
                         if (active && !hasWin)
@@ -163,9 +172,11 @@ Item {
                 }
 
                 MouseArea {
+                    id: wsMouse
                     cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
                     acceptedButtons: Qt.LeftButton
+                    hoverEnabled: true
                     onClicked: Hyprland.dispatch(`workspace ${wsId}`)
                 }
             }

@@ -82,6 +82,7 @@ Item {
         property var menuModel: null
         property bool internalVisible: false
         property bool ready: menuLoader.item !== null
+        property real slideY: -Theme.dp(12)
 
         visible: internalVisible && ready
 
@@ -96,9 +97,21 @@ Item {
         anchor.item: root
         anchor.rect: Qt.rect(0, root.height + Theme.dp(6), 0, 0)
 
+        onInternalVisibleChanged: {
+            if (internalVisible) slideY = -Theme.dp(12)
+        }
+
         Rectangle {
             anchors.fill: parent
+            y: menuPopup.slideY
             color: Theme.bgSecondary
+
+            Behavior on y {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             Loader {
                 id: menuLoader
@@ -142,6 +155,7 @@ Item {
         id: trayPopup
 
         property bool open: false
+        property real slideY: -Theme.dp(12)
 
         visible: open && hasAnyTrayItems
 
@@ -160,6 +174,9 @@ Item {
         anchor.item: launcher
         anchor.rect: Qt.rect(0, launcher.height + Theme.dp(6), 0, 0)
 
+        onOpenChanged: {
+            if (open) slideY = -Theme.dp(12)
+        }
         onVisibleChanged: {
             if (!visible) {
                 open = false
@@ -168,9 +185,17 @@ Item {
 
         Rectangle {
             anchors.fill: parent
+            y: trayPopup.slideY
             radius: 0
             color: Theme.bgPrimary
             opacity: 1
+
+            Behavior on y {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             ColumnLayout {
                 anchors.fill: parent
@@ -340,6 +365,7 @@ Item {
         id: overflowPopup
 
         property bool open: false
+        property real slideX: -Theme.dp(12)
 
         visible: open && overflowItems.length > 0
 
@@ -352,6 +378,9 @@ Item {
         anchor.window: trayPopup
         anchor.rect: Qt.rect(trayPopup.width + Theme.dp(6), 0, 0, 0)
 
+        onOpenChanged: {
+            if (open) slideX = -Theme.dp(12)
+        }
         onVisibleChanged: {
             if (!visible) {
                 open = false
@@ -363,8 +392,16 @@ Item {
 
         Rectangle {
             anchors.fill: parent
+            x: overflowPopup.slideX
             color: Theme.bgSecondary
             opacity: Theme.opacityPanel
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             GridLayout {
                 anchors.centerIn: parent
@@ -478,6 +515,7 @@ Item {
 
         property var menuData: null
         property var anchorItem: null
+        property real slideX: -Theme.dp(12)
 
         visible: menuData !== null
 
@@ -494,9 +532,21 @@ Item {
             ? Qt.rect(anchorItem.width + Theme.dp(6), 0, 0, 0)
             : Qt.rect(0, 0, 0, 0)
 
+        onMenuDataChanged: {
+            if (menuData !== null) slideX = -Theme.dp(12)
+        }
+
         Rectangle {
             anchors.fill: parent
+            x: subMenuPopup.slideX
             color: Theme.bgSecondary
+
+            Behavior on x {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
 
             Loader {
                 id: subMenuLoader

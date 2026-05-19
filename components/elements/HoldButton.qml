@@ -10,7 +10,7 @@ Rectangle {
     property bool requireHold: true
     signal execute()
 
-    readonly property real holdDuration: 3000
+    readonly property real holdDuration: root.requireHold ? 1000 : 0
     readonly property real minWidth: Theme.dp(60)
 
     implicitWidth: Math.max(lbl.implicitWidth + Theme.dp(16), minWidth)
@@ -50,7 +50,7 @@ Rectangle {
     Text {
         id: lbl
         anchors.centerIn: parent
-        text: root.confirming ? Math.ceil((1 - root.holdProgress) * root.holdDuration / 1000) + "s" : root.buttonLabel
+        text: root.confirming ? Math.ceil((1 - root.holdProgress) * root.holdDuration / 1000).toString() : root.buttonLabel
         color: root.confirming ? "white" : (root.danger ? Theme.danger : Theme.textMuted)
         font.family: Typography.fontFamily
         font.pixelSize: Math.round((Typography.sizeXXS || 8) * root.s)

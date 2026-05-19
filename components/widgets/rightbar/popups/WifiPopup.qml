@@ -14,12 +14,12 @@ PopupWindow {
     property var popupPanel: null
     property var closeCallback: null
     visible: false
-    grabFocus: false
+    grabFocus: true
 
     property real s: Scales.uiScale
 
     property bool slideIn: false
-    property real slideX: Theme.dp(20)
+    property real slideY: -Theme.dp(20)
 
     readonly property real itemH: Theme.dp(32)
     readonly property real headerH: Theme.dp(36)
@@ -28,6 +28,8 @@ PopupWindow {
     property var wifiDevice: null
     property var selectedNetwork: null
     property bool showAvailable: false
+    property bool pskVisible: false
+    property string pskError: ""
 
     readonly property var connectedNetworks: sortedNetworks().filter(function(n) { return n.connected })
     readonly property var availableNetworks: showAvailable ? sortedNetworks().filter(function(n) { return !n.connected }) : []
@@ -35,7 +37,7 @@ PopupWindow {
     readonly property int availableCount: availableNetworks.length
 
     readonly property real connectedH: connectedCount > 0 ? connectedCount * itemH : 0
-    readonly property real availableH: availableCount * itemH
+    readonly property real availableH: (availableCount * itemH) + (root.selectedNetwork ? Theme.dp(58) : 0)
     readonly property real displayedAvailableH: Math.min(availableH, maxAvailableH)
     readonly property real listH: {
         var h = connectedH
@@ -52,7 +54,7 @@ PopupWindow {
 
     onVisibleChanged: {
         if (visible) {
-            slideX = Theme.dp(20)
+            slideY = -Theme.dp(20)
             slideIn = true
             refreshWifiDevice()
             showAvailable = false
@@ -105,14 +107,14 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
-        x: -root.slideX
+        y: root.slideY
         color: Theme.bgSecondary
         border.width: 1
         border.color: Theme.border
         radius: 0
         clip: true
 
-        Behavior on x {
+        Behavior on y {
             NumberAnimation {
                 duration: 250
                 easing.type: Easing.OutCubic
@@ -147,7 +149,7 @@ PopupWindow {
                         iconSize: Theme.dp(12)
                     }
 
-                    Text {
+                    MarqueeText {
                         Layout.fillWidth: true
                         text: {
                             if (!Networking.wifiEnabled) return "WiFi — Off"
@@ -162,21 +164,28 @@ PopupWindow {
                             } catch(e) {}
                             return "WiFi"
                         }
-                        color: Networking.wifiEnabled ? Theme.accent : Theme.textPrimary
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
-                        font.weight: Typography.weightMedium || Font.Normal
-                        elide: Text.ElideRight
+                        textColor: Networking.wifiEnabled ? Theme.accent : Theme.textPrimary
+                        fontSize: 10
+                        fontScale: s
+                        fontWeight: Typography.weightMedium || Font.Normal
+                        scrolling: true
+                        textPadding: 0
                     }
 
                     Rectangle {
                         Layout.preferredWidth: Theme.dp(36)
                         Layout.preferredHeight: Theme.dp(22)
                         Layout.alignment: Qt.AlignVCenter
-                        color: Networking.wifiEnabled ? Theme.accent : Theme.bgSecondary
+                        color: wifiToggleMouse.containsMouse
+                            ? (Networking.wifiEnabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                            : (Networking.wifiEnabled ? Theme.accent : Theme.bgSecondary)
                         border.width: 1
                         border.color: Networking.wifiEnabled ? Theme.accent : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Text {
                             anchors.centerIn: parent
@@ -188,8 +197,10 @@ PopupWindow {
                         }
 
                         MouseArea {
+                            id: wifiToggleMouse
                             cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: Networking.wifiEnabled = !Networking.wifiEnabled
                         }
                     }
@@ -198,10 +209,16 @@ PopupWindow {
                         Layout.preferredWidth: Theme.dp(36)
                         Layout.preferredHeight: Theme.dp(22)
                         Layout.alignment: Qt.AlignVCenter
-                        color: root.showAvailable ? Theme.accentSoft : Theme.bgPrimary
+                        color: scanMouse.containsMouse
+                            ? (root.showAvailable ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                            : (root.showAvailable ? Theme.accentSoft : Theme.bgPrimary)
                         border.width: 1
                         border.color: root.showAvailable ? Theme.accent : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Text {
                             anchors.centerIn: parent
@@ -212,8 +229,10 @@ PopupWindow {
                         }
 
                         MouseArea {
+                            id: scanMouse
                             cursorShape: Qt.PointingHandCursor
                             anchors.fill: parent
+                            hoverEnabled: true
                             onClicked: root.startScan()
                         }
                     }
@@ -251,15 +270,28 @@ PopupWindow {
                         property var network: modelData
                         width: parent.width
                         height: root.itemH
-                        color: Theme.bgPrimary
+                        color: connRowMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.08) : Theme.bgPrimary
                         border.width: 1
                         border.color: Theme.accent
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
+
+                        MouseArea {
+                            id: connRowMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {} // Row itself is not clickable; inner buttons handle actions
+                        }
 
                         RowLayout {
                             anchors.fill: parent
                             anchors.margins: Theme.dp(6)
                             spacing: Theme.dp(6)
+                            z: 1
 
                             Rectangle {
                                 Layout.preferredWidth: Theme.dp(6)
@@ -269,13 +301,14 @@ PopupWindow {
                                 color: Theme.accent
                             }
 
-                            Text {
+                            MarqueeText {
                                 text: root.getNetworkName(network)
-                                color: Theme.textPrimary
-                                font.family: Typography.fontFamily
-                                font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                                font.weight: Typography.weightBold || Font.Bold
-                                elide: Text.ElideRight
+                                textColor: Theme.textPrimary
+                                fontSize: 9
+                                fontScale: s
+                                fontWeight: Typography.weightBold || Font.Bold
+                                scrolling: true
+                                textPadding: 0
                                 Layout.fillWidth: true
                             }
 
@@ -289,24 +322,62 @@ PopupWindow {
                             Rectangle {
                                 Layout.preferredWidth: Theme.dp(50)
                                 Layout.preferredHeight: Theme.dp(20)
-                                color: Theme.bgPrimary
+                                color: discMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgPrimary
                                 border.width: 1
-                                border.color: Theme.border
+                                border.color: discMouse.containsMouse ? Theme.textPrimary : Theme.border
                                 radius: 0
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
+                                }
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: "Disc."
-                                    color: Theme.textPrimary
+                                    color: discMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary
                                     font.family: Typography.fontFamily
                                     font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                                     font.weight: Typography.weightRegular || Font.Normal
                                 }
 
                                 MouseArea {
+                                    id: discMouse
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
                                     onClicked: network.disconnect()
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: Theme.dp(24)
+                                Layout.preferredHeight: Theme.dp(20)
+                                color: forgetNetMouse.containsMouse ? Theme.danger : Theme.bgPrimary
+                                border.width: 1
+                                border.color: forgetNetMouse.containsMouse ? Theme.danger : Theme.border
+                                radius: 0
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "✕"
+                                    color: forgetNetMouse.containsMouse ? "#ffffff" : Theme.danger
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+                                    font.weight: Font.Bold
+                                }
+
+                                MouseArea {
+                                    id: forgetNetMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    onClicked: {
+                                        try { network.forget() } catch(e) {}
+                                    }
                                 }
                             }
                         }
@@ -356,73 +427,268 @@ PopupWindow {
                     Repeater {
                         model: root.availableNetworks
 
-                        delegate: Rectangle {
+                        delegate: Item {
+                            id: availDelegate
                             property var network: modelData
+                            property string passwordText: ""
                             width: parent.width
-                            height: root.itemH
-                            color: "transparent"
-                            border.width: 1
-                            border.color: Theme.border
-                            radius: 0
+                            height: root.itemH + (isExpanded ? Theme.dp(76) : 0)
+                            property bool isExpanded: root.selectedNetwork === network
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: Theme.dp(6)
-                                spacing: Theme.dp(6)
+                            onIsExpandedChanged: {
+                                if (isExpanded && pskField) {
+                                    pskField.forceActiveFocus()
+                                }
+                            }
 
-                                Rectangle {
-                                    Layout.preferredWidth: Theme.dp(6)
-                                    Layout.preferredHeight: Theme.dp(6)
-                                    Layout.alignment: Qt.AlignVCenter
-                                    radius: Theme.dp(3)
-                                    color: network.known ? Theme.accentSoft : Theme.border
+                            Rectangle {
+                                id: availRowRect
+                                width: parent.width
+                                height: root.itemH
+                                color: availRowMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.04) : "transparent"
+                                border.width: 1
+                                border.color: Theme.border
+                                radius: 0
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
                                 }
 
-                                Text {
-                                    text: root.getNetworkName(network)
-                                    color: Theme.textPrimary
-                                    font.family: Typography.fontFamily
-                                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                                    font.weight: Typography.weightRegular || Font.Normal
-                                    elide: Text.ElideRight
-                                    Layout.fillWidth: true
+                                MouseArea {
+                                    id: availRowMouse
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {}
                                 }
 
-                                Text {
-                                    text: network.known ? "Saved" : ""
-                                    color: Theme.textMuted
-                                    font.family: Typography.fontFamily
-                                    font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
-                                }
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: Theme.dp(6)
+                                    spacing: Theme.dp(6)
+                                    z: 1
 
-                                Rectangle {
-                                    Layout.preferredWidth: Theme.dp(50)
-                                    Layout.preferredHeight: Theme.dp(20)
-                                    color: network.known ? Theme.accentSoft : Theme.bgPrimary
-                                    border.width: 1
-                                    border.color: network.known ? Theme.accent : Theme.border
-                                    radius: 0
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: network.known ? "Connect" : "Join"
-                                        color: network.known ? Theme.bgPrimary : Theme.textPrimary
-                                        font.family: Typography.fontFamily
-                                        font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
-                                        font.weight: Typography.weightBold || Font.Bold
+                                    Rectangle {
+                                        Layout.preferredWidth: Theme.dp(6)
+                                        Layout.preferredHeight: Theme.dp(6)
+                                        Layout.alignment: Qt.AlignVCenter
+                                        radius: Theme.dp(3)
+                                        color: network.known ? Theme.accentSoft : Theme.border
                                     }
 
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            if (network.known) {
-                                                network.connect()
-                                            } else {
-                                                root.selectedNetwork = network
-                                                pskDialog.visible = true
+                                    MarqueeText {
+                                        text: root.getNetworkName(network)
+                                        textColor: Theme.textPrimary
+                                        fontSize: 9
+                                        fontScale: s
+                                        fontWeight: Typography.weightRegular || Font.Normal
+                                        scrolling: true
+                                        textPadding: 0
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text {
+                                        text: network.known ? "Saved" : ""
+                                        color: Theme.textMuted
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                                    }
+
+                                    Rectangle {
+                                        Layout.preferredWidth: Theme.dp(50)
+                                        Layout.preferredHeight: Theme.dp(20)
+                                        color: connBtnMouse.containsMouse
+                                            ? (network.known ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                                            : (network.known ? Theme.accentSoft : Theme.bgPrimary)
+                                        border.width: 1
+                                        border.color: network.known ? Theme.accent : Theme.border
+                                        radius: 0
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 120 }
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: network.known ? "Connect" : (availDelegate.isExpanded ? "Cancel" : "Join")
+                                            color: network.known ? Theme.bgPrimary : Theme.textPrimary
+                                            font.family: Typography.fontFamily
+                                            font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                                            font.weight: Typography.weightBold || Font.Bold
+                                        }
+
+                                        MouseArea {
+                                            id: connBtnMouse
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
+                                            onClicked: {
+                                                if (network.known) {
+                                                    network.connect()
+                                                } else {
+                                                    if (availDelegate.isExpanded) {
+                                                        root.selectedNetwork = null
+                                                        root.pskError = ""
+                                                    } else {
+                                                        // Open networks connect directly without password
+                                                        if (network.security === WifiSecurityType.Open) {
+                                                            network.connect()
+                                                        } else {
+                                                            root.selectedNetwork = network
+                                                            root.pskError = ""
+                                                            root.pskVisible = false
+                                                            availDelegate.passwordText = ""
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
+                                    }
+
+                                    Rectangle {
+                                        visible: network.known
+                                        Layout.preferredWidth: Theme.dp(24)
+                                        Layout.preferredHeight: Theme.dp(20)
+                                        color: forgetAvailMouse.containsMouse ? Theme.danger : Theme.bgPrimary
+                                        border.width: 1
+                                        border.color: forgetAvailMouse.containsMouse ? Theme.danger : Theme.border
+                                        radius: 0
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 120 }
+                                        }
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: "✕"
+                                            color: forgetAvailMouse.containsMouse ? "#ffffff" : Theme.danger
+                                            font.family: Typography.fontFamily
+                                            font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+                                            font.weight: Font.Bold
+                                        }
+
+                                        MouseArea {
+                                            id: forgetAvailMouse
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
+                                            onClicked: network.forget()
+                                        }
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                id: expandArea
+                                y: root.itemH
+                                width: parent.width
+                                height: availDelegate.isExpanded ? Theme.dp(58) : 0
+                                visible: availDelegate.isExpanded
+                                color: Theme.bgPrimary
+                                border.width: 1
+                                border.color: Theme.border
+                                radius: 0
+                                clip: true
+
+                                Behavior on height {
+                                    NumberAnimation {
+                                        duration: 200
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    anchors.fill: parent
+                                    anchors.margins: Theme.dp(4)
+                                    anchors.bottomMargin: Theme.dp(6)
+                                    spacing: Theme.dp(2)
+
+                                    RowLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Theme.dp(4)
+
+                                        TextField {
+                                            id: pskField
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: Theme.dp(26)
+                                            text: availDelegate.passwordText
+                                            focus: availDelegate.isExpanded
+                                            echoMode: root.pskVisible ? TextInput.Normal : TextInput.Password
+                                            placeholderText: "Password"
+                                            placeholderTextColor: Theme.textMuted
+                                            font.family: Typography.fontFamily
+                                            font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+                                            color: "#ffffff"
+                                            selectionColor: Theme.accentSoft
+                                            selectedTextColor: "#ffffff"
+                                            padding: Theme.dp(6)
+                                            verticalAlignment: TextInput.AlignVCenter
+
+                                            background: Rectangle {
+                                                color: Theme.bgSecondary
+                                                border.width: 1
+                                                border.color: root.pskError.length > 0 ? Theme.danger : Theme.border
+                                                radius: 0
+                                            }
+
+                                            onTextChanged: availDelegate.passwordText = text
+
+                                            onAccepted: {
+                                                if (!root.selectedNetwork) return
+                                                root.pskError = ""
+                                                try {
+                                                    root.selectedNetwork.connectWithPsk(availDelegate.passwordText)
+                                                    root.selectedNetwork = null
+                                                } catch(e) {
+                                                    root.pskError = "Incorrect password or connection failed"
+                                                }
+                                            }
+                                        }
+
+                                        Rectangle {
+                                            Layout.preferredWidth: Theme.dp(26)
+                                            Layout.preferredHeight: Theme.dp(26)
+                                            Layout.alignment: Qt.AlignVCenter
+                                            color: showPskMouse.containsMouse
+                                                ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12)
+                                                : Theme.bgSecondary
+                                            border.width: 1
+                                            border.color: showPskMouse.containsMouse ? Theme.textPrimary : Theme.border
+                                            radius: 0
+
+                                            Behavior on color {
+                                                ColorAnimation { duration: 120 }
+                                            }
+
+                                            IconEye {
+                                                anchors.centerIn: parent
+                                                iconColor: Theme.textPrimary
+                                                iconSize: parent.width * 0.45
+                                                visible: root.pskVisible
+                                            }
+                                            IconEyeOff {
+                                                anchors.centerIn: parent
+                                                iconColor: Theme.textPrimary
+                                                iconSize: parent.width * 0.45
+                                                visible: !root.pskVisible
+                                            }
+
+                                            MouseArea {
+                                                id: showPskMouse
+                                                anchors.fill: parent
+                                                cursorShape: Qt.PointingHandCursor
+                                                hoverEnabled: true
+                                                onClicked: root.pskVisible = !root.pskVisible
+                                            }
+                                        }
+                                    }
+
+                                    Text {
+                                        visible: root.pskError.length > 0
+                                        text: root.pskError
+                                        color: Theme.danger
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                                     }
                                 }
                             }
@@ -442,121 +708,6 @@ PopupWindow {
                     color: Theme.textMuted
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                }
-            }
-        }
-    }
-
-    PopupWindow {
-        id: pskDialog
-        visible: false
-        implicitWidth: Theme.dp(260)
-        implicitHeight: Theme.dp(140)
-        grabFocus: false
-
-        anchor.window: root
-        anchor.rect.x: Theme.dp(8)
-        anchor.rect.y: Theme.dp(50)
-
-        Rectangle {
-            anchors.fill: parent
-            color: Theme.bgSecondary
-            border.width: 1
-            border.color: Theme.border
-            radius: 0
-
-            ColumnLayout {
-                anchors.fill: parent
-                anchors.margins: Theme.dp(8)
-                spacing: Theme.dp(6)
-
-                Text {
-                    text: root.selectedNetwork ? root.getNetworkName(root.selectedNetwork) : ""
-                    color: Theme.textPrimary
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
-                    font.weight: Typography.weightBold || Font.Bold
-                    elide: Text.ElideRight
-                    Layout.fillWidth: true
-                }
-
-                TextField {
-                    id: pskField
-                    Layout.fillWidth: true
-                    echoMode: TextInput.Password
-                    placeholderText: "Password"
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                    color: Theme.textPrimary
-                    selectionColor: Theme.accentSoft
-                    selectedTextColor: Theme.textPrimary
-
-                    background: Rectangle {
-                        color: Theme.bgPrimary
-                        border.width: 1
-                        border.color: Theme.border
-                        radius: 0
-                    }
-
-                    onAccepted: {
-                        if (root.selectedNetwork) root.selectedNetwork.connectWithPsk(pskField.text)
-                        pskDialog.visible = false
-                    }
-                }
-
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Theme.dp(4)
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Theme.dp(26)
-                        color: Theme.accentSoft
-                        border.width: 1
-                        border.color: Theme.accent
-                        radius: 0
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Connect"
-                            color: Theme.bgPrimary
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                            font.weight: Typography.weightBold || Font.Bold
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                if (root.selectedNetwork) root.selectedNetwork.connectWithPsk(pskField.text)
-                                pskDialog.visible = false
-                            }
-                        }
-                    }
-
-                    Rectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Theme.dp(26)
-                        color: Theme.bgPrimary
-                        border.width: 1
-                        border.color: Theme.border
-                        radius: 0
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Cancel"
-                            color: Theme.textMuted
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: pskDialog.visible = false
-                        }
-                    }
                 }
             }
         }

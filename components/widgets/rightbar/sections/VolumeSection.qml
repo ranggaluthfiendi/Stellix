@@ -137,10 +137,16 @@ Rectangle {
                 Layout.preferredWidth: Theme.dp(24)
                 Layout.preferredHeight: Theme.dp(24)
                 Layout.alignment: Qt.AlignVCenter
-                color: root.sinkReady && root.sink.audio.muted ? Theme.accent : Theme.bgSecondary
+                color: muteMouse.containsMouse
+                    ? (root.sinkReady && root.sink.audio.muted ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                    : (root.sinkReady && root.sink.audio.muted ? Theme.accent : Theme.bgSecondary)
                 border.width: 1
-                border.color: Theme.border
+                border.color: muteMouse.containsMouse ? (root.sinkReady && root.sink.audio.muted ? Theme.accent : Theme.textPrimary) : Theme.border
                 radius: 0
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
 
                 Text {
                     anchors.centerIn: parent
@@ -151,8 +157,10 @@ Rectangle {
                 }
 
                 MouseArea {
+                    id: muteMouse
                     cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
+                    hoverEnabled: true
                     enabled: root.sinkReady
                     onClicked: root.sink.audio.muted = !root.sink.audio.muted
                 }
@@ -162,22 +170,28 @@ Rectangle {
                 Layout.preferredWidth: Theme.dp(24)
                 Layout.preferredHeight: Theme.dp(24)
                 Layout.alignment: Qt.AlignVCenter
-                color: Theme.bgSecondary
+                color: expandMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
                 border.width: 1
-                border.color: Theme.border
+                border.color: expandMouse.containsMouse ? Theme.textPrimary : Theme.border
                 radius: 0
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
 
                 Text {
                     anchors.centerIn: parent
                     text: root.volumeExpanded ? "▲" : "▼"
-                    color: Theme.textMuted
+                    color: expandMouse.containsMouse ? Theme.textPrimary : Theme.textMuted
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                 }
 
                 MouseArea {
+                    id: expandMouse
                     cursorShape: Qt.PointingHandCursor
                     anchors.fill: parent
+                    hoverEnabled: true
                     onClicked: root.volumeExpanded = !root.volumeExpanded
                 }
             }
@@ -286,10 +300,16 @@ Rectangle {
                                 Rectangle {
                                     Layout.preferredWidth: Theme.dp(20)
                                     Layout.preferredHeight: Theme.dp(18)
-                                    color: root.sink && root.sink.audio && root.sink.audio.muted ? Theme.accent : Theme.bgPrimary
+                                    color: mainMuteMouse.containsMouse
+                                        ? (root.sink && root.sink.audio && root.sink.audio.muted ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                                        : (root.sink && root.sink.audio && root.sink.audio.muted ? Theme.accent : Theme.bgPrimary)
                                     border.width: 1
-                                    border.color: Theme.border
+                                    border.color: mainMuteMouse.containsMouse ? (root.sink && root.sink.audio && root.sink.audio.muted ? Theme.accent : Theme.textPrimary) : Theme.border
                                     radius: 0
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 120 }
+                                    }
 
                                     Text {
                                         anchors.centerIn: parent
@@ -300,8 +320,10 @@ Rectangle {
                                     }
 
                                     MouseArea {
+                                        id: mainMuteMouse
                                         anchors.fill: parent
                                         cursorShape: Qt.PointingHandCursor
+                                        hoverEnabled: true
                                         enabled: root.sinkReady
                                         onClicked: root.sink.audio.muted = !root.sink.audio.muted
                                     }
@@ -420,10 +442,16 @@ Rectangle {
                                 Rectangle {
                                     Layout.preferredWidth: Theme.dp(20)
                                     Layout.preferredHeight: Theme.dp(18)
-                                    color: mainInputBox.mainSource && mainInputBox.mainSource.audio && mainInputBox.mainSource.audio.muted ? Theme.danger : Theme.bgPrimary
+                                    color: inputMuteMouse.containsMouse
+                                        ? (mainInputBox.mainSource && mainInputBox.mainSource.audio && mainInputBox.mainSource.audio.muted ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                                        : (mainInputBox.mainSource && mainInputBox.mainSource.audio && mainInputBox.mainSource.audio.muted ? Theme.danger : Theme.bgPrimary)
                                     border.width: 1
-                                    border.color: Theme.border
+                                    border.color: inputMuteMouse.containsMouse ? (mainInputBox.mainSource && mainInputBox.mainSource.audio && mainInputBox.mainSource.audio.muted ? Theme.danger : Theme.textPrimary) : Theme.border
                                     radius: 0
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 120 }
+                                    }
 
                                     Text {
                                         anchors.centerIn: parent
@@ -434,7 +462,9 @@ Rectangle {
                                     }
 
                                     MouseArea {
+                                        id: inputMuteMouse
                                         anchors.fill: parent
+                                        hoverEnabled: true
                                         enabled: mainInputBox.mainSource != null && mainInputBox.mainSource.audio != null
                                         onClicked: {
                                             if (mainInputBox.mainSource && mainInputBox.mainSource.audio)
@@ -558,10 +588,16 @@ Rectangle {
                                     Rectangle {
                                         Layout.preferredWidth: Theme.dp(20)
                                         Layout.preferredHeight: Theme.dp(18)
-                                        color: itemData.audio && itemData.audio.muted ? Theme.accent : Theme.bgPrimary
+                                        color: sinkMuteMouse.containsMouse
+                                            ? (itemData.audio && itemData.audio.muted ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                                            : (itemData.audio && itemData.audio.muted ? Theme.accent : Theme.bgPrimary)
                                         border.width: 1
-                                        border.color: Theme.border
+                                        border.color: sinkMuteMouse.containsMouse ? (itemData.audio && itemData.audio.muted ? Theme.accent : Theme.textPrimary) : Theme.border
                                         radius: 0
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 120 }
+                                        }
 
                                         Text {
                                             anchors.centerIn: parent
@@ -572,8 +608,10 @@ Rectangle {
                                         }
 
                                         MouseArea {
+                                            id: sinkMuteMouse
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
                                             enabled: itemData.audio
                                             onClicked: itemData.audio.muted = !itemData.audio.muted
                                         }
@@ -582,22 +620,28 @@ Rectangle {
                                     Rectangle {
                                         Layout.preferredWidth: Theme.dp(28)
                                         Layout.preferredHeight: Theme.dp(18)
-                                        color: Theme.bgPrimary
+                                        color: sinkSetMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Theme.bgPrimary
                                         border.width: 1
-                                        border.color: Theme.border
+                                        border.color: sinkSetMouse.containsMouse ? Theme.accent : Theme.border
                                         radius: 0
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 120 }
+                                        }
 
                                         Text {
                                             anchors.centerIn: parent
                                             text: "Set"
-                                            color: Theme.textPrimary
+                                            color: sinkSetMouse.containsMouse ? Theme.accent : Theme.textPrimary
                                             font.family: Typography.fontFamily
                                             font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                                         }
 
                                         MouseArea {
+                                            id: sinkSetMouse
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
                                             enabled: itemData.audio
                                             onClicked: itemData.audio.muted = !itemData.audio.muted
                                         }
@@ -747,10 +791,16 @@ Rectangle {
                                     Rectangle {
                                         Layout.preferredWidth: Theme.dp(20)
                                         Layout.preferredHeight: Theme.dp(18)
-                                        color: itemData.audio && itemData.audio.muted ? Theme.accent : Theme.bgPrimary
+                                        color: appMuteMouse.containsMouse
+                                            ? (itemData.audio && itemData.audio.muted ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                                            : (itemData.audio && itemData.audio.muted ? Theme.accent : Theme.bgPrimary)
                                         border.width: 1
-                                        border.color: Theme.border
+                                        border.color: appMuteMouse.containsMouse ? (itemData.audio && itemData.audio.muted ? Theme.accent : Theme.textPrimary) : Theme.border
                                         radius: 0
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 120 }
+                                        }
 
                                         Text {
                                             anchors.centerIn: parent
@@ -761,7 +811,9 @@ Rectangle {
                                         }
 
                                         MouseArea {
+                                            id: appMuteMouse
                                             anchors.fill: parent
+                                            hoverEnabled: true
                                             enabled: itemData.audio
                                             onClicked: itemData.audio.muted = !itemData.audio.muted
                                         }
@@ -879,10 +931,16 @@ Rectangle {
                                     Rectangle {
                                         Layout.preferredWidth: Theme.dp(20)
                                         Layout.preferredHeight: Theme.dp(18)
-                                        color: itemData.audio && itemData.audio.muted ? Theme.danger : Theme.bgPrimary
+                                        color: sourceMuteMouse.containsMouse
+                                            ? (itemData.audio && itemData.audio.muted ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                                            : (itemData.audio && itemData.audio.muted ? Theme.danger : Theme.bgPrimary)
                                         border.width: 1
-                                        border.color: Theme.border
+                                        border.color: sourceMuteMouse.containsMouse ? (itemData.audio && itemData.audio.muted ? Theme.danger : Theme.textPrimary) : Theme.border
                                         radius: 0
+
+                                        Behavior on color {
+                                            ColorAnimation { duration: 120 }
+                                        }
 
                                         Text {
                                             anchors.centerIn: parent
@@ -893,7 +951,9 @@ Rectangle {
                                         }
 
                                         MouseArea {
+                                            id: sourceMuteMouse
                                             anchors.fill: parent
+                                            hoverEnabled: true
                                             enabled: itemData.audio
                                             onClicked: itemData.audio.muted = !itemData.audio.muted
                                         }

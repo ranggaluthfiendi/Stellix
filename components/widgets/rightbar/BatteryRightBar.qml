@@ -160,7 +160,6 @@ Scope {
         visible: RightBarState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen
         color: "transparent"
 
-        // FIXED: Use Top layer so it doesn't block the sidebar in Overlay
         WlrLayershell.layer: WlrLayer.Top
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.exclusiveZone: -1

@@ -127,10 +127,16 @@ Item {
                     Layout.preferredWidth: Theme.dp(32)
                     Layout.preferredHeight: Theme.dp(22)
                     Layout.alignment: Qt.AlignVCenter
-                    color: wifiEnabled ? Theme.accent : Theme.bgSecondary
+                    color: wifiToggleMouse.containsMouse
+                        ? (wifiEnabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                        : (wifiEnabled ? Theme.accent : Theme.bgSecondary)
                     border.width: 1
                     border.color: wifiEnabled ? Theme.accent : Theme.border
                     radius: 0
+
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
 
                     Text {
                         anchors.centerIn: parent
@@ -142,8 +148,10 @@ Item {
                     }
 
                     MouseArea {
+                        id: wifiToggleMouse
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
+                        hoverEnabled: true
                         onClicked: root.toggleWifi()
                     }
                 }
@@ -152,22 +160,28 @@ Item {
                     Layout.preferredWidth: Theme.dp(24)
                     Layout.preferredHeight: Theme.dp(22)
                     Layout.alignment: Qt.AlignVCenter
-                    color: Theme.bgSecondary
+                    color: wifiMoreMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
                     border.width: 1
-                    border.color: Theme.border
+                    border.color: wifiMoreMouse.containsMouse ? Theme.textPrimary : Theme.border
                     radius: 0
+
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
 
                     Text {
                         anchors.centerIn: parent
                         text: "..."
-                        color: Theme.textMuted
+                        color: wifiMoreMouse.containsMouse ? Theme.textPrimary : Theme.textMuted
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
                     }
 
                     MouseArea {
+                        id: wifiMoreMouse
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
+                        hoverEnabled: true
                         onClicked: root.openWifiPopup()
                     }
                 }
@@ -212,10 +226,16 @@ Item {
                     Layout.preferredWidth: Theme.dp(32)
                     Layout.preferredHeight: Theme.dp(22)
                     Layout.alignment: Qt.AlignVCenter
-                    color: btEnabled ? Theme.accent : Theme.bgSecondary
+                    color: btToggleMouse.containsMouse
+                        ? (btEnabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                        : (btEnabled ? Theme.accent : Theme.bgSecondary)
                     border.width: 1
                     border.color: btEnabled ? Theme.accent : Theme.border
                     radius: 0
+
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
 
                     Text {
                         anchors.centerIn: parent
@@ -227,8 +247,10 @@ Item {
                     }
 
                     MouseArea {
+                        id: btToggleMouse
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
+                        hoverEnabled: true
                         onClicked: root.toggleBluetooth()
                     }
                 }
@@ -237,22 +259,28 @@ Item {
                     Layout.preferredWidth: Theme.dp(24)
                     Layout.preferredHeight: Theme.dp(22)
                     Layout.alignment: Qt.AlignVCenter
-                    color: Theme.bgSecondary
+                    color: btMoreMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
                     border.width: 1
-                    border.color: Theme.border
+                    border.color: btMoreMouse.containsMouse ? Theme.textPrimary : Theme.border
                     radius: 0
+
+                    Behavior on color {
+                        ColorAnimation { duration: 120 }
+                    }
 
                     Text {
                         anchors.centerIn: parent
                         text: "..."
-                        color: Theme.textMuted
+                        color: btMoreMouse.containsMouse ? Theme.textPrimary : Theme.textMuted
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
                     }
 
                     MouseArea {
+                        id: btMoreMouse
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
+                        hoverEnabled: true
                         onClicked: root.openBtPopup()
                     }
                 }

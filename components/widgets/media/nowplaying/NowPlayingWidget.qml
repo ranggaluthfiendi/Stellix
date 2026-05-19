@@ -93,6 +93,64 @@ Item {
             height: 97 * s
             clip: true
 
+            property bool artHovered: false
+
+            MouseArea {
+                anchors.fill: parent
+                hoverEnabled: true
+                cursorShape: Qt.PointingHandCursor
+                onEntered: parent.artHovered = true
+                onExited: parent.artHovered = false
+                onClicked: {
+                    if (media.targetWorkspace > 0) {
+                        media.goToMediaWorkspace()
+                    }
+                }
+            }
+
+            // ── Hover overlay with workspace icon ──
+            Rectangle {
+                anchors.fill: parent
+                color: Qt.rgba(0, 0, 0, 0.5)
+                opacity: parent.artHovered ? 1 : 0
+                visible: opacity > 0
+                z: 10
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 150 }
+                }
+
+                Column {
+                    anchors.centerIn: parent
+                    spacing: 4 * s
+
+                    IconWorkspaces {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        iconSize: 28 * s
+                        iconColor: Theme.accent
+                        opacity: parent.parent.parent.artHovered ? 1 : 0
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 200 }
+                        }
+                    }
+
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: media.targetWorkspace > 0 ? "WS " + media.targetWorkspace : ""
+                        color: Theme.accent
+                        font.family: Typography.fontFamily
+                        font.pixelSize: 10 * s
+                        font.weight: Font.Bold
+                        opacity: parent.parent.parent.artHovered ? 1 : 0
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 200 }
+                        }
+                    }
+                }
+            }
+
             Image {
                 id: coverArt
 
@@ -104,7 +162,7 @@ Item {
                 fillMode: Image.PreserveAspectCrop
 
                 visible: media.hasMedia && media.hasArt
-                opacity: visible ? 1 : 0
+                opacity: (visible && !parent.artHovered) ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation { duration: 200 }

@@ -168,11 +168,16 @@ Item {
                         width: parent.cellW
                         height: parent.cellH
                         color: {
+                            if (cellMouse.containsMouse && !isToday) return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
                             if (isToday) return Theme.accent
                             if (pinned) return Qt.rgba(1, 1, 1, 0.06)
                             return "transparent"
                         }
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Text {
                             anchors.centerIn: parent
@@ -188,8 +193,10 @@ Item {
                         }
 
                         MouseArea {
+                            id: cellMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
                             onClicked: RightBarState.togglePinnedDate(parent.key)
                         }
                     }
@@ -212,21 +219,21 @@ Item {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.margins: Theme.dp(6)
-                    spacing: Theme.dp(6)
+                    spacing: Theme.dp(4)
 
                     Text {
-                        Layout.fillWidth: true
-                        text: root.pinnedCountInShownMonth() > 0 ? (root.pinnedCountInShownMonth() + " pinned this month") : "Click a date to pin it"
+                        text: root.pinnedCountInShownMonth() > 0 ? (root.pinnedCountInShownMonth() + " pinned") : "Click a date to pin"
                         color: Theme.textMuted
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                         elide: Text.ElideRight
+                        Layout.fillWidth: true
                     }
 
                     HoldButton {
                         visible: root.pinnedCountInShownMonth() > 0
                         s: root.s
-                        buttonLabel: "Clear Month"
+                        buttonLabel: "Clear"
                         requireHold: false
                         onExecute: RightBarState.clearPinnedDatesInMonth(root.shownYear, root.shownMonth)
                     }
@@ -234,8 +241,9 @@ Item {
                     HoldButton {
                         visible: RightBarState.pinnedDates.length > root.pinnedCountInShownMonth()
                         s: root.s
-                        buttonLabel: "Clear All"
+                        buttonLabel: "All"
                         danger: true
+                        requireHold: false
                         onExecute: RightBarState.clearAllPinnedDates()
                     }
                 }
@@ -259,20 +267,26 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: Theme.dp(22)
                         Layout.preferredHeight: Theme.dp(22)
-                        color: Theme.bgSecondary
+                        color: chevronsLeftMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
                         border.width: 1
-                        border.color: Theme.border
+                        border.color: chevronsLeftMouse.containsMouse ? Theme.textPrimary : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Loader {
                             anchors.centerIn: parent
                             sourceComponent: chevronsLeftComp
                         }
-                        Component { id: chevronsLeftComp; IconChevronsLeft { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+                        Component { id: chevronsLeftComp; IconChevronsLeft { iconSize: Theme.dp(12); iconColor: chevronsLeftMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
 
                         MouseArea {
+                            id: chevronsLeftMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
                             onClicked: RightBarState.calendarMonthOffset -= 12
                         }
                     }
@@ -280,20 +294,26 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: Theme.dp(22)
                         Layout.preferredHeight: Theme.dp(22)
-                        color: Theme.bgSecondary
+                        color: chevronLeftMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
                         border.width: 1
-                        border.color: Theme.border
+                        border.color: chevronLeftMouse.containsMouse ? Theme.textPrimary : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Loader {
                             anchors.centerIn: parent
                             sourceComponent: chevronLeftComp
                         }
-                        Component { id: chevronLeftComp; IconChevronLeft { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+                        Component { id: chevronLeftComp; IconChevronLeft { iconSize: Theme.dp(12); iconColor: chevronLeftMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
 
                         MouseArea {
+                            id: chevronLeftMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
                             onClicked: RightBarState.prevMonth()
                         }
                     }
@@ -302,10 +322,16 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: Theme.dp(86)
                         Layout.preferredHeight: Theme.dp(22)
-                        color: root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.bgSecondary : Theme.bgPrimary
+                        color: monthMouse.containsMouse
+                            ? (root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                            : (root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.bgSecondary : Theme.bgPrimary)
                         border.width: 1
                         border.color: root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.accent : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Text {
                             id: monthLabel
@@ -318,8 +344,10 @@ Item {
                         }
 
                         MouseArea {
+                            id: monthMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
                             onClicked: RightBarState.calendarMonthOffset = 0
                         }
                     }
@@ -327,20 +355,26 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: Theme.dp(22)
                         Layout.preferredHeight: Theme.dp(22)
-                        color: Theme.bgSecondary
+                        color: chevronRightMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
                         border.width: 1
-                        border.color: Theme.border
+                        border.color: chevronRightMouse.containsMouse ? Theme.textPrimary : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Loader {
                             anchors.centerIn: parent
                             sourceComponent: chevronRightComp
                         }
-                        Component { id: chevronRightComp; IconChevronRight { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+                        Component { id: chevronRightComp; IconChevronRight { iconSize: Theme.dp(12); iconColor: chevronRightMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
 
                         MouseArea {
+                            id: chevronRightMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
                             onClicked: RightBarState.nextMonth()
                         }
                     }
@@ -348,20 +382,26 @@ Item {
                     Rectangle {
                         Layout.preferredWidth: Theme.dp(22)
                         Layout.preferredHeight: Theme.dp(22)
-                        color: Theme.bgSecondary
+                        color: chevronsRightMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
                         border.width: 1
-                        border.color: Theme.border
+                        border.color: chevronsRightMouse.containsMouse ? Theme.textPrimary : Theme.border
                         radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
 
                         Loader {
                             anchors.centerIn: parent
                             sourceComponent: chevronsRightComp
                         }
-                        Component { id: chevronsRightComp; IconChevronsRight { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+                        Component { id: chevronsRightComp; IconChevronsRight { iconSize: Theme.dp(12); iconColor: chevronsRightMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
 
                         MouseArea {
+                            id: chevronsRightMouse
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
                             onClicked: RightBarState.calendarMonthOffset += 12
                         }
                     }

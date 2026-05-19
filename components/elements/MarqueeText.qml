@@ -13,6 +13,8 @@ Item {
 
     implicitHeight: textItem.implicitHeight
 
+    readonly property real textWidth: textItem.implicitWidth
+
     clip: true
 
     property real scrollOffset: 0
@@ -67,7 +69,7 @@ Item {
         }
     }
 
-    Component.onCompleted: checkOverflow()
-    onTextChanged: checkOverflow()
+    Component.onCompleted: Qt.callLater(checkOverflow)
+    onTextChanged: Qt.callLater(checkOverflow)
     onWidthChanged: Qt.callLater(checkOverflow)
 }

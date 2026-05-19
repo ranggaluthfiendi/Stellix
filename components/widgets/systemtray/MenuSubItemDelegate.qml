@@ -8,8 +8,9 @@ Item {
 
     required property var entry
     property bool expanded: false
+    property real s: Scales.uiScale
 
-    implicitHeight: Theme.dp(28)
+    implicitHeight: Theme.dp(24)
     implicitWidth: row.implicitWidth + Theme.dp(16)
 
     ColumnLayout {
@@ -19,7 +20,7 @@ Item {
         Rectangle {
             id: bg
 
-            height: Theme.dp(28)
+            height: Theme.dp(24)
             width: implicitWidth
 
             color: mouse.containsMouse
@@ -45,6 +46,8 @@ Item {
                     color: entry && entry.enabled
                         ? Theme.textPrimary
                         : Theme.textMuted
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * root.s)
 
                     wrapMode: Text.NoWrap
                     elide: Text.ElideNone
@@ -57,6 +60,8 @@ Item {
                     text: entry && entry.hasChildren ? "▶" : ""
                     color: Theme.textMuted
                     visible: entry && entry.hasChildren
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * root.s)
                 }
             }
 

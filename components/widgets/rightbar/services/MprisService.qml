@@ -75,6 +75,11 @@ Item {
         }
     }
 
+    function refresh() {
+        root.artRefreshCounter++
+        root.saveCache()
+    }
+
     function formatTime(val) {
         if (!val || val <= 0) return "00:00"
         var totalSec = Math.floor(val)
