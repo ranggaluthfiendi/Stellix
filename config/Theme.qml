@@ -28,6 +28,10 @@ Singleton {
     property color warning: "#e6c97a"
     property color danger: "#d98c8c"
 
+    property color labelApp: "#4a90d9"
+    property color labelOutput: "#5cb85c"
+    property color labelInput: "#f0ad4e"
+
     property real opacityPanel: 0.9
     property real opacityOverlay: 0.75
 

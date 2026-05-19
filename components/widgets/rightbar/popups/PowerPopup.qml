@@ -14,7 +14,8 @@ PopupWindow {
     readonly property real s: Scales.uiScale
 
     readonly property real itemH: Theme.dp(38)
-    readonly property real contentH: Theme.dp(32) + Theme.dp(1) + 4 * itemH + Theme.dp(16)
+    readonly property real maxContentH: Theme.dp(200)
+    readonly property real contentH: Math.min(Theme.dp(32) + Theme.dp(1) + 4 * itemH + Theme.dp(16), maxContentH)
 
     implicitWidth: Theme.dp(252)
     implicitHeight: contentH
@@ -63,67 +64,83 @@ PopupWindow {
             }
         }
 
-        ColumnLayout {
+        Flickable {
             anchors.fill: parent
-            anchors.margins: Theme.dp(8)
-            spacing: Theme.dp(4)
+            contentWidth: parent.width
+            contentHeight: powerLayout.implicitHeight
+            interactive: contentHeight > height
+            clip: true
 
-            RowLayout {
-                Layout.fillWidth: true
+            ScrollBar.vertical: ScrollBar {
+                policy: powerLayout.implicitHeight > parent.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                width: Theme.dp(4)
+            }
+
+            ColumnLayout {
+                id: powerLayout
+                anchors.top: parent.top
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: Theme.dp(8)
                 spacing: Theme.dp(4)
 
-                Text {
-                    text: "Power"
-                    color: Theme.textPrimary
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round((Typography.sizeXXS || 12) * s)
-                    font.weight: Typography.weightBold || Font.Bold
-                }
-
-                Item { Layout.fillWidth: true }
-
-                Text {
-                    text: "Close"
-                    color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-
-                    Behavior on color {
-                        ColorAnimation { duration: 120 }
-                    }
-
-                    MouseArea {
-                        id: closeMouse
-                        anchors.fill: parent
-                        cursorShape: Qt.PointingHandCursor
-                        hoverEnabled: true
-                        onClicked: { if (root.closeCallback) root.closeCallback() }
-                    }
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.dp(1)
-                color: Theme.border
-            }
-
-            Repeater {
-                model: [
-                    { label: "Logout", icon: "↩", cmd: ["loginctl", "terminate-user", "--no-ask-password", "rang"], colorType: "warning" },
-                    { label: "Sleep", icon: "☾", cmd: ["systemctl", "suspend"], colorType: "info" },
-                    { label: "Reboot", icon: "↻", cmd: ["systemctl", "reboot"], colorType: "danger" },
-                    { label: "Shutdown", icon: "⏻", cmd: ["systemctl", "poweroff"], colorType: "danger" }
-                ]
-
-                delegate: PowerButton {
-                    required property var modelData
+                RowLayout {
                     Layout.fillWidth: true
-                    s: root.s
-                    colorType: modelData.colorType
-                    buttonLabel: modelData.label
-                    buttonIcon: modelData.icon
-                    onExecute: root.runCommand(modelData.cmd)
+                    spacing: Theme.dp(4)
+
+                    Text {
+                        text: "Power"
+                        color: Theme.textPrimary
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round((Typography.sizeXXS || 12) * s)
+                        font.weight: Typography.weightBold || Font.Bold
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    Text {
+                        text: "Close"
+                        color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
+
+                        MouseArea {
+                            id: closeMouse
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            hoverEnabled: true
+                            onClicked: { if (root.closeCallback) root.closeCallback() }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(1)
+                    color: Theme.border
+                }
+
+                Repeater {
+                    model: [
+                       { label: "Logout",icon: "↩",cmd: ["hyprctl", "dispatch", "exit"],colorType: "warning"},
+                        { label: "Sleep", icon: "☾", cmd: ["systemctl", "suspend"], colorType: "info" },
+                        { label: "Reboot", icon: "↻", cmd: ["systemctl", "reboot"], colorType: "danger" },
+                        { label: "Shutdown", icon: "⏻", cmd: ["systemctl", "poweroff"], colorType: "danger" }
+                    ]
+
+                    delegate: PowerButton {
+                        required property var modelData
+                        Layout.fillWidth: true
+                        s: root.s
+                        colorType: modelData.colorType
+                        buttonLabel: modelData.label
+                        buttonIcon: modelData.icon
+                        onExecute: root.runCommand(modelData.cmd)
+                    }
                 }
             }
         }

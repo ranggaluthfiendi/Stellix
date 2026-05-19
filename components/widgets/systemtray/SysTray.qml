@@ -13,7 +13,7 @@ Item {
     id: root
 
     property int visibleLimit: 8
-    property bool hidePassiveItems: true
+    property bool hidePassiveItems: false
 
     property var trayItems: SystemTray.items && SystemTray.items.values
         ? SystemTray.items.values

@@ -109,11 +109,6 @@ Item {
         function onPlaybackStateChanged() { root.pickPlayer() }
     }
 
-    Connections {
-        target: Hyprland
-        function onToplevelsChanged() { root.findMediaWorkspace() }
-    }
-
     Component.onCompleted: {
         root.pickPlayer()
         root.updateState()

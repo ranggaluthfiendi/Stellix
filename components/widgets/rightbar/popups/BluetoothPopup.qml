@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
@@ -22,16 +23,29 @@ PopupWindow {
 
     readonly property real itemH: Theme.dp(32)
     readonly property real headerH: Theme.dp(36)
-    readonly property real maxListH: itemH * 2 // Limiting to 2 items height
+    readonly property real maxAvailableH: itemH * 2
 
     property var btAdapter: Bluetooth.defaultAdapter
 
     readonly property var connectedDevices: sortedDevices().filter(function(d) { return d.connected })
     readonly property var pairedDevices: sortedDevices().filter(function(d) { return !d.connected && d.bonded })
     readonly property var availableDevices: sortedDevices().filter(function(d) { return !d.connected && !d.bonded })
-    readonly property int totalItems: connectedDevices.length + pairedDevices.length + availableDevices.length
-        + (pairedDevices.length > 0 ? 1 : 0) + (availableDevices.length > 0 ? 1 : 0)
-    readonly property real listH: Math.min(Math.max(totalItems * itemH, itemH), maxListH)
+
+    readonly property int connectedCount: connectedDevices.length
+    readonly property int pairedCount: pairedDevices.length
+    readonly property int availableCount: availableDevices.length
+
+    readonly property real connectedH: connectedCount > 0 ? connectedCount * itemH : 0
+    readonly property real pairedH: pairedCount > 0 ? pairedCount * itemH : 0
+    readonly property real availableH: availableCount > 0 ? Math.min(availableCount * itemH, maxAvailableH) : 0
+
+    readonly property real listH: {
+        var h = connectedH
+        if (pairedCount > 0) h += Theme.dp(24) + pairedH
+        if (availableCount > 0) h += Theme.dp(24) + availableH
+        if (h === 0) h = itemH
+        return h
+    }
 
     implicitWidth: Theme.dp(252)
     implicitHeight: headerH + Theme.dp(28) + listH + Theme.dp(8)
@@ -59,37 +73,9 @@ PopupWindow {
         return arr
     }
 
-    function buildDeviceModel() {
-        var result = []
-        var connected = root.connectedDevices
-        var paired = root.pairedDevices
-        var available = root.availableDevices
-
-        for (var i = 0; i < connected.length; i++) {
-            result.push({ device: connected[i], isHeader: false })
-        }
-
-        if (paired.length > 0) {
-            result.push({ isHeader: true, label: "Paired" })
-            for (var j = 0; j < paired.length; j++) {
-                result.push({ device: paired[j], isHeader: false })
-            }
-        }
-
-        if (available.length > 0) {
-            result.push({ isHeader: true, label: "Available" })
-            var showCount = Math.min(available.length, 6)
-            for (var k = 0; k < showCount; k++) {
-                result.push({ device: available[k], isHeader: false })
-            }
-        }
-
-        return result
+    function isAdapterDiscoverable() {
+        return root.btAdapter && root.btAdapter.discoverable === true
     }
-
-    function isDevConnected(dd) { return dd && dd.device && dd.device.connected }
-    function isDevBonded(dd) { return dd && dd.device && dd.device.bonded }
-    function isHeader(dd) { return dd && dd.isHeader }
 
     Rectangle {
         anchors.fill: parent
@@ -181,76 +167,126 @@ PopupWindow {
                             onClicked: { if (root.btAdapter) root.btAdapter.enabled = !root.btAdapter.enabled }
                         }
                     }
+
+                    Rectangle {
+                        Layout.preferredWidth: Theme.dp(36)
+                        Layout.preferredHeight: Theme.dp(22)
+                        Layout.alignment: Qt.AlignVCenter
+                        color: discToggleMouse.containsMouse
+                            ? (isAdapterDiscoverable() ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                            : (isAdapterDiscoverable() ? Theme.accent : Theme.bgPrimary)
+                        border.width: 1
+                        border.color: isAdapterDiscoverable() ? Theme.accent : Theme.border
+                        radius: 0
+                        visible: root.btAdapter && root.btAdapter.enabled
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "SHOW"
+                            color: isAdapterDiscoverable() ? Theme.bgPrimary : Theme.textMuted
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                            font.weight: Typography.weightBold || Font.Bold
+                        }
+
+                        MouseArea {
+                            id: discToggleMouse
+                            cursorShape: Qt.PointingHandCursor
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            enabled: root.btAdapter && root.btAdapter.enabled
+                            onClicked: {
+                                if (root.btAdapter && root.btAdapter.discoverable !== undefined) {
+                                    root.btAdapter.discoverable = !root.btAdapter.discoverable
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Connected ──
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.connectedCount > 0 ? Theme.dp(20) : 0
+                visible: root.connectedCount > 0
+                spacing: Theme.dp(4)
+
+                Text {
+                    text: "Connected"
+                    color: Theme.textMuted
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                    font.weight: Typography.weightMedium || Font.Normal
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(1)
+                    color: Theme.border
                 }
             }
 
             Column {
                 Layout.fillWidth: true
                 spacing: Theme.dp(3)
+                visible: root.connectedCount > 0
 
                 Repeater {
-                    model: root.buildDeviceModel()
+                    model: root.connectedDevices
 
                     delegate: Rectangle {
-                        property var dd: modelData
+                        property var device: modelData
                         width: parent.width
-                        height: isHeader(dd) ? Theme.dp(20) : root.itemH
-                        color: {
-                            if (isHeader(dd)) return "transparent"
-                            if (devRowMouse.containsMouse) return isDevConnected(dd) ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.12) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.04)
-                            return isDevConnected(dd) ? Theme.bgPrimary : "transparent"
-                        }
-                        border.width: isHeader(dd) ? 0 : 1
-                        border.color: isHeader(dd) ? "transparent" : (isDevConnected(dd) ? Theme.accent : Theme.border)
+                        height: root.itemH
+                        color: connRowMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.08) : Theme.bgPrimary
+                        border.width: 1
+                        border.color: Theme.accent
                         radius: 0
 
                         Behavior on color {
-                            enabled: !isHeader(dd)
                             ColorAnimation { duration: 120 }
                         }
 
-                        Text {
-                            visible: isHeader(dd)
-                            anchors.left: parent.left
-                            anchors.verticalCenter: parent.verticalCenter
-                            anchors.leftMargin: Theme.dp(6)
-                            text: dd ? dd.label : ""
-                            color: Theme.textMuted
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
-                            font.weight: Typography.weightMedium || Font.Normal
+                        MouseArea {
+                            id: connRowMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {}
                         }
 
                         RowLayout {
-                            visible: dd && !isHeader(dd) && dd.device
                             anchors.fill: parent
                             anchors.margins: Theme.dp(6)
                             spacing: Theme.dp(6)
+                            z: 1
 
                             Rectangle {
                                 Layout.preferredWidth: Theme.dp(6)
                                 Layout.preferredHeight: Theme.dp(6)
                                 Layout.alignment: Qt.AlignVCenter
                                 radius: Theme.dp(3)
-                                color: isDevConnected(dd) ? Theme.accent
-                                    : (isDevBonded(dd) ? Theme.accentSoft : Theme.border)
+                                color: Theme.accent
                             }
 
                             MarqueeText {
-                                text: dd.device.name || dd.device.deviceName || "Unknown"
+                                text: device.name || device.deviceName || "Unknown"
                                 textColor: Theme.textPrimary
                                 fontSize: 9
                                 fontScale: s
-                                fontWeight: isDevConnected(dd)
-                                    ? (Typography.weightBold || Font.Bold)
-                                    : (Typography.weightRegular || Font.Normal)
+                                fontWeight: Typography.weightBold || Font.Bold
                                 scrolling: true
                                 textPadding: 0
                                 Layout.fillWidth: true
                             }
 
                             Text {
-                                text: dd.device.batteryAvailable ? Math.round(dd.device.battery * 100) + "%" : ""
+                                text: device.batteryAvailable ? Math.round(device.battery * 100) + "%" : ""
                                 color: Theme.textMuted
                                 font.family: Typography.fontFamily
                                 font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
@@ -259,13 +295,10 @@ PopupWindow {
                             Rectangle {
                                 Layout.preferredWidth: Theme.dp(50)
                                 Layout.preferredHeight: Theme.dp(20)
-                                color: devBtnMouse.containsMouse
-                                    ? (isDevConnected(dd) ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85))
-                                    : (isDevConnected(dd) ? Theme.bgPrimary : Theme.accentSoft)
+                                color: discBtnMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgPrimary
                                 border.width: 1
-                                border.color: isDevConnected(dd) ? Theme.border : Theme.accent
+                                border.color: discBtnMouse.containsMouse ? Theme.textPrimary : Theme.border
                                 radius: 0
-                                visible: !dd.device.pairing
 
                                 Behavior on color {
                                     ColorAnimation { duration: 120 }
@@ -273,46 +306,316 @@ PopupWindow {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: isDevConnected(dd) ? "Disc." : (isDevBonded(dd) ? "Connect" : "Pair")
-                                    color: isDevConnected(dd) ? Theme.textPrimary : Theme.bgPrimary
+                                    text: "Disc."
+                                    color: Theme.textPrimary
                                     font.family: Typography.fontFamily
                                     font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
-                                    font.weight: !isDevConnected(dd)
-                                        ? (Typography.weightBold || Font.Bold)
-                                        : (Typography.weightRegular || Font.Normal)
+                                    font.weight: Typography.weightRegular || Font.Normal
                                 }
 
                                 MouseArea {
-                                    id: devBtnMouse
+                                    id: discBtnMouse
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     hoverEnabled: true
-                                    enabled: root.btAdapter && root.btAdapter.enabled
+                                    onClicked: device.disconnect()
+                                }
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: Theme.dp(24)
+                                Layout.preferredHeight: Theme.dp(20)
+                                color: forgetBtnMouse.containsMouse ? Theme.danger : Theme.bgPrimary
+                                border.width: 1
+                                border.color: forgetBtnMouse.containsMouse ? Theme.danger : Theme.border
+                                radius: 0
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "✕"
+                                    color: forgetBtnMouse.containsMouse ? "#ffffff" : Theme.danger
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+                                    font.weight: Font.Bold
+                                }
+
+                                MouseArea {
+                                    id: forgetBtnMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
                                     onClicked: {
-                                        if (isDevConnected(dd)) dd.device.disconnect()
-                                        else if (isDevBonded(dd)) dd.device.connect()
-                                        else dd.device.pair()
+                                        try { device.disconnect() } catch(e) {}
+                                        try { device.forget() } catch(e) {}
                                     }
                                 }
                             }
-                        }
-
-                        MouseArea {
-                            id: devRowMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            visible: !isHeader(dd)
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {}
                         }
                     }
                 }
             }
 
+            // ── Paired ──
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.pairedCount > 0 ? Theme.dp(20) : 0
+                visible: root.pairedCount > 0
+                spacing: Theme.dp(4)
+
+                Text {
+                    text: "Paired"
+                    color: Theme.textMuted
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                    font.weight: Typography.weightMedium || Font.Normal
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(1)
+                    color: Theme.border
+                }
+            }
+
+            Column {
+                Layout.fillWidth: true
+                spacing: Theme.dp(3)
+                visible: root.pairedCount > 0
+
+                Repeater {
+                    model: root.pairedDevices
+
+                    delegate: Rectangle {
+                        property var device: modelData
+                        width: parent.width
+                        height: root.itemH
+                        color: pairedRowMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.04) : Theme.bgPrimary
+                        border.width: 1
+                        border.color: Theme.border
+                        radius: 0
+
+                        Behavior on color {
+                            ColorAnimation { duration: 120 }
+                        }
+
+                        MouseArea {
+                            id: pairedRowMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {}
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.margins: Theme.dp(6)
+                            spacing: Theme.dp(6)
+                            z: 1
+
+                            Rectangle {
+                                Layout.preferredWidth: Theme.dp(6)
+                                Layout.preferredHeight: Theme.dp(6)
+                                Layout.alignment: Qt.AlignVCenter
+                                radius: Theme.dp(3)
+                                color: Theme.accentSoft
+                            }
+
+                            MarqueeText {
+                                text: device.name || device.deviceName || "Unknown"
+                                textColor: Theme.textPrimary
+                                fontSize: 9
+                                fontScale: s
+                                fontWeight: Typography.weightRegular || Font.Normal
+                                scrolling: true
+                                textPadding: 0
+                                Layout.fillWidth: true
+                            }
+
+                            Text {
+                                text: device.batteryAvailable ? Math.round(device.battery * 100) + "%" : ""
+                                color: Theme.textMuted
+                                font.family: Typography.fontFamily
+                                font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: Theme.dp(50)
+                                Layout.preferredHeight: Theme.dp(20)
+                                color: pairConnMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Theme.accentSoft
+                                border.width: 1
+                                border.color: Theme.accent
+                                radius: 0
+                                visible: !device.pairing
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 120 }
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "Connect"
+                                    color: Theme.bgPrimary
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                                    font.weight: Typography.weightBold || Font.Bold
+                                }
+
+                                MouseArea {
+                                    id: pairConnMouse
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    hoverEnabled: true
+                                    enabled: root.btAdapter && root.btAdapter.enabled
+                                    onClicked: device.connect()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Available ──
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.availableCount > 0 ? Theme.dp(20) : 0
+                visible: root.availableCount > 0
+                spacing: Theme.dp(4)
+
+                Text {
+                    text: "Available"
+                    color: Theme.textMuted
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                    font.weight: Typography.weightMedium || Font.Normal
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(1)
+                    color: Theme.border
+                }
+            }
+
+            Flickable {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.availableCount > 0 ? root.availableH : 0
+                visible: root.availableCount > 0
+                contentHeight: availableCol.implicitHeight
+                interactive: contentHeight > height
+                clip: true
+
+                ScrollBar.vertical: ScrollBar {
+                    policy: availableCol.implicitHeight > parent.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                    width: Theme.dp(6)
+                }
+
+                Column {
+                    id: availableCol
+                    width: parent.width
+                    spacing: Theme.dp(3)
+
+                    Repeater {
+                        model: root.availableDevices.slice(0, 6)
+
+                        delegate: Rectangle {
+                            property var device: modelData
+                            width: parent.width
+                            height: root.itemH
+                            color: availRowMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.04) : "transparent"
+                            border.width: 1
+                            border.color: Theme.border
+                            radius: 0
+
+                            Behavior on color {
+                                ColorAnimation { duration: 120 }
+                            }
+
+                            MouseArea {
+                                id: availRowMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {}
+                            }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: Theme.dp(6)
+                                spacing: Theme.dp(6)
+                                z: 1
+
+                                Rectangle {
+                                    Layout.preferredWidth: Theme.dp(6)
+                                    Layout.preferredHeight: Theme.dp(6)
+                                    Layout.alignment: Qt.AlignVCenter
+                                    radius: Theme.dp(3)
+                                    color: Theme.border
+                                }
+
+                                MarqueeText {
+                                    text: device.name || device.deviceName || "Unknown"
+                                    textColor: Theme.textPrimary
+                                    fontSize: 9
+                                    fontScale: s
+                                    fontWeight: Typography.weightRegular || Font.Normal
+                                    scrolling: true
+                                    textPadding: 0
+                                    Layout.fillWidth: true
+                                }
+
+                                Text {
+                                    text: device.batteryAvailable ? Math.round(device.battery * 100) + "%" : ""
+                                    color: Theme.textMuted
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                                }
+
+                                Rectangle {
+                                    Layout.preferredWidth: Theme.dp(50)
+                                    Layout.preferredHeight: Theme.dp(20)
+                                    color: availPairMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Theme.accentSoft
+                                    border.width: 1
+                                    border.color: Theme.accent
+                                    radius: 0
+                                    visible: !device.pairing
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 120 }
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "Pair"
+                                        color: Theme.bgPrimary
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                                        font.weight: Typography.weightBold || Font.Bold
+                                    }
+
+                                    MouseArea {
+                                        id: availPairMouse
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        hoverEnabled: true
+                                        enabled: root.btAdapter && root.btAdapter.enabled
+                                        onClicked: device.pair()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ── Empty state ──
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: root.totalItems === 0 ? Theme.dp(28) : 0
-                visible: root.totalItems === 0
+                Layout.preferredHeight: root.connectedCount === 0 && root.pairedCount === 0 && root.availableCount === 0 ? Theme.dp(28) : 0
+                visible: root.connectedCount === 0 && root.pairedCount === 0 && root.availableCount === 0
 
                 Text {
                     anchors.centerIn: parent

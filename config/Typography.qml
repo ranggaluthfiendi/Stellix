@@ -9,6 +9,7 @@ Singleton {
 
     property string fontFamily: "JetBrainsMono Nerd Font"
 
+    property int sizeXXSBase: 7
     property int sizeXSBase: 10
     property int sizeSMBase: 12
     property int sizeMDBase: 14
@@ -16,11 +17,13 @@ Singleton {
 
     function sp(x) { return Math.round(x * Scales.uiScale) }
 
+    readonly property int sizeXXS: sp(sizeXXSBase)
     readonly property int sizeXS: sp(sizeXSBase)
     readonly property int sizeSM: sp(sizeSMBase)
     readonly property int sizeMD: sp(sizeMDBase)
     readonly property int sizeLG: sp(sizeLGBase)
 
     property int weightNormal: Font.Normal
+    property int weightMedium: Font.Medium
     property int weightBold: Font.DemiBold
 }

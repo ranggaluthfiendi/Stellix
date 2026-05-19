@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Notifications
 import qs.config
 import qs.components.widgets.rightbar
@@ -18,21 +19,24 @@ PopupWindow {
     property bool slideIn: false
     property real slideY: -Theme.dp(30)
 
-    // ── Clear All animation state ──
     property bool clearAllActive: false
     property int clearAllProgress: 0
 
     readonly property int filteredCount: root.filteredNotifs().length
-    readonly property real itemH: Theme.dp(72)
-    readonly property real listH: filteredCount > 0
-        ? Math.min(filteredCount * itemH, Theme.dp(360))
-        : Theme.dp(100)
+    readonly property real itemH: Theme.dp(56)
+    readonly property int maxVisibleItems: 2
+    readonly property real actionItemH: Theme.dp(30)
+
+    readonly property bool hasCategories: root.notifCategories().length > 1
+    readonly property real catRowH: root.hasCategories ? Theme.dp(24) : 0
+
+    property int expandedNotifIndex: -1
+
+    readonly property real listH: root.calcListH()
+    readonly property bool needsScroll: root.filteredCount > root.maxVisibleItems && root.expandedNotifIndex < 0
 
     implicitWidth: Theme.dp(372)
-    implicitHeight: Math.min(
-        Theme.dp(40) + Theme.dp(1) + listH + Theme.dp(16),
-        Theme.dp(500)
-    )
+    implicitHeight: Theme.dp(32) + Theme.dp(4) + root.catRowH + Theme.dp(1) + root.listH + Theme.dp(8)
     grabFocus: false
 
     property real s: Scales.uiScale
@@ -43,7 +47,21 @@ PopupWindow {
         if (visible) {
             slideY = -Theme.dp(30)
             slideIn = true
+        } else {
+            root.expandedNotifIndex = -1
         }
+    }
+
+    function calcListH() {
+        if (root.filteredCount === 0) return Theme.dp(100)
+        if (root.expandedNotifIndex >= 0) {
+            var expandedNotif = root.filteredNotifs()[root.expandedNotifIndex]
+            var actionCount = (expandedNotif && expandedNotif.actions) ? expandedNotif.actions.length : 0
+            var expandedH = root.itemH + Theme.dp(4) + Theme.dp(1) + (actionCount * root.actionItemH) + Math.max(actionCount - 1, 0) * Theme.dp(3) + Theme.dp(8)
+            return expandedH
+        }
+        var vis = Math.min(root.filteredCount, root.maxVisibleItems)
+        return vis * root.itemH + Math.max(vis - 1, 0) * Theme.dp(4) + Theme.dp(8)
     }
 
     function filteredNotifs() {
@@ -67,9 +85,17 @@ PopupWindow {
         var now = new Date()
         var diff = Math.floor((now - d) / 1000)
         if (diff < 60) return "now"
-        if (diff < 3600) return Math.floor(diff / 60) + "m"
-        if (diff < 86400) return Math.floor(diff / 3600) + "h"
+        if (diff < 3600) return Math.floor(diff / 60) + "m ago"
+        if (diff < 86400) return Math.floor(diff / 3600) + "h ago"
         return d.getDate() + "/" + (d.getMonth() + 1)
+    }
+
+    function formatNotifTimeFull(ts) {
+        if (!ts) return ""
+        var d = new Date(ts * 1000)
+        var h = d.getHours().toString().padStart(2, "0")
+        var m = d.getMinutes().toString().padStart(2, "0")
+        return h + ":" + m
     }
 
     function dismissAll() {
@@ -102,7 +128,16 @@ PopupWindow {
 
     function dismissOne(n) {
         if (!n) return
+        root.expandedNotifIndex = -1
         try { n.dismiss() } catch (e) {}
+    }
+
+    function toggleActions(idx) {
+        if (root.expandedNotifIndex === idx) {
+            root.expandedNotifIndex = -1
+        } else {
+            root.expandedNotifIndex = idx
+        }
     }
 
     function notifCategories() {
@@ -141,12 +176,13 @@ PopupWindow {
 
         ColumnLayout {
             anchors.fill: parent
-            anchors.margins: Theme.dp(8)
-            spacing: Theme.dp(6)
+            anchors.margins: Theme.dp(6)
+            spacing: Theme.dp(4)
 
+            // ── Header ──
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Theme.dp(6)
+                spacing: Theme.dp(4)
 
                 Text {
                     text: "Notifications"
@@ -159,10 +195,10 @@ PopupWindow {
                 Rectangle {
                     visible: root.filteredCount > 0
                     implicitWidth: countLabel.implicitWidth + Theme.dp(8)
-                    implicitHeight: Theme.dp(18)
+                    implicitHeight: Theme.dp(16)
                     color: Theme.danger
                     border.width: 0
-                    radius: Theme.dp(9)
+                    radius: Theme.dp(8)
 
                     Text {
                         id: countLabel
@@ -170,7 +206,7 @@ PopupWindow {
                         text: String(root.filteredCount)
                         color: "#ffffff"
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                        font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                         font.weight: Typography.weightBold || Font.Bold
                     }
                 }
@@ -178,8 +214,8 @@ PopupWindow {
                 Item { Layout.fillWidth: true }
 
                 Rectangle {
-                    implicitWidth: dndLabel.implicitWidth + Theme.dp(16)
-                    implicitHeight: Theme.dp(22)
+                    implicitWidth: dndLabel.implicitWidth + Theme.dp(12)
+                    implicitHeight: Theme.dp(20)
                     color: dndMouse.containsMouse
                         ? (RightBarState.dndEnabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
                         : (RightBarState.dndEnabled ? Theme.accent : Theme.bgPrimary)
@@ -194,13 +230,10 @@ PopupWindow {
                     Text {
                         id: dndLabel
                         anchors.centerIn: parent
-                        text: RightBarState.dndEnabled ? "DND On" : "DND"
+                        text: RightBarState.dndEnabled ? "DND" : "DND"
                         color: RightBarState.dndEnabled ? Theme.bgPrimary : Theme.textMuted
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
-                        font.weight: RightBarState.dndEnabled
-                            ? (Typography.weightBold || Font.Bold)
-                            : (Typography.weightRegular || Font.Normal)
+                        font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                     }
 
                     MouseArea {
@@ -216,7 +249,7 @@ PopupWindow {
                     s: root.s
                     visible: root.filteredCount > 0
                     buttonLabel: "Clear"
-                    requireHold: true // Keep hold for clearing all filtered
+                    requireHold: true
                     onExecute: root.dismissAll()
                 }
 
@@ -245,12 +278,12 @@ PopupWindow {
             // ── Category filter ──
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Theme.dp(4)
+                spacing: Theme.dp(3)
                 visible: root.notifCategories().length > 1
 
                 Rectangle {
-                    Layout.preferredHeight: Theme.dp(18)
-                    Layout.preferredWidth: catAllLabel.implicitWidth + Theme.dp(10)
+                    Layout.preferredHeight: Theme.dp(16)
+                    Layout.preferredWidth: catAllLabel.implicitWidth + Theme.dp(8)
                     color: catAllMouse.containsMouse && root.filterCategory !== "all"
                         ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
                         : (root.filterCategory === "all" ? Theme.accentSoft : Theme.bgPrimary)
@@ -286,8 +319,8 @@ PopupWindow {
 
                     delegate: Rectangle {
                         required property var modelData
-                        Layout.preferredHeight: Theme.dp(18)
-                        Layout.preferredWidth: catLbl.implicitWidth + Theme.dp(10)
+                        Layout.preferredHeight: Theme.dp(16)
+                        Layout.preferredWidth: catLbl.implicitWidth + Theme.dp(8)
                         color: catMouse.containsMouse && root.filterCategory !== modelData.name
                             ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
                             : (root.filterCategory === modelData.name ? Theme.accentSoft : Theme.bgPrimary)
@@ -326,21 +359,22 @@ PopupWindow {
                 color: Theme.border
             }
 
+            // ── Notification List ──
             Item {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
                 Layout.preferredHeight: root.listH
+                clip: true
 
+                // Empty state
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: Theme.dp(12)
+                    spacing: Theme.dp(8)
                     visible: root.filteredCount === 0
 
                     IconBell {
                         Layout.alignment: Qt.AlignHCenter
                         iconColor: RightBarState.dndEnabled ? Theme.textMuted : Theme.accent
-                        iconSize: Theme.dp(48)
-                        Layout.bottomMargin: Theme.dp(10)
+                        iconSize: Theme.dp(36)
                     }
 
                     ColumnLayout {
@@ -349,9 +383,7 @@ PopupWindow {
 
                         Text {
                             Layout.alignment: Qt.AlignHCenter
-                            text: RightBarState.dndEnabled
-                                ? "Do Not Disturb"
-                                : "No Notifications"
+                            text: RightBarState.dndEnabled ? "Do Not Disturb" : "No Notifications"
                             color: Theme.textPrimary
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round((Typography.sizeSM || 14) * s)
@@ -360,9 +392,7 @@ PopupWindow {
 
                         Text {
                             Layout.alignment: Qt.AlignHCenter
-                            text: RightBarState.dndEnabled
-                                ? "You won't see new alerts"
-                                : "Your tray is empty"
+                            text: RightBarState.dndEnabled ? "You won't see new alerts" : "Your tray is empty"
                             color: Theme.textMuted
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
@@ -370,180 +400,310 @@ PopupWindow {
                     }
                 }
 
-                ListView {
+                // Scrollable list
+                Flickable {
+                    id: notifFlickable
                     anchors.fill: parent
+                    contentWidth: parent.width
+                    contentHeight: notifColumn.implicitHeight
+                    interactive: contentHeight > height
                     clip: true
-                    spacing: Theme.dp(4)
-                    model: root.filteredNotifs()
                     visible: root.filteredCount > 0
 
-                    delegate: Item {
-                        required property var modelData
-                        required property int index
-                        width: ListView.view.width
-                        height: modelData.body && modelData.body.length > 0 ? Theme.dp(96) : root.itemH
+                    ScrollBar.vertical: ScrollBar {
+                        policy: root.needsScroll ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
+                        width: Theme.dp(4)
+                    }
 
-                        property bool dismissPending: false
+                    ColumnLayout {
+                        id: notifColumn
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        spacing: Theme.dp(4)
 
-                        // Exit animation for Clear All
-                        property real exitX: 0
-                        property real exitOpacity: 1
+                        Repeater {
+                            id: notifRepeater
+                            model: root.filteredNotifs()
 
-                        states: State {
-                            name: "exiting"
-                            when: root.clearAllActive && index < root.clearAllProgress
-                            PropertyChanges { target: delegateItem; exitX: delegateItem.width + Theme.dp(20); exitOpacity: 0 }
-                        }
+                            delegate: Item {
+                                required property var modelData
+                                required property int index
+                                width: notifFlickable.width
 
-                        transitions: Transition {
-                            to: "exiting"
-                            NumberAnimation { properties: "exitX,exitOpacity"; duration: 280; easing.type: Easing.InCubic }
-                        }
+                                property bool isExpanded: root.expandedNotifIndex === index
+                                property bool isHidden: root.expandedNotifIndex >= 0 && !isExpanded
+                                property int actionCount: modelData.actions ? modelData.actions.length : 0
+                                property real expandedH: root.itemH + Theme.dp(4) + Theme.dp(1) + (actionCount * root.actionItemH) + Math.max(actionCount - 1, 0) * Theme.dp(3) + Theme.dp(8)
 
-                        id: delegateItem
-                        transform: Translate { x: delegateItem.exitX }
-                        opacity: delegateItem.exitOpacity
+                                height: isHidden ? 0 : (isExpanded ? expandedH : root.itemH)
+                                opacity: isHidden ? 0 : 1
 
-                        Rectangle {
-                            anchors.fill: parent
-                            color: Math.abs(swipeRect.x) > Theme.dp(50) ? Theme.danger : "transparent"
-                            opacity: Math.min(1.0, Math.abs(swipeRect.x) / Theme.dp(80))
-                            z: 1
+                                Behavior on height {
+                                    NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                                }
+                                Behavior on opacity {
+                                    NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                                }
 
-                            Text {
-                                anchors.centerIn: parent
-                                text: "Dismiss"
-                                color: "white"
-                                font.family: Typography.fontFamily
-                                font.pixelSize: Math.round((Typography.sizeSM || 12) * s)
-                                font.weight: Font.Bold
-                                visible: Math.abs(swipeRect.x) > Theme.dp(30)
-                            }
-                        }
+                                property real exitX: 0
+                                property real exitOpacity: 1
 
-                        Rectangle {
-                            id: swipeRect
-                            x: 0
-                            width: parent.width
-                            height: parent.height
-                            color: Theme.bgPrimary
-                            border.width: 1
-                            border.color: Theme.border
-                            radius: 0
-                            z: 2
+                                id: delegateItem
+                                transform: Translate { x: delegateItem.exitX }
 
-                            Behavior on x {
-                                enabled: !dragMouse.drag.active && !root.clearAllActive
-                                NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
-                            }
-
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.margins: Theme.dp(8)
-                                spacing: Theme.dp(8)
-
+                                // Swipe dismiss background
                                 Rectangle {
-                                    Layout.preferredWidth: Theme.dp(36)
-                                    Layout.preferredHeight: Theme.dp(36)
-                                    Layout.alignment: Qt.AlignVCenter
-                                    color: Theme.accentSoft
-                                    border.width: 1
-                                    border.color: Theme.border
-                                    radius: 0
-
-                                    Image {
-                                        id: notifAppIcon
-                                        anchors.fill: parent
-                                        anchors.margins: Theme.dp(4)
-                                        source: modelData.appIcon ? "image://icon/" + modelData.appIcon : ""
-                                        fillMode: Image.PreserveAspectFit
-                                        visible: (modelData.appIcon || "").length > 0 && status === Image.Ready
-                                        asynchronous: true
-                                        cache: true
-                                        sourceSize.width: Theme.dp(28)
-                                        sourceSize.height: Theme.dp(28)
-                                    }
+                                    anchors.fill: parent
+                                    color: Math.abs(swipeRect.x) > Theme.dp(50) ? Theme.danger : "transparent"
+                                    opacity: Math.min(1.0, Math.abs(swipeRect.x) / Theme.dp(80))
+                                    z: 1
 
                                     Text {
                                         anchors.centerIn: parent
-                                        visible: !notifAppIcon.visible
-                                        text: modelData.appName ? modelData.appName.charAt(0).toUpperCase() : "N"
-                                        color: Theme.accent
+                                        text: "Dismiss"
+                                        color: "white"
                                         font.family: Typography.fontFamily
-                                        font.pixelSize: Math.round((Typography.sizeSM || 14) * s)
-                                        font.weight: Typography.weightBold || Font.Bold
+                                        font.pixelSize: Math.round((Typography.sizeSM || 12) * s)
+                                        font.weight: Font.Bold
+                                        visible: Math.abs(swipeRect.x) > Theme.dp(30)
                                     }
                                 }
 
-                                ColumnLayout {
-                                    Layout.fillWidth: true
-                                    Layout.fillHeight: true
-                                    spacing: Theme.dp(2)
+                                // Main notification card
+                                Rectangle {
+                                    id: swipeRect
+                                    x: 0
+                                    width: parent.width
+                                    height: root.itemH
+                                    color: Theme.bgPrimary
+                                    border.width: 1
+                                    border.color: isExpanded ? Theme.accent : Theme.border
+                                    radius: 0
+                                    z: 2
+
+                                    Behavior on x {
+                                        enabled: !dragMouse.drag.active && !root.clearAllActive
+                                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                                    }
 
                                     RowLayout {
-                                        Layout.fillWidth: true
-                                        spacing: Theme.dp(4)
+                                        anchors.fill: parent
+                                        anchors.margins: Theme.dp(4)
+                                        anchors.rightMargin: Theme.dp(28)
+                                        anchors.topMargin: Theme.dp(2)
+                                        anchors.bottomMargin: Theme.dp(2)
+                                        spacing: Theme.dp(6)
 
-                                        MarqueeText {
-                                            Layout.fillWidth: true
-                                            text: modelData.appName || ""
-                                            textColor: Theme.accent
-                                            fontSize: 7
-                                            fontScale: s
-                                            fontWeight: Typography.weightMedium || Font.Normal
-                                            scrolling: true
-                                            textPadding: 0
+                                        // App icon
+                                        Rectangle {
+                                            Layout.preferredWidth: Theme.dp(28)
+                                            Layout.preferredHeight: Theme.dp(28)
+                                            Layout.alignment: Qt.AlignVCenter
+                                            color: Theme.bgSecondary
+                                            border.width: 1
+                                            border.color: Theme.border
+                                            radius: 0
+
+                                            Image {
+                                                id: notifAppIcon
+                                                anchors.fill: parent
+                                                anchors.margins: Theme.dp(3)
+                                                source: modelData.appIcon ? "image://icon/" + modelData.appIcon : ""
+                                                fillMode: Image.PreserveAspectFit
+                                                visible: (modelData.appIcon || "").length > 0 && status === Image.Ready
+                                                asynchronous: true
+                                                cache: true
+                                                sourceSize.width: Theme.dp(22)
+                                                sourceSize.height: Theme.dp(22)
+                                            }
+
+                                            Text {
+                                                anchors.centerIn: parent
+                                                visible: !notifAppIcon.visible
+                                                text: modelData.appName ? modelData.appName.charAt(0).toUpperCase() : "N"
+                                                color: Theme.accent
+                                                font.family: Typography.fontFamily
+                                                font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
+                                                font.weight: Typography.weightBold || Font.Bold
+                                            }
                                         }
+
+                                        // Content
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            Layout.fillHeight: true
+                                            spacing: Theme.dp(1)
+
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: Theme.dp(4)
+
+                                                Text {
+                                                    text: modelData.appName || ""
+                                                    color: Theme.accent
+                                                    font.family: Typography.fontFamily
+                                                    font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                                                    font.weight: Typography.weightMedium || Font.Normal
+                                                    Layout.fillWidth: true
+                                                    elide: Text.ElideRight
+                                                }
+
+                                                Text {
+                                                    text: root.formatNotifTimeFull(modelData.time)
+                                                    color: Theme.textMuted
+                                                    font.family: Typography.fontFamily
+                                                    font.pixelSize: Math.round((Typography.sizeXXS || 6) * s)
+                                                }
+                                            }
+
+                                            MarqueeText {
+                                                text: modelData.summary || "Notification"
+                                                textColor: Theme.textPrimary
+                                                fontSize: Typography.sizeXXS || 8
+                                                fontScale: s
+                                                fontWeight: Typography.weightMedium || Font.Normal
+                                                scrolling: true
+                                                textPadding: 0
+                                                Layout.fillWidth: true
+                                            }
+
+                                            Text {
+                                                text: modelData.body || ""
+                                                color: Theme.textMuted
+                                                font.family: Typography.fontFamily
+                                                font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                                                Layout.fillWidth: true
+                                                elide: Text.ElideRight
+                                                maximumLineCount: 1
+                                                visible: modelData.body && modelData.body.length > 0
+                                            }
+                                        }
+                                    }
+
+                                    // "..." actions button
+                                    Rectangle {
+                                        id: actionsBtn
+                                        anchors.right: parent.right
+                                        anchors.rightMargin: Theme.dp(4)
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        implicitWidth: Theme.dp(22)
+                                        implicitHeight: Theme.dp(22)
+                                        color: actionsBtnMouse.containsMouse ? Theme.accent : (isExpanded ? Theme.accent : Theme.bgSecondary)
+                                        border.width: 1
+                                        border.color: actionsBtnMouse.containsMouse ? Theme.accent : (isExpanded ? Theme.accent : Theme.border)
+                                        radius: 0
+                                        visible: modelData.actions && modelData.actions.length > 0
+                                        z: 3
+
+                                        Behavior on color { ColorAnimation { duration: 100 } }
 
                                         Text {
-                                            text: root.formatNotifTime(modelData.time)
-                                            color: Theme.textMuted
+                                            anchors.centerIn: parent
+                                            text: isExpanded ? "▾" : "⋯"
+                                            color: actionsBtnMouse.containsMouse || isExpanded ? Theme.bgPrimary : Theme.textMuted
                                             font.family: Typography.fontFamily
-                                            font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                                            font.pixelSize: Math.round((Typography.sizeSM || 12) * s)
+                                            font.weight: Typography.weightBold || Font.Bold
+                                        }
+
+                                        MouseArea {
+                                            id: actionsBtnMouse
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
+                                            onClicked: root.toggleActions(index)
                                         }
                                     }
 
-                                    MarqueeText {
-                                        text: modelData.summary || "Notification"
-                                        textColor: Theme.textPrimary
-                                        fontSize: 10
-                                        fontScale: s
-                                        fontWeight: Typography.weightMedium || Font.Normal
-                                        scrolling: true
-                                        textPadding: 0
-                                        Layout.fillWidth: true
-                                    }
+                                    // Swipe drag area
+                                    MouseArea {
+                                        id: dragMouse
+                                        anchors.fill: parent
+                                        drag.target: swipeRect
+                                        drag.axis: Drag.XAxis
+                                        drag.minimumX: -Theme.dp(100)
+                                        drag.maximumX: Theme.dp(100)
 
-                                    Text {
-                                        text: modelData.body || ""
-                                        color: Theme.textMuted
-                                        font.family: Typography.fontFamily
-                                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
-                                        font.weight: Font.Normal
-                                        wrapMode: Text.Wrap
-                                        maximumLineCount: 2
-                                        elide: Text.ElideRight
-                                        lineHeight: 1.2
-                                        lineHeightMode: Text.ProportionalHeight
-                                        Layout.fillWidth: true
-                                        visible: modelData.body && modelData.body.length > 0
+                                        onReleased: {
+                                            if (Math.abs(swipeRect.x) > Theme.dp(60)) {
+                                                root.dismissOne(modelData)
+                                            } else {
+                                                swipeRect.x = 0
+                                            }
+                                        }
                                     }
                                 }
-                            }
 
-                            MouseArea {
-                                id: dragMouse
-                                anchors.fill: parent
-                                drag.target: swipeRect
-                                drag.axis: Drag.XAxis
-                                drag.minimumX: -Theme.dp(100)
-                                drag.maximumX: Theme.dp(100)
+                                // Inline actions section
+                                ColumnLayout {
+                                    anchors.top: swipeRect.bottom
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.leftMargin: Theme.dp(4)
+                                    anchors.rightMargin: Theme.dp(4)
+                                    anchors.bottomMargin: Theme.dp(4)
+                                    spacing: Theme.dp(3)
+                                    visible: isExpanded && modelData.actions && modelData.actions.length > 0
+                                    opacity: visible ? 1 : 0
 
-                                onReleased: {
-                                    if (Math.abs(swipeRect.x) > Theme.dp(60)) {
-                                        root.dismissOne(modelData)
-                                    } else {
-                                        swipeRect.x = 0
+                                    Behavior on opacity {
+                                        NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
+                                    }
+
+                                    Rectangle {
+                                        Layout.fillWidth: true
+                                        Layout.preferredHeight: Theme.dp(1)
+                                        color: Theme.border
+                                    }
+
+                                    Repeater {
+                                        model: modelData.actions || []
+
+                                        delegate: Rectangle {
+                                            required property var modelData
+                                            Layout.fillWidth: true
+                                            Layout.preferredHeight: root.actionItemH
+                                            color: actionItemMouse.containsMouse ? Theme.accent : Theme.bgSecondary
+                                            border.width: 1
+                                            border.color: actionItemMouse.containsMouse ? Theme.accent : Theme.border
+                                            radius: 0
+
+                                            Behavior on color { ColorAnimation { duration: 120 } }
+
+                                            RowLayout {
+                                                anchors.fill: parent
+                                                anchors.margins: Theme.dp(6)
+                                                spacing: Theme.dp(6)
+
+                                                Text {
+                                                    text: "▸"
+                                                    color: actionItemMouse.containsMouse ? Theme.bgPrimary : Theme.accent
+                                                    font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
+                                                    font.weight: Typography.weightBold || Font.Bold
+                                                }
+
+                                                Text {
+                                                    text: modelData.text
+                                                    color: actionItemMouse.containsMouse ? Theme.bgPrimary : Theme.textPrimary
+                                                    font.family: Typography.fontFamily
+                                                    font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+                                                    font.weight: actionItemMouse.containsMouse ? (Typography.weightBold || Font.Bold) : (Typography.weightRegular || Font.Normal)
+                                                    Layout.fillWidth: true
+                                                }
+                                            }
+
+                                            MouseArea {
+                                                id: actionItemMouse
+                                                anchors.fill: parent
+                                                cursorShape: Qt.PointingHandCursor
+                                                hoverEnabled: true
+                                                onClicked: {
+                                                    try { modelData.invoke() } catch (e) {}
+                                                    root.expandedNotifIndex = -1
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }

@@ -97,7 +97,8 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                hoverEnabled: true
+                hoverEnabled: media.hasMedia && media.targetWorkspace > 0
+                enabled: media.hasMedia && media.targetWorkspace > 0
                 cursorShape: Qt.PointingHandCursor
                 onEntered: parent.artHovered = true
                 onExited: parent.artHovered = false
@@ -158,15 +159,17 @@ Item {
                 height: 97 * s
                 clip: true
 
-                source: media.artUrl
+                source: media.hasMedia && media.hasArt ? media.artUrl : ""
                 fillMode: Image.PreserveAspectCrop
 
-                visible: media.hasMedia && media.hasArt
+                visible: media.hasMedia && media.hasArt && status !== Image.Error
                 opacity: (visible && !parent.artHovered) ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation { duration: 200 }
                 }
+
+                onStatusChanged: if (status === Image.Error) source = ""
             }
 
             Item {
@@ -195,7 +198,7 @@ Item {
                             }
 
                             SequentialAnimation {
-                                running: true
+                                running: media.hasMedia && !media.hasArt
                                 loops: Animation.Infinite
 
                                 NumberAnimation {

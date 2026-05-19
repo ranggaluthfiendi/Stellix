@@ -197,7 +197,7 @@ Item {
         Text {
             id: appLbl
             anchors.centerIn: parent
-            text: "▶ " + root.player.identity
+            text: root.player ? "▶ " + root.player.identity : ""
             color: appBtnMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted
             font.family: Typography.fontFamily
             font.pixelSize: Typography.sizeXXS

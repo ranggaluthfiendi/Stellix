@@ -7,6 +7,8 @@ Item {
 
     readonly property var sink: Pipewire.defaultAudioSink
     readonly property bool sinkReady: sink && sink.audio && sink.ready
+    readonly property var source: Pipewire.defaultAudioSource
+    readonly property bool sourceReady: source && source.audio && source.ready
 
     PwObjectTracker {
         id: pwTracker
@@ -19,6 +21,7 @@ Item {
     function sinkDevices() { return allSinks.filter(function(n) { return !n.isStream }) }
     function sinkApps() { return allSinks.filter(function(n) { return n.isStream }) }
     function sourceDevices() { return allSources.filter(function(n) { return !n.isStream }) }
+    function sourceApps() { return allSources.filter(function(n) { return n.isStream }) }
 
     function nodeName(node) {
         if (!node) return "Unknown"

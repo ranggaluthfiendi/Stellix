@@ -24,14 +24,17 @@ Rectangle {
     readonly property int artRefreshCounter: mprisService ? mprisService.artRefreshCounter : 0
     readonly property string displayArtUrl: activePlayer && activePlayer.trackArtUrl
         ? activePlayer.trackArtUrl
-        : (mprisService ? mprisService.cachedArtUrl : "")
+        : ""
     readonly property string displayTitle: activePlayer
-        ? (activePlayer.trackTitle || "No title")
-        : (mprisService && mprisService.cachedTitle ? mprisService.cachedTitle : "")
+        ? (activePlayer.trackTitle || "")
+        : ""
     readonly property string displayArtist: activePlayer
         ? (activePlayer.trackArtist || activePlayer.identity || "")
-        : (mprisService && mprisService.cachedArtist ? mprisService.cachedArtist : "")
-    readonly property bool hasMedia: activePlayer != null || displayArtUrl.length > 0 || displayTitle.length > 0
+        : ""
+    readonly property bool hasMedia: activePlayer != null && (displayTitle.length > 0 || displayArtist.length > 0 || displayArtUrl.length > 0)
+
+    property string failedArtUrl: ""
+    property string failedArtUrlBg: ""
 
     readonly property int artSize: Theme.dp(120)
     readonly property int pad: Theme.dp(6)
@@ -45,13 +48,19 @@ Rectangle {
     Image {
         id: artBg
         anchors.fill: parent
-        source: root.displayArtUrl
+        source: root.hasMedia && root.displayArtUrl && root.displayArtUrl !== root.failedArtUrlBg
             ? root.displayArtUrl + "?t=" + root.artRefreshCounter : ""
         fillMode: Image.PreserveAspectCrop
         visible: status === Image.Ready
         cache: false
         asynchronous: true
         opacity: 0.15
+        onStatusChanged: {
+            if (status === Image.Error) {
+                root.failedArtUrlBg = root.displayArtUrl
+                source = ""
+            }
+        }
     }
     Rectangle {
         anchors.fill: parent
@@ -74,7 +83,7 @@ Rectangle {
         Image {
             id: art
             anchors.fill: parent
-            source: root.displayArtUrl
+            source: root.hasMedia && root.displayArtUrl && root.displayArtUrl !== root.failedArtUrl
                 ? root.displayArtUrl + "?t=" + root.artRefreshCounter : ""
             fillMode: Image.PreserveAspectCrop
             visible: status === Image.Ready
@@ -82,6 +91,12 @@ Rectangle {
             asynchronous: true
             sourceSize.width: root.artSize
             sourceSize.height: root.artSize
+            onStatusChanged: {
+                if (status === Image.Error) {
+                    root.failedArtUrl = root.displayArtUrl
+                    source = ""
+                }
+            }
         }
         Text {
             anchors.centerIn: parent

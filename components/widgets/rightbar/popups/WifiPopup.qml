@@ -222,10 +222,11 @@ PopupWindow {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "⟳"
-                            color: root.showAvailable ? Theme.accent : Theme.textMuted
+                            text: "SCAN"
+                            color: root.showAvailable ? Theme.bgPrimary : Theme.textMuted
                             font.family: Typography.fontFamily
-                            font.pixelSize: Math.round((Typography.sizeXXS || 11) * s)
+                            font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
+                            font.weight: Typography.weightBold || Font.Bold
                         }
 
                         MouseArea {
@@ -416,7 +417,7 @@ PopupWindow {
 
                 ScrollBar.vertical: ScrollBar {
                     policy: availableCol.implicitHeight > parent.height ? ScrollBar.AsNeeded : ScrollBar.AlwaysOff
-                    width: Theme.dp(4)
+                    width: Theme.dp(6)
                 }
 
                 Column {
