@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.config
+import qs.services
 
 Singleton {
     id: root
@@ -47,7 +48,22 @@ Singleton {
     property int borderWidthBase: 1
     readonly property int borderWidth: dp(borderWidthBase)
 
-    // Dark/Light mode detection (based on matugen mode)
-    readonly property bool isDark: "{{mode}}" === "dark"
-    readonly property string schemeName: "{{mode}}"
+    // Dark/Light mode - source of truth
+    property bool isDark: true
+    readonly property string schemeName: isDark ? "dark" : "light"
+
+    // Sync with ColorService on load
+    Component.onCompleted: {
+        root.isDark = (GlobalState.currentScheme === "dark")
+    }
+
+    function setLightMode(light) {
+        root.isDark = !light
+        GlobalState.currentScheme = root.schemeName
+    }
+
+    function toggleMode() {
+        root.isDark = !root.isDark
+        GlobalState.currentScheme = root.schemeName
+    }
 }

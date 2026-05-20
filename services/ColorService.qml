@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Io
 import QtCore
 import qs.config
+import qs.services
 
 Item {
     id: root
@@ -12,6 +13,7 @@ Item {
     property bool isGenerating: false
     property string lastWallpaper: ""
     property bool initDone: false
+    property int lastMatugenRun: 0
 
     readonly property string matugenConf: Quickshell.env("HOME") + "/.config/matugen/matugen.toml"
     readonly property string themeOutput: Quickshell.env("HOME") + "/.config/quickshell/config/Theme.qml"
@@ -87,6 +89,10 @@ Item {
     Component.onCompleted: {
         root.initDone = true
         root.loadState()
+
+        // Sync Theme.isDark with loaded state
+        Theme.isDark = (root.currentScheme === "dark")
+        GlobalState.currentScheme = root.currentScheme
     }
 
     onCurrentSchemeChanged: {
@@ -95,6 +101,19 @@ Item {
 
     onCurrentTypeChanged: {
         root.saveState()
+    }
+
+    // Listen to Theme.isDark changes and run matugen + reload
+    Connections {
+        target: Theme
+        function onIsDarkChanged() {
+            if (!root.initDone) return
+            var newScheme = Theme.schemeName
+            if (newScheme !== root.currentScheme) {
+                root.currentScheme = newScheme
+                root.runMatugenAndReload()
+            }
+        }
     }
 
     StdioCollector { id: matugenCollector }
@@ -110,19 +129,18 @@ Item {
             if (exitCode === 0) {
                 Quickshell.reload(false)
             } else {
-                console.log("Matugen failed:", output)
+                // Matugen failed, silently reload anyway
             }
         }
     }
 
-    function extractFromWallpaper(path) {
-        if (root.isGenerating) {
-            return
-        }
+    function runMatugenAndReload() {
+        var now = new Date().getTime()
+        if (root.isGenerating || (now - root.lastMatugenRun < 1500)) return
+        root.lastMatugenRun = now
 
-        var targetPath = path || root.lastWallpaper
+        var targetPath = root.lastWallpaper
         if (!targetPath) {
-            // Fallback to wallpaper service current path
             if (wallpaper.currentWallpaperPath && wallpaper.currentWallpaperPath !== "") {
                 targetPath = wallpaper.currentWallpaperPath
             } else if (wallpaper.wallpapers.length > 0 && wallpaper.currentIndex >= 0) {
@@ -130,16 +148,45 @@ Item {
             }
         }
         if (!targetPath) {
-            console.log("ColorService: No wallpaper path available")
+            Quickshell.reload(false)
             return
         }
 
         root.isGenerating = true
         root.lastWallpaper = targetPath
 
-        var mode = root.currentScheme === "dark" ? "dark" : "light"
+        var mode = Theme.schemeName
 
-        console.log("ColorService: Running matugen with mode=" + mode + " type=" + root.currentType + " path=" + targetPath)
+        matugenProcess.exec(["sh", "-c",
+            "matugen image '" + targetPath + "' " +
+            "-m " + mode + " " +
+            "-t " + root.currentType + " " +
+            "-c " + root.matugenConf + " " +
+            "--prefer=darkness 2>&1"
+        ])
+    }
+
+    function extractFromWallpaper(path) {
+        var now = new Date().getTime()
+        if (root.isGenerating || (now - root.lastMatugenRun < 1500)) return
+        root.lastMatugenRun = now
+
+        var targetPath = path || root.lastWallpaper
+        if (!targetPath) {
+            if (wallpaper.currentWallpaperPath && wallpaper.currentWallpaperPath !== "") {
+                targetPath = wallpaper.currentWallpaperPath
+            } else if (wallpaper.wallpapers.length > 0 && wallpaper.currentIndex >= 0) {
+                targetPath = wallpaper.wallpapers[wallpaper.currentIndex]
+            }
+        }
+        if (!targetPath) {
+            return
+        }
+
+        root.isGenerating = true
+        root.lastWallpaper = targetPath
+
+        var mode = Theme.schemeName
 
         matugenProcess.exec(["sh", "-c",
             "matugen image '" + targetPath + "' " +
@@ -151,19 +198,12 @@ Item {
     }
 
     function toggleMode() {
-        root.currentScheme = root.currentScheme === "dark" ? "light" : "dark"
-
-        if (root.lastWallpaper !== "") {
-            extractFromWallpaper(root.lastWallpaper)
-        }
+        Theme.toggleMode()
     }
 
     function setMode(mode) {
         if (mode === "dark" || mode === "light") {
-            root.currentScheme = mode
-
-            // Always try to extract, even if lastWallpaper is empty
-            extractFromWallpaper("")
+            Theme.setLightMode(mode === "light")
         }
     }
 
@@ -176,25 +216,19 @@ Item {
             }
         }
         root.currentType = schemeTypes[(idx + 1) % schemeTypes.length].value
-
-        // Always try to extract, even if lastWallpaper is empty
         extractFromWallpaper("")
     }
 
     function setType(type) {
         root.currentType = type
-
-        // Always try to extract, even if lastWallpaper is empty
         extractFromWallpaper("")
     }
 
     function applyTheme() {
-        // Force extract from current wallpaper
         extractFromWallpaper("")
     }
 
     function applySystemTheme() {
-        // Apply theme system-wide (GTK, KDE, Qt)
         applyProcess.exec(["sh", "-c",
             "bash " + Quickshell.env("HOME") + "/.config/matugen/apply-theme.sh " + root.currentScheme + " " + root.lastWallpaper + " 2>&1"
         ])

@@ -35,6 +35,10 @@ ShellRoot {
         id: calc
     }
 
+    CurrencyService {
+        id: currencyService
+    }
+
     ColorService {
         id: colorService
     }

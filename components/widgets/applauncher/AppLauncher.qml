@@ -27,29 +27,26 @@ PanelWindow {
     readonly property var commands: [
         { name: ">wallpaper", desc: "Switch wallpaper", trigger: ">", icon: "preferences-desktop-wallpaper" },
         { name: ">color", desc: "Color scheme settings", trigger: ">", icon: "preferences-desktop-color" },
-        { name: ">dark", desc: "Switch to dark mode", trigger: ">", icon: "weather-clear-night" },
-        { name: ">light", desc: "Switch to light mode", trigger: ">", icon: "weather-clear" },
         { name: ">record", desc: "Screen recording", trigger: ">", icon: "media-record" },
         { name: ">screenshot", desc: "Take screenshot", trigger: ">", icon: "camera-photo" },
         { name: ">power", desc: "Power menu", trigger: ">", icon: "system-shutdown" },
         { name: ">calc", desc: "Calculator", trigger: ">", icon: "accessories-calculator" },
+        { name: ">currency", desc: "Currency converter", trigger: ">", icon: "accessories-calculator" },
         { name: "/wallpaper", desc: "Switch wallpaper", trigger: "/", icon: "preferences-desktop-wallpaper" },
         { name: "/color", desc: "Color scheme settings", trigger: "/", icon: "preferences-desktop-color" },
-        { name: "/dark", desc: "Switch to dark mode", trigger: "/", icon: "weather-clear-night" },
-        { name: "/light", desc: "Switch to light mode", trigger: "/", icon: "weather-clear" },
         { name: "/record", desc: "Screen recording", trigger: "/", icon: "media-record" },
         { name: "/screenshot", desc: "Take screenshot", trigger: "/", icon: "camera-photo" },
         { name: "/power", desc: "Power menu", trigger: "/", icon: "system-shutdown" },
         { name: "/calc", desc: "Calculator", trigger: "/", icon: "accessories-calculator" },
+        { name: "/currency", desc: "Currency converter", trigger: "/", icon: "accessories-calculator" },
         { name: "?help", desc: "Show commands", trigger: "?", icon: "help-about" },
         { name: "?wallpaper", desc: "Switch wallpaper", trigger: "?", icon: "preferences-desktop-wallpaper" },
         { name: "?color", desc: "Color scheme settings", trigger: "?", icon: "preferences-desktop-color" },
-        { name: "?dark", desc: "Switch to dark mode", trigger: "?", icon: "weather-clear-night" },
-        { name: "?light", desc: "Switch to light mode", trigger: "?", icon: "weather-clear" },
         { name: "?record", desc: "Screen recording", trigger: "?", icon: "media-record" },
         { name: "?screenshot", desc: "Take screenshot", trigger: "?", icon: "camera-photo" },
         { name: "?power", desc: "Power menu", trigger: "?", icon: "system-shutdown" },
-        { name: "?calc", desc: "Calculator", trigger: "?", icon: "accessories-calculator" }
+        { name: "?calc", desc: "Calculator", trigger: "?", icon: "accessories-calculator" },
+        { name: "?currency", desc: "Currency converter", trigger: "?", icon: "accessories-calculator" }
     ]
 
     readonly property var currentModel: root.showCommands
@@ -98,13 +95,9 @@ PanelWindow {
                 root.viewMode = 4
                 root.wallpaperMode = false
                 break
-            case "dark":
-                colorService.setMode("dark")
-                closeLauncher()
-                break
-            case "light":
-                colorService.setMode("light")
-                closeLauncher()
+            case "currency":
+                root.viewMode = 6
+                root.wallpaperMode = false
                 break
             case "help":
                 root.showCommands = true
@@ -251,6 +244,9 @@ PanelWindow {
                                 } else if (cmd === ">calc" || cmd === "/calc" || cmd === "?calc") {
                                     root.showCommands = false
                                     root.viewMode = 4
+                                } else if (cmd === ">currency" || cmd === "/currency" || cmd === "?currency") {
+                                    root.showCommands = false
+                                    root.viewMode = 6
                                 } else if (cmd === ">color" || cmd === "/color" || cmd === "?color") {
                                     root.showCommands = false
                                     root.viewMode = 5
@@ -286,9 +282,15 @@ PanelWindow {
                                 } else if (root.viewMode === 3) {
                                     powerPopup.executeCurrent()
                                     event.accepted = true
-                                } else if (root.viewMode === 4) {
+                } else if (root.viewMode === 4) {
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.currencyInput.forceActiveFocus()
+                                    event.accepted = true
                                 } else if (root.viewMode === 5) {
-                                    colorPopup.applyCurrent()
+                                    if (colorPopup) colorPopup.applyCurrent()
+                                    event.accepted = true
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.closeRequested()
                                     event.accepted = true
                                 } else if (appList.currentIndex >= 0 && appList.currentIndex < root.currentModel.length) {
                                     launcher.launchApp(root.currentModel[appList.currentIndex])
@@ -307,7 +309,10 @@ PanelWindow {
                                     powerPopup.next()
                                     event.accepted = true
                                 } else if (root.viewMode === 5) {
-                                    colorPopup.next()
+                                    if (colorPopup) colorPopup.next()
+                                    event.accepted = true
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.currencyInput.forceActiveFocus()
                                     event.accepted = true
                                 } else {
                                     appList.currentIndex = Math.min(appList.currentIndex + 1, root.currentModel.length - 1)
@@ -325,7 +330,10 @@ PanelWindow {
                                     powerPopup.prev()
                                     event.accepted = true
                                 } else if (root.viewMode === 5) {
-                                    colorPopup.prev()
+                                    if (colorPopup) colorPopup.prev()
+                                    event.accepted = true
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.currencyInput.forceActiveFocus()
                                     event.accepted = true
                                 } else {
                                     appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
@@ -335,10 +343,16 @@ PanelWindow {
                                 if (root.wallpaperMode) {
                                     wallpaper.next()
                                     event.accepted = true
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.doSwap()
+                                    event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_Left) {
                                 if (root.wallpaperMode) {
                                     wallpaper.prev()
+                                    event.accepted = true
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.doSwap()
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier)) {
@@ -351,7 +365,10 @@ PanelWindow {
                                     wallpaper.next()
                                     event.accepted = true
                                 } else if (root.viewMode === 4) {
-                                    calcPopup.calcInput.forceActiveFocus()
+                                    if (calcPopup && calcPopup.calcInput) calcPopup.calcInput.forceActiveFocus()
+                                    event.accepted = true
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup && currencyPopup.currencyInput) currencyPopup.currencyInput.forceActiveFocus()
                                     event.accepted = true
                                 } else {
                                     appList.forceActiveFocus()
@@ -378,39 +395,37 @@ PanelWindow {
                                     wallpaperSwitcher.apply()
                                     event.accepted = true
                                 } else if (root.viewMode === 5) {
-                                    colorPopup.applyCurrent()
+                                    if (colorPopup) colorPopup.applyCurrent()
+                                    event.accepted = true
+                                } else if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.closeRequested()
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_A) {
                                 if (event.modifiers & Qt.ShiftModifier) {
-                                    root.wallpaperMode = false
-                                    root.showCommands = false
-                                    root.viewMode = 0
-                                    searchInput.text = ""
-                                    launcher.searchText = ""
-                                    event.accepted = true
-                                } else {
+                                    if (root.wallpaperMode || root.showCommands || root.viewMode >= 3) {
+                                        root.wallpaperMode = false
+                                        root.showCommands = false
+                                        root.viewMode = 0
+                                        searchInput.text = ""
+                                        launcher.searchText = ""
+                                        event.accepted = true
+                                    }
+                                } else if (root.wallpaperMode) {
                                     root.followCursor = !root.followCursor
+                                    event.accepted = true
+                                } else if (root.viewMode === 5) {
+                                    colorService.applyTheme()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_S && !event.modifiers) {
+                                if (root.viewMode === 6) {
+                                    if (currencyPopup) currencyPopup.doSwap()
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_T && !event.modifiers) {
                                 if (root.wallpaperMode) {
                                     wallpaperSwitcher.nextAnim()
-                                    event.accepted = true
-                                }
-                            } else if (event.key === Qt.Key_D && !event.modifiers) {
-                                if (root.viewMode === 5) {
-                                    colorService.setMode("dark")
-                                    event.accepted = true
-                                }
-                            } else if (event.key === Qt.Key_L && !event.modifiers) {
-                                if (root.viewMode === 5) {
-                                    colorService.setMode("light")
-                                    event.accepted = true
-                                }
-                            } else if (event.key === Qt.Key_A && !event.modifiers && !root.wallpaperMode) {
-                                if (root.viewMode === 5) {
-                                    colorService.applyTheme()
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_M && !event.modifiers) {
@@ -804,6 +819,42 @@ PanelWindow {
                                         opacity: 0.7
                                     }
                                 }
+
+                                Rectangle {
+                                    Layout.preferredWidth: Theme.dp(28)
+                                    Layout.preferredHeight: Theme.dp(28)
+                                    Layout.alignment: Qt.AlignVCenter
+                                    color: actionMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
+                                    radius: Theme.dp(4)
+                                    visible: !root.showCommands
+
+                                    Behavior on color {
+                                        ColorAnimation { duration: 100 }
+                                    }
+
+                                    Text {
+                                        anchors.centerIn: parent
+                                        text: "⋮"
+                                        color: actionMouse.containsMouse ? Theme.accent : Theme.textMuted
+                                        font.pixelSize: Math.round(14 * s)
+                                    }
+
+                                    MouseArea {
+                                        id: actionMouse
+                                        anchors.fill: parent
+                                        cursorShape: Qt.PointingHandCursor
+                                        hoverEnabled: true
+                                        propagateComposedEvents: false
+                                        onClicked: function(mouse) {
+                                            mouse.accepted = true
+                                            root.contextMenuApp = modelData
+                                            contextMenu.popup(mouse.x, mouse.y)
+                                        }
+                                        onPressed: function(mouse) {
+                                            mouse.accepted = true
+                                        }
+                                    }
+                                }
                             }
 
                             MouseArea {
@@ -988,6 +1039,15 @@ PanelWindow {
                         launcher.searchText = ""
                     }
                 }
+
+                CurrencyPopup {
+                    id: currencyPopup
+                    onCloseRequested: {
+                        root.viewMode = 0
+                        searchInput.text = ""
+                        launcher.searchText = ""
+                    }
+                }
             }
 
             RowLayout {
@@ -996,7 +1056,7 @@ PanelWindow {
                 spacing: Theme.dp(6)
                 Layout.topMargin: Theme.dp(2)
                 Layout.bottomMargin: Theme.dp(2)
-                visible: !root.showCommands && !root.wallpaperMode && root.viewMode !== 5
+                visible: !root.showCommands && !root.wallpaperMode && root.viewMode !== 5 && root.viewMode !== 6
 
                 Text {
                     text: "↑↓ Navigate"

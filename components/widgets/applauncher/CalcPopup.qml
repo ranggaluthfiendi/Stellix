@@ -14,6 +14,7 @@ Rectangle {
     property real s: Scales.uiScale
     property string expression: ""
     property string result: ""
+    property alias calcInput: calcInput
 
     signal closeRequested
 
@@ -97,7 +98,8 @@ Rectangle {
             elide: Text.ElideRight
         }
 
-        // Operator hints
+        Item { Layout.fillHeight: true }
+
         ColumnLayout {
             Layout.fillWidth: true
             spacing: Theme.dp(2)
