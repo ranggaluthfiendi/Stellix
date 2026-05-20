@@ -13,31 +13,26 @@ Item {
     signal requestSubmenu(var entry, var anchorItem)
 
     readonly property bool isEnabled: entry && entry.enabled
-
+    readonly property bool isSeparator: entry && entry.isSeparator
+    readonly property bool isCheckbox: entry && entry.buttonType === QsMenuButtonType.CheckBox
+    readonly property bool isRadio: entry && entry.buttonType === QsMenuButtonType.RadioButton
+    readonly property bool hasSubmenu: entry && entry.hasChildren
     readonly property bool isActiveSubmenu: SysTrayState.openedSubmenuEntry === entry
 
     property real s: Scales.uiScale
 
-    implicitHeight: Theme.dp(24)
-    implicitWidth: row.implicitWidth + Theme.dp(16)
+    implicitHeight: isSeparator ? Theme.dp(1) : Theme.dp(24)
+    implicitWidth: isSeparator ? Theme.dp(120) : row.implicitWidth + Theme.dp(16)
 
     Rectangle {
         anchors.fill: parent
         color: "transparent"
     }
 
-    scale: isEnabled && mouse.containsMouse ? 1.02 : 1.0
-
-    Behavior on scale {
-        NumberAnimation {
-            duration: 120
-            easing.type: Easing.OutCubic
-        }
-    }
-
     Rectangle {
         anchors.fill: parent
         radius: 0
+        visible: !isSeparator
 
         color: {
             if (!isEnabled) return "transparent"
@@ -68,12 +63,36 @@ Item {
         }
     }
 
+    Rectangle {
+        visible: isSeparator
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        anchors.topMargin: Theme.dp(3)
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Theme.dp(3)
+        anchors.leftMargin: Theme.dp(8)
+        anchors.rightMargin: Theme.dp(8)
+        width: parent.width - Theme.dp(16)
+        height: Theme.dp(1)
+        color: Theme.border
+    }
+
+    scale: isEnabled && mouse.containsMouse ? 1.02 : 1.0
+
+    Behavior on scale {
+        NumberAnimation {
+            duration: 120
+            easing.type: Easing.OutCubic
+        }
+    }
+
     RowLayout {
         id: row
         anchors.fill: parent
         anchors.leftMargin: Theme.dp(8)
         anchors.rightMargin: Theme.dp(8)
         spacing: Theme.dp(6)
+        visible: !isSeparator
 
         Text {
             text: entry && entry.text ? entry.text : ""
@@ -81,18 +100,31 @@ Item {
             font.family: Typography.fontFamily
             font.pixelSize: Math.round((Typography.sizeXXS || 9) * root.s)
 
-            Layout.fillWidth: false
+            Layout.fillWidth: true
             wrapMode: Text.NoWrap
-            elide: Text.ElideNone
+            elide: Text.ElideRight
             horizontalAlignment: Text.AlignLeft
             verticalAlignment: Text.AlignVCenter
         }
 
         Text {
-            text: entry && entry.hasChildren ? "▶" : ""
+            id: checkIndicator
+            visible: isCheckbox || isRadio
+            text: {
+                if (isCheckbox) return entry.checkState === Qt.Checked ? "✓" : ""
+                if (isRadio) return entry.checkState === Qt.Checked ? "●" : ""
+                return ""
+            }
+            color: isEnabled ? Theme.accent : Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round((Typography.sizeXS || 10) * root.s)
+            font.weight: Font.Bold
+        }
 
+        Text {
+            text: hasSubmenu ? "▶" : ""
             color: isActiveSubmenu ? Theme.accent : Theme.textMuted
-            visible: entry && entry.hasChildren
+            visible: hasSubmenu
             font.family: Typography.fontFamily
             font.pixelSize: Math.round((Typography.sizeXXS || 9) * root.s)
         }
@@ -104,7 +136,7 @@ Item {
         repeat: false
 
         onTriggered: {
-            if (!isEnabled || !entry || !entry.hasChildren) return
+            if (!isEnabled || !entry || !hasSubmenu) return
 
             if (SysTrayState.openedSubmenuEntry !== entry) {
                 root.requestSubmenu(entry, root)
@@ -118,10 +150,10 @@ Item {
         hoverEnabled: true
 
         cursorShape: isEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-        enabled: isEnabled
+        enabled: isEnabled && !isSeparator
 
         onEntered: {
-            if (entry && entry.hasChildren) hoverTimer.start()
+            if (entry && hasSubmenu) hoverTimer.start()
         }
 
         onExited: {
@@ -131,7 +163,9 @@ Item {
         onClicked: {
             if (!entry) return
 
-            if (entry.hasChildren) {
+            if (isCheckbox || isRadio) {
+                try { entry.triggered() } catch(e) {}
+            } else if (hasSubmenu) {
                 if (SysTrayState.openedSubmenuEntry === entry) {
                     root.requestSubmenu(null, null)
                 } else {

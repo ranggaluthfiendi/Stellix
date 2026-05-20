@@ -7,7 +7,7 @@ import Quickshell.Wayland
 import Quickshell.Io
 import qs.config
 import qs.components.elements
-import "components"
+import qs.components.widgets.workspaceswitcher.components
 
 PanelWindow {
     id: root

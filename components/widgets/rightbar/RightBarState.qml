@@ -12,6 +12,7 @@ Item {
     property bool open: false
     property bool calendarOpen: false
     property bool workspaceSwitcherOpen: false
+    property bool launcherOpen: false
     property bool dndEnabled: false
     property int calendarMonthOffset: 0
     property bool notifPanelRequested: false
@@ -62,6 +63,7 @@ Item {
         open = false
         calendarOpen = false
         workspaceSwitcherOpen = false
+        launcherOpen = false
     }
 
     function prevMonth() {

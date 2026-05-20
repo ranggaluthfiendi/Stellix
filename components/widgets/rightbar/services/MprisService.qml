@@ -8,76 +8,215 @@ import qs.config
 Item {
     id: root
 
-    readonly property var players: (Mpris.players && Mpris.players.values) ? Mpris.players.values : []
-    readonly property var activePlayer: players.length > 0 ? players[0] : null
+    property var activePlayer: null
 
+    property string title: ""
+    property string artist: ""
+    property string artUrl: ""
+    property string localArtPath: ""
+    property string desktopEntry: ""
+    property string identity: ""
+    property bool isPlaying: false
+    property bool hasPlayer: false
+    property real position: 0
+    property real length: 0
     property int artRefreshCounter: 0
-    property string cachedArtUrl: ""
-    property string cachedTitle: ""
-    property string cachedArtist: ""
+    property string lastArtUrl: ""
 
-    readonly property string artCachePath: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata/media-cache.json"
+    readonly property string artCacheDir: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata"
+    readonly property string localArtFile: artCacheDir + "/current-cover.jpg"
 
-    StdioCollector { id: cacheReadOut }
-    StdioCollector { id: cacheWriteOut }
+    StdioCollector { id: artDownloadOut }
 
     Process {
-        id: cacheRead
-        stdout: cacheReadOut
+        id: artDownload
+        stdout: artDownloadOut
         onExited: function(exitCode, exitStatus) {
             if (exitCode === 0) {
-                try {
-                    var data = JSON.parse(cacheReadOut.text.trim())
-                    root.cachedArtUrl = data.artUrl || ""
-                    root.cachedTitle = data.title || ""
-                    root.cachedArtist = data.artist || ""
-                } catch (e) {}
+                root.localArtPath = root.localArtFile
+                root.artRefreshCounter++
             }
         }
     }
 
-    Process {
-        id: cacheWrite
-        stdout: cacheWriteOut
+    function downloadArt(url) {
+        if (!url || url === "") {
+            root.localArtPath = ""
+            return
+        }
+        var escapedUrl = url.replace(/'/g, "'\\''")
+        artDownload.exec(["sh", "-c", "mkdir -p '" + root.artCacheDir + "' && curl -fsSL --max-time 5 '" + escapedUrl + "' -o '" + root.localArtFile + "' 2>/dev/null"])
     }
 
-    function saveCache() {
-        var artUrl = root.activePlayer && root.activePlayer.trackArtUrl ? root.activePlayer.trackArtUrl : root.cachedArtUrl
-        var title = root.activePlayer && root.activePlayer.trackTitle ? root.activePlayer.trackTitle : root.cachedTitle
-        var artist = root.activePlayer && root.activePlayer.trackArtist ? root.activePlayer.trackArtist : root.cachedArtist
+    function cleanTitle(raw) {
+        if (!raw) return ""
+        var t = raw
+        t = t.replace(/\s*-\s*YouTube\s*$/i, "")
+        t = t.replace(/\s*\|\s*YouTube\s*$/i, "")
+        t = t.replace(/\s*-\s*youtube\s*$/i, "")
+        t = t.replace(/\s*\(\d+\)\s*$/i, "")
+        t = t.replace(/^\(\d+\)\s*/, "")
+        t = t.replace(/^\[\d+\]\s*/, "")
+        t = t.replace(/^\d+\.\s*/, "")
+        t = t.trim()
+        return t
+    }
 
-        var json = JSON.stringify({
-            artUrl: artUrl,
-            title: title,
-            artist: artist
-        })
-        var dir = root.artCachePath.replace(/\/[^\/]+$/, "")
-        cacheWrite.exec(["sh", "-c", "mkdir -p '" + dir + "' && echo '" + json + "' > '" + root.artCachePath + "'"])
+    function extractArtistFromTitle(rawTitle) {
+        if (!rawTitle) return ""
+        var parts = rawTitle.split(/\s*-\s*/)
+        if (parts.length >= 2) {
+            var potential = parts[0].trim()
+            if (potential.length > 0 && potential.toLowerCase() !== "unknown") {
+                return potential
+            }
+        }
+        return ""
+    }
+
+    function cleanArtist(raw, identity, rawTitle) {
+        if (raw && raw.length > 0 && raw !== "Unknown" && raw !== "unknown") return raw
+
+        var fromTitle = root.extractArtistFromTitle(rawTitle)
+        if (fromTitle.length > 0) return fromTitle
+
+        if (!identity) return ""
+        var id = identity.toLowerCase()
+        var isBrowser = (id.indexOf("firefox") >= 0 || id.indexOf("chrome") >= 0 || id.indexOf("brave") >= 0 || id.indexOf("chromium") >= 0 || id.indexOf("edge") >= 0 || id.indexOf("plasma-browser") >= 0)
+        if (isBrowser) return ""
+        return identity
+    }
+
+    function resolveActivePlayer() {
+        var players = Mpris.players.values || []
+        var playing = null
+        for (var i = 0; i < players.length; i++) {
+            if (players[i].isPlaying) {
+                playing = players[i]
+                break
+            }
+        }
+        if (playing) {
+            if (root.activePlayer !== playing) {
+                playerConn.target = playing
+                root.activePlayer = playing
+            }
+            return
+        }
+        if (players.length > 0) {
+            if (root.activePlayer !== players[0]) {
+                playerConn.target = players[0]
+                root.activePlayer = players[0]
+            }
+            return
+        }
+        if (root.activePlayer !== null) {
+            playerConn.target = null
+            root.activePlayer = null
+        }
+    }
+
+    function updateState() {
+        if (!root.activePlayer) {
+            root.title = ""
+            root.artist = ""
+            root.artUrl = ""
+            root.localArtPath = ""
+            root.desktopEntry = ""
+            root.identity = ""
+            root.isPlaying = false
+            root.hasPlayer = false
+            root.position = 0
+            root.length = 0
+            root.lastArtUrl = ""
+            return
+        }
+
+        root.hasPlayer = true
+        root.isPlaying = root.activePlayer.isPlaying
+        root.desktopEntry = root.activePlayer.desktopEntry || ""
+        root.identity = root.activePlayer.identity || ""
+
+        var rawTitle = root.activePlayer.trackTitle || ""
+        root.title = root.cleanTitle(rawTitle)
+
+        var rawArtist = root.activePlayer.trackArtist || ""
+        var identity = root.activePlayer.identity || ""
+        root.artist = root.cleanArtist(rawArtist, identity, rawTitle)
+
+        root.artUrl = root.activePlayer.trackArtUrl || ""
+        root.position = root.activePlayer.position || 0
+        root.length = root.activePlayer.lengthSupported ? root.activePlayer.length : 0
+
+        if (root.artUrl && root.artUrl !== root.lastArtUrl) {
+            root.lastArtUrl = root.artUrl
+            root.downloadArt(root.artUrl)
+        }
     }
 
     Connections {
-        target: root.activePlayer
-        function onTrackArtUrlChanged() {
-            root.artRefreshCounter++
-            root.saveCache()
+        id: playerConn
+        target: null
+        ignoreUnknownSignals: true
+
+        function onIsPlayingChanged() {
+            if (root.activePlayer && root.activePlayer.isPlaying) {
+                root.resolveActivePlayer()
+            }
+            root.updateState()
         }
-        function onTrackTitleChanged() { root.saveCache() }
-        function onMetadataChanged() { root.saveCache() }
+        function onPlaybackStateChanged() {
+            root.updateState()
+        }
+        function onTrackChanged() {
+            root.updateState()
+        }
+        function onPostTrackChanged() {
+            Qt.callLater(function() {
+                Qt.callLater(function() {
+                    root.updateState()
+                })
+            })
+        }
+        function onTrackArtUrlChanged() {
+            Qt.callLater(function() {
+                Qt.callLater(function() {
+                    if (root.activePlayer && root.activePlayer.trackArtUrl) {
+                        var newUrl = root.activePlayer.trackArtUrl
+                        if (newUrl !== root.lastArtUrl) {
+                            root.lastArtUrl = newUrl
+                            root.downloadArt(newUrl)
+                        }
+                    }
+                })
+            })
+        }
+        function onTrackTitleChanged() { root.updateState() }
+        function onTrackArtistChanged() { root.updateState() }
     }
 
     Timer {
-        id: positionTimer
-        interval: 500
-        running: root.activePlayer != null && root.activePlayer.playbackState === MprisPlaybackState.Playing
+        id: pollTimer
+        interval: 1500
+        running: true
         repeat: true
         onTriggered: {
-            root.activePlayer.positionChanged()
+            root.resolveActivePlayer()
+            root.updateState()
         }
     }
 
-    function refresh() {
-        root.artRefreshCounter++
-        root.saveCache()
+    Timer {
+        interval: 1000
+        running: root.activePlayer && root.activePlayer.playbackState === MprisPlaybackState.Playing
+        repeat: true
+        onTriggered: {
+            if (root.activePlayer) {
+                root.activePlayer.positionChanged()
+                root.position = root.activePlayer.position
+                root.length = root.activePlayer.lengthSupported ? root.activePlayer.length : 0
+            }
+        }
     }
 
     function formatTime(val) {
@@ -93,7 +232,7 @@ Item {
     }
 
     Component.onCompleted: {
-        var dir = root.artCachePath.replace(/\/[^\/]+$/, "")
-        cacheRead.exec(["sh", "-c", "mkdir -p '" + dir + "' && cat '" + root.artCachePath + "' 2>/dev/null || echo '{}'"])
+        root.resolveActivePlayer()
+        root.updateState()
     }
 }

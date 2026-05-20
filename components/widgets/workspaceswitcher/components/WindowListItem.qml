@@ -114,8 +114,10 @@ Item {
                         var wsId = modelData && modelData.workspace ? modelData.workspace.id : wsService.panelWorkspace;
                         wsService.moveWindowToTop(wsId, winAddr);
                         Hyprland.dispatch("alterzorder top,address:" + winAddr);
-                        wsService.refreshTrigger++;
-                        wsService.forceRefreshTimer.restart();
+                        Qt.callLater(function() {
+                            wsService.refreshTrigger++;
+                            wsService.forceRefreshTimer.restart();
+                        });
                     }
                 }
             }
@@ -152,8 +154,10 @@ Item {
                         var wsId = modelData && modelData.workspace ? modelData.workspace.id : wsService.panelWorkspace;
                         wsService.moveWindowToBottom(wsId, winAddr);
                         Hyprland.dispatch("alterzorder bottom,address:" + winAddr);
-                        wsService.refreshTrigger++;
-                        wsService.forceRefreshTimer.restart();
+                        Qt.callLater(function() {
+                            wsService.refreshTrigger++;
+                            wsService.forceRefreshTimer.restart();
+                        });
                     }
                 }
             }

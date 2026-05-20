@@ -4,6 +4,8 @@ import qs.components.ui.bar.items
 import qs.components.widgets.systemtray
 import qs.components.elements
 import qs.config
+import qs.services
+import qs.components.widgets.rightbar
 
 RowLayout {
     id: root
@@ -13,9 +15,9 @@ RowLayout {
     Layout.leftMargin: Theme.dp(10)
     spacing: Theme.dp(6)
 
-    // ── Workspace switcher button ──
+    // ── App launcher button ──
     Rectangle {
-        id: wsBox
+        id: appLauncherBtn
         Layout.alignment: Qt.AlignVCenter
         width: Theme.dp(22)
         height: Theme.dp(22)
@@ -26,17 +28,28 @@ RowLayout {
 
         property bool hovered: false
 
-        IconWorkspaces {
+        Grid {
             anchors.centerIn: parent
-            iconSize: Theme.dp(13)
-            iconColor: Theme.textPrimary
+            columns: 2
+            rowSpacing: Theme.dp(2)
+            columnSpacing: Theme.dp(2)
+
+            Repeater {
+                model: 4
+                Rectangle {
+                    width: Theme.dp(5)
+                    height: Theme.dp(5)
+                    color: Theme.textPrimary
+                    radius: Theme.dp(1)
+                }
+            }
         }
 
         Rectangle {
             anchors.fill: parent
-            color: wsBox.hovered ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : "transparent"
-            border.width: wsBox.hovered ? 1 : 0
-            border.color: wsBox.hovered ? Theme.textPrimary : "transparent"
+            color: appLauncherBtn.hovered ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : "transparent"
+            border.width: appLauncherBtn.hovered ? 1 : 0
+            border.color: appLauncherBtn.hovered ? Theme.textPrimary : "transparent"
             radius: 0
         }
 
@@ -45,13 +58,23 @@ RowLayout {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             acceptedButtons: Qt.LeftButton
-            onEntered: wsBox.hovered = true
-            onExited: wsBox.hovered = false
+            onEntered: appLauncherBtn.hovered = true
+            onExited: appLauncherBtn.hovered = false
             onClicked: {
-                RightBarState.workspaceSwitcherOpen = !RightBarState.workspaceSwitcherOpen
+                if (RightBarState.launcherOpen) {
+                    RightBarState.launcherOpen = false
+                    launcher.close()
+                } else {
+                    RightBarState.closeAll()
+                    RightBarState.launcherOpen = true
+                    launcher.open()
+                }
             }
         }
     }
+
+    // ── Workspace switcher button ──
+    
 
     WorkspaceItem {
     }

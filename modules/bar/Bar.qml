@@ -13,11 +13,8 @@ Scope {
 
     property real s: Scales.uiScale
 
-    property bool hovering: false
     property bool pinned: true
     property bool autoHideEnabled: true
-
-    readonly property bool expanded: pinned || (autoHideEnabled && hovering)
 
     BarState {
         id: state
@@ -46,6 +43,11 @@ Scope {
         if (!_loadingState) state.applyState(root.pinned, root.autoHideEnabled)
     }
 
+    property bool _triggerHovering: false
+    property bool _barHovering: false
+
+    readonly property bool expanded: pinned || (autoHideEnabled && (_triggerHovering || _barHovering))
+
     // ── Hover trigger zone (only visible when bar is hidden) ──
     PanelWindow {
         id: trigger
@@ -71,8 +73,8 @@ Scope {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: root.hovering = true
-            onExited: root.hovering = false
+            onEntered: root._triggerHovering = true
+            onExited: root._triggerHovering = false
         }
     }
 
@@ -110,10 +112,10 @@ Scope {
             hoverEnabled: true
             acceptedButtons: Qt.RightButton
 
-            onEntered: root.hovering = true
+            onEntered: root._barHovering = true
             onExited: {
                 if (!root.pinned && root.autoHideEnabled)
-                    root.hovering = false
+                    root._barHovering = false
             }
 
             onPressed: function(mouse) {

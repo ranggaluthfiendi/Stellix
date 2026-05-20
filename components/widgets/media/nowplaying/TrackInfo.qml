@@ -16,9 +16,36 @@ Item {
 
     property bool isPlaying: false
 
+    function cleanTitle(raw) {
+        if (!raw) return ""
+        var t = raw
+        t = t.replace(/\s*-\s*YouTube\s*$/i, "")
+        t = t.replace(/\s*\|\s*YouTube\s*$/i, "")
+        t = t.replace(/\s*\(\d+\)\s*$/i, "")
+        t = t.replace(/^\(\d+\)\s*/, "")
+        t = t.replace(/^\[\d+\]\s*/, "")
+        t = t.replace(/^\d+\.\s*/, "")
+        return t.trim()
+    }
+
+    function cleanArtist(raw, identity) {
+        if (raw && raw.length > 0 && raw !== "Unknown" && raw !== "unknown") return raw
+        if (!identity) return ""
+        var id = identity.toLowerCase()
+        if (id.indexOf("firefox") >= 0 || id.indexOf("chrome") >= 0 || id.indexOf("brave") >= 0 || id.indexOf("chromium") >= 0 || id.indexOf("edge") >= 0) {
+            return ""
+        }
+        return identity
+    }
+
     function updateTrack() {
-        trackTitle = player && player.trackTitle ? player.trackTitle : "No Track"
-        artist = player && player.trackArtist ? player.trackArtist : "No Artist"
+        if (!player) {
+            trackTitle = ""
+            artist = ""
+            return
+        }
+        trackTitle = cleanTitle(player.trackTitle || "")
+        artist = cleanArtist(player.trackArtist || "", player.identity || "")
     }
 
     function syncPlayback() {
@@ -47,7 +74,12 @@ Item {
         ignoreUnknownSignals: true
 
         function onTrackChanged() { root.updateTrack() }
+        function onPostTrackChanged() {
+            Qt.callLater(function() { root.updateTrack() })
+        }
         function onPlaybackStateChanged() { root.syncPlayback() }
+        function onTrackTitleChanged() { root.updateTrack() }
+        function onTrackArtistChanged() { root.updateTrack() }
     }
 
     Timer {
@@ -151,7 +183,7 @@ Item {
         id: titleMarquee
         x: 245 * s
         y: 24 * s
-        width: 350 * s
+        width: 400 * s
         height: 28 * s
         text: root.trackTitle
         textColor: root.primary
@@ -166,7 +198,7 @@ Item {
         id: artistMarquee
         x: 245 * s
         y: 52 * s
-        width: 350 * s
+        width: 400 * s
         height: 24 * s
         text: root.artist
         textColor: root.primary
@@ -180,40 +212,5 @@ Item {
     property real contentWidth: {
         let w = Math.max(titleMarquee.textWidth, artistMarquee.textWidth)
         return (w > 0 ? w : 200 * s) + 140 * s
-    }
-
-    // ── App Launcher Button ──
-    Rectangle {
-        x: 245 * s + Math.max(titleMarquee.textWidth, artistMarquee.textWidth) + 20 * s
-        y: 30 * s
-        width: appLbl.implicitWidth + 16 * s
-        height: 22 * s
-        color: appBtnMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.surface.r, Theme.surface.g, Theme.surface.b, 0.6)
-        border.width: 1
-        border.color: appBtnMouse.containsMouse ? Theme.accent : Theme.border
-        radius: 4 * s
-        visible: root.player && root.player.identity && root.player.identity !== ""
-
-        Text {
-            id: appLbl
-            anchors.centerIn: parent
-            text: root.player ? "▶ " + root.player.identity : ""
-            color: appBtnMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted
-            font.family: Typography.fontFamily
-            font.pixelSize: Typography.sizeXXS
-            font.weight: Font.Bold
-        }
-
-        MouseArea {
-            id: appBtnMouse
-            anchors.fill: parent
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                if (root.player && root.player.canRaise) {
-                    root.player.raise()
-                }
-            }
-        }
     }
 }

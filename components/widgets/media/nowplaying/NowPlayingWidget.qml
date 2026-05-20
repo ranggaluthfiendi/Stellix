@@ -1,4 +1,5 @@
 import QtQuick
+import Quickshell
 import qs.config
 import qs.components.elements
 import qs.components.widgets.media.nowplaying
@@ -80,7 +81,7 @@ Item {
             opacity: media.hasMedia ? 1 : 0.4
 
             SequentialAnimation on opacity {
-                running: true
+                running: media.hasMedia
                 loops: Animation.Infinite
                 NumberAnimation { from: 1; to: 0.4; duration: 900 }
                 NumberAnimation { from: 0.4; to: 1; duration: 900 }
@@ -97,9 +98,8 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                hoverEnabled: media.hasMedia && media.targetWorkspace > 0
-                enabled: media.hasMedia && media.targetWorkspace > 0
-                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: media.hasMedia
+                cursorShape: media.hasMedia && media.targetWorkspace > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onEntered: parent.artHovered = true
                 onExited: parent.artHovered = false
                 onClicked: {
@@ -109,61 +109,19 @@ Item {
                 }
             }
 
-            // ── Hover overlay with workspace icon ──
-            Rectangle {
-                anchors.fill: parent
-                color: Qt.rgba(0, 0, 0, 0.5)
-                opacity: parent.artHovered ? 1 : 0
-                visible: opacity > 0
-                z: 10
-
-                Behavior on opacity {
-                    NumberAnimation { duration: 150 }
-                }
-
-                Column {
-                    anchors.centerIn: parent
-                    spacing: 4 * s
-
-                    IconWorkspaces {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        iconSize: 28 * s
-                        iconColor: Theme.accent
-                        opacity: parent.parent.parent.artHovered ? 1 : 0
-
-                        Behavior on opacity {
-                            NumberAnimation { duration: 200 }
-                        }
-                    }
-
-                    Text {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        text: media.targetWorkspace > 0 ? "WS " + media.targetWorkspace : ""
-                        color: Theme.accent
-                        font.family: Typography.fontFamily
-                        font.pixelSize: 10 * s
-                        font.weight: Font.Bold
-                        opacity: parent.parent.parent.artHovered ? 1 : 0
-
-                        Behavior on opacity {
-                            NumberAnimation { duration: 200 }
-                        }
-                    }
-                }
-            }
-
             Image {
                 id: coverArt
 
-                width: (97 * s) * (16 / 9)
-                height: 97 * s
+                anchors.fill: parent
                 clip: true
 
-                source: media.hasMedia && media.hasArt ? media.artUrl : ""
+                source: media.hasMedia && media.localArtPath !== ""
+                    ? "file://" + media.localArtPath
+                    : (media.hasMedia && media.artUrl !== "" ? media.artUrl : "")
                 fillMode: Image.PreserveAspectCrop
 
-                visible: media.hasMedia && media.hasArt && status !== Image.Error
-                opacity: (visible && !parent.artHovered) ? 1 : 0
+                visible: media.hasMedia && (media.localArtPath !== "" || media.artUrl !== "") && status !== Image.Error
+                opacity: visible ? (parent.artHovered ? 0.25 : 1.0) : 0
 
                 Behavior on opacity {
                     NumberAnimation { duration: 200 }
@@ -176,7 +134,7 @@ Item {
                 anchors.centerIn: parent
                 width: 40 * s
                 height: 40 * s
-                visible: media.hasMedia && !media.hasArt
+                visible: media.hasMedia && media.localArtPath === "" && media.artUrl === "" && !parent.artHovered
 
                 Row {
                     anchors.centerIn: parent
@@ -198,7 +156,7 @@ Item {
                             }
 
                             SequentialAnimation {
-                                running: media.hasMedia && !media.hasArt
+                                running: media.hasMedia && media.localArtPath === "" && media.artUrl === ""
                                 loops: Animation.Infinite
 
                                 NumberAnimation {
@@ -218,6 +176,106 @@ Item {
                                 }
                             }
                         }
+                    }
+                }
+            }
+
+            Rectangle {
+                anchors.fill: parent
+                color: Qt.rgba(0, 0, 0, 0.35)
+                opacity: parent.artHovered ? 1 : 0
+                visible: opacity > 0 && media.hasMedia
+                z: 5
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 200 }
+                }
+            }
+
+            Column {
+                anchors.centerIn: parent
+                spacing: 8 * s
+                opacity: parent.artHovered ? 1 : 0
+                visible: opacity > 0 && media.hasMedia
+                z: 10
+
+                Behavior on opacity {
+                    NumberAnimation { duration: 200 }
+                }
+
+                Image {
+                    id: appIcon
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: 32 * s
+                    height: 32 * s
+                    source: {
+                        var de = media.player ? media.player.desktopEntry : ""
+                        if (de) {
+                            var entry = DesktopEntries.byId(de)
+                            if (entry && entry.icon) {
+                                var p = Quickshell.iconPath(entry.icon, true)
+                                if (p !== "") return p
+                            }
+                        }
+                        return ""
+                    }
+                    visible: source !== "" && status === Image.Ready
+                    fillMode: Image.PreserveAspectFit
+                }
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    visible: !appIcon.visible
+                    text: "♪"
+                    color: Theme.textPrimary
+                    font.pixelSize: 24 * s
+                }
+
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: media.identity || ""
+                    color: Theme.textPrimary
+                    font.family: Typography.fontFamily
+                    font.pixelSize: 9 * s
+                    font.weight: Font.Bold
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                    width: 120 * s
+                }
+
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    width: wsIndicatorRow.implicitWidth + Theme.dp(8)
+                    height: Theme.dp(16)
+                    color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
+                    border.width: 1
+                    border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.4)
+                    radius: Theme.dp(4)
+                    visible: media.targetWorkspace > 0
+
+                    Row {
+                        id: wsIndicatorRow
+                        anchors.centerIn: parent
+                        spacing: 4 * s
+
+                        IconWorkspaces {
+                            iconSize: 10 * s
+                            iconColor: Theme.accent
+                        }
+
+                        Text {
+                            text: "WS " + media.targetWorkspace
+                            color: Theme.accent
+                            font.family: Typography.fontFamily
+                            font.pixelSize: 8 * s
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: media.goToMediaWorkspace()
                     }
                 }
             }

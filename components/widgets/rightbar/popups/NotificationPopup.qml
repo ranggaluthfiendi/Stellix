@@ -32,11 +32,12 @@ PopupWindow {
 
     property int expandedNotifIndex: -1
 
+    readonly property real maxListH: Theme.dp(220)
     readonly property real listH: root.calcListH()
-    readonly property bool needsScroll: root.filteredCount > root.maxVisibleItems && root.expandedNotifIndex < 0
+    readonly property bool needsScroll: root.listH > root.maxListH
 
     implicitWidth: Theme.dp(372)
-    implicitHeight: Theme.dp(32) + Theme.dp(4) + root.catRowH + Theme.dp(1) + root.listH + Theme.dp(8)
+    implicitHeight: Theme.dp(32) + Theme.dp(4) + root.catRowH + Theme.dp(1) + root.maxListH + Theme.dp(8)
     grabFocus: false
 
     property real s: Scales.uiScale
@@ -54,14 +55,17 @@ PopupWindow {
 
     function calcListH() {
         if (root.filteredCount === 0) return Theme.dp(100)
-        if (root.expandedNotifIndex >= 0) {
-            var expandedNotif = root.filteredNotifs()[root.expandedNotifIndex]
-            var actionCount = (expandedNotif && expandedNotif.actions) ? expandedNotif.actions.length : 0
-            var expandedH = root.itemH + Theme.dp(4) + Theme.dp(1) + (actionCount * root.actionItemH) + Math.max(actionCount - 1, 0) * Theme.dp(3) + Theme.dp(8)
-            return expandedH
+        var total = 0
+        var arr = root.filteredNotifs()
+        for (var i = 0; i < arr.length; i++) {
+            total += root.itemH
+            if (i > 0) total += Theme.dp(4)
+            if (root.expandedNotifIndex === i && arr[i] && arr[i].actions) {
+                var ac = arr[i].actions.length
+                total += Theme.dp(4) + Theme.dp(1) + (ac * root.actionItemH) + Math.max(ac - 1, 0) * Theme.dp(3) + Theme.dp(8)
+            }
         }
-        var vis = Math.min(root.filteredCount, root.maxVisibleItems)
-        return vis * root.itemH + Math.max(vis - 1, 0) * Theme.dp(4) + Theme.dp(8)
+        return total
     }
 
     function filteredNotifs() {
@@ -362,7 +366,7 @@ PopupWindow {
             // ── Notification List ──
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: root.listH
+                Layout.fillHeight: true
                 clip: true
 
                 // Empty state
@@ -415,7 +419,7 @@ PopupWindow {
                         width: Theme.dp(4)
                     }
 
-                    ColumnLayout {
+                    Column {
                         id: notifColumn
                         anchors.top: parent.top
                         anchors.left: parent.left
@@ -432,22 +436,20 @@ PopupWindow {
                                 width: notifFlickable.width
 
                                 property bool isExpanded: root.expandedNotifIndex === index
-                                property bool isHidden: root.expandedNotifIndex >= 0 && !isExpanded
                                 property int actionCount: modelData.actions ? modelData.actions.length : 0
-                                property real expandedH: root.itemH + Theme.dp(4) + Theme.dp(1) + (actionCount * root.actionItemH) + Math.max(actionCount - 1, 0) * Theme.dp(3) + Theme.dp(8)
+                                property real actionsSectionH: isExpanded && actionCount > 0
+                                    ? Theme.dp(4) + Theme.dp(1) + (actionCount * root.actionItemH) + Math.max(actionCount - 1, 0) * Theme.dp(3) + Theme.dp(8)
+                                    : 0
+                                property real totalH: root.itemH + actionsSectionH
 
-                                height: isHidden ? 0 : (isExpanded ? expandedH : root.itemH)
-                                opacity: isHidden ? 0 : 1
+                                height: totalH
+                                opacity: 1
 
                                 Behavior on height {
                                     NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
                                 }
-                                Behavior on opacity {
-                                    NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
-                                }
 
                                 property real exitX: 0
-                                property real exitOpacity: 1
 
                                 id: delegateItem
                                 transform: Translate { x: delegateItem.exitX }
@@ -474,6 +476,7 @@ PopupWindow {
                                 Rectangle {
                                     id: swipeRect
                                     x: 0
+                                    y: 0
                                     width: parent.width
                                     height: root.itemH
                                     color: Theme.bgPrimary
@@ -636,13 +639,9 @@ PopupWindow {
                                 }
 
                                 // Inline actions section
-                                ColumnLayout {
-                                    anchors.top: swipeRect.bottom
-                                    anchors.left: parent.left
-                                    anchors.right: parent.right
-                                    anchors.leftMargin: Theme.dp(4)
-                                    anchors.rightMargin: Theme.dp(4)
-                                    anchors.bottomMargin: Theme.dp(4)
+                                Column {
+                                    y: swipeRect.height + Theme.dp(4)
+                                    width: parent.width
                                     spacing: Theme.dp(3)
                                     visible: isExpanded && modelData.actions && modelData.actions.length > 0
                                     opacity: visible ? 1 : 0
@@ -652,8 +651,8 @@ PopupWindow {
                                     }
 
                                     Rectangle {
-                                        Layout.fillWidth: true
-                                        Layout.preferredHeight: Theme.dp(1)
+                                        width: parent.width
+                                        height: Theme.dp(1)
                                         color: Theme.border
                                     }
 
@@ -662,8 +661,8 @@ PopupWindow {
 
                                         delegate: Rectangle {
                                             required property var modelData
-                                            Layout.fillWidth: true
-                                            Layout.preferredHeight: root.actionItemH
+                                            width: parent.width
+                                            height: root.actionItemH
                                             color: actionItemMouse.containsMouse ? Theme.accent : Theme.bgSecondary
                                             border.width: 1
                                             border.color: actionItemMouse.containsMouse ? Theme.accent : Theme.border
