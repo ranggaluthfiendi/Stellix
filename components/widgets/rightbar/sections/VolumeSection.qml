@@ -743,7 +743,7 @@ Rectangle {
                             id: catAllLbl
                             anchors.centerIn: parent
                             text: "All"
-                            color: root.volumeFilter === "all" ? Theme.bgPrimary : Theme.textMuted
+                            color: root.volumeFilter === "all" ? Theme.accent : Theme.textMuted
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                             font.weight: root.volumeFilter === "all" ? (Typography.weightBold || Font.Bold) : (Typography.weightRegular || Font.Normal)

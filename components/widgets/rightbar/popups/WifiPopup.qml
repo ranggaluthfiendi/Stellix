@@ -583,12 +583,12 @@ PopupWindow {
                                 id: expandArea
                                 y: root.itemH
                                 width: parent.width
-                                height: availDelegate.isExpanded ? Theme.dp(58) : 0
+                                height: availDelegate.isExpanded ? Theme.dp(68) : 0
                                 visible: availDelegate.isExpanded
-                                color: Theme.bgPrimary
+                                color: Theme.bgSecondary
                                 border.width: 1
                                 border.color: Theme.border
-                                radius: 0
+                                radius: Theme.radiusSmall
                                 clip: true
 
                                 Behavior on height {
@@ -600,62 +600,73 @@ PopupWindow {
 
                                 ColumnLayout {
                                     anchors.fill: parent
-                                    anchors.margins: Theme.dp(4)
-                                    anchors.bottomMargin: Theme.dp(6)
-                                    spacing: Theme.dp(2)
+                                    anchors.margins: Theme.dp(8)
+                                    spacing: Theme.dp(6)
+
+                                    Text {
+                                        text: "Enter Password"
+                                        color: Theme.textPrimary
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
+                                        font.weight: Font.Medium
+                                    }
 
                                     RowLayout {
                                         Layout.fillWidth: true
+                                        Layout.preferredHeight: Theme.dp(32)
                                         spacing: Theme.dp(4)
 
-                                        TextField {
-                                            id: pskField
+                                        Rectangle {
                                             Layout.fillWidth: true
-                                            Layout.preferredHeight: Theme.dp(26)
-                                            text: availDelegate.passwordText
-                                            focus: availDelegate.isExpanded
-                                            echoMode: root.pskVisible ? TextInput.Normal : TextInput.Password
-                                            placeholderText: "Password"
-                                            placeholderTextColor: Theme.textMuted
-                                            font.family: Typography.fontFamily
-                                            font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                                            color: "#ffffff"
-                                            selectionColor: Theme.accentSoft
-                                            selectedTextColor: "#ffffff"
-                                            padding: Theme.dp(6)
-                                            verticalAlignment: TextInput.AlignVCenter
+                                            Layout.fillHeight: true
+                                            color: Theme.bgPrimary
+                                            border.width: 1
+                                            border.color: root.pskError.length > 0 ? Theme.danger : Theme.border
+                                            radius: Theme.radiusSmall
 
-                                            background: Rectangle {
-                                                color: Theme.bgSecondary
-                                                border.width: 1
-                                                border.color: root.pskError.length > 0 ? Theme.danger : Theme.border
-                                                radius: 0
-                                            }
+                                            TextField {
+                                                id: pskField
+                                                anchors.fill: parent
+                                                anchors.margins: Theme.dp(8)
+                                                text: availDelegate.passwordText
+                                                focus: availDelegate.isExpanded
+                                                echoMode: root.pskVisible ? TextInput.Normal : TextInput.Password
+                                                placeholderText: "Password"
+                                                placeholderTextColor: Theme.textMuted
+                                                font.family: Typography.fontFamily
+                                                font.pixelSize: Math.round((Typography.sizeSM || 12) * s)
+                                                font.weight: Font.Medium
+                                                color: Theme.textPrimary
+                                                selectionColor: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                                                selectedTextColor: Theme.textPrimary
+                                                background: Item {}
+                                                verticalAlignment: TextInput.AlignVCenter
 
-                                            onTextChanged: availDelegate.passwordText = text
+                                                onTextChanged: availDelegate.passwordText = text
 
-                                            onAccepted: {
-                                                if (!root.selectedNetwork) return
-                                                root.pskError = ""
-                                                try {
-                                                    root.selectedNetwork.connectWithPsk(availDelegate.passwordText)
-                                                    root.selectedNetwork = null
-                                                } catch(e) {
-                                                    root.pskError = "Incorrect password or connection failed"
+                                                onAccepted: {
+                                                    if (!root.selectedNetwork) return
+                                                    root.pskError = ""
+                                                    try {
+                                                        root.selectedNetwork.connectWithPsk(availDelegate.passwordText)
+                                                        root.selectedNetwork = null
+                                                    } catch(e) {
+                                                        root.pskError = "Incorrect password or connection failed"
+                                                    }
                                                 }
                                             }
                                         }
 
                                         Rectangle {
-                                            Layout.preferredWidth: Theme.dp(26)
-                                            Layout.preferredHeight: Theme.dp(26)
+                                            Layout.preferredWidth: Theme.dp(32)
+                                            Layout.preferredHeight: Theme.dp(32)
                                             Layout.alignment: Qt.AlignVCenter
                                             color: showPskMouse.containsMouse
-                                                ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12)
-                                                : Theme.bgSecondary
+                                                ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
+                                                : "transparent"
                                             border.width: 1
-                                            border.color: showPskMouse.containsMouse ? Theme.textPrimary : Theme.border
-                                            radius: 0
+                                            border.color: showPskMouse.containsMouse ? Theme.accent : Theme.border
+                                            radius: Theme.radiusSmall
 
                                             Behavior on color {
                                                 ColorAnimation { duration: 120 }
@@ -663,14 +674,14 @@ PopupWindow {
 
                                             IconEye {
                                                 anchors.centerIn: parent
-                                                iconColor: Theme.textPrimary
-                                                iconSize: parent.width * 0.45
+                                                iconColor: root.pskVisible ? Theme.accent : Theme.textMuted
+                                                iconSize: Theme.dp(16)
                                                 visible: root.pskVisible
                                             }
                                             IconEyeOff {
                                                 anchors.centerIn: parent
-                                                iconColor: Theme.textPrimary
-                                                iconSize: parent.width * 0.45
+                                                iconColor: !root.pskVisible ? Theme.accent : Theme.textMuted
+                                                iconSize: Theme.dp(16)
                                                 visible: !root.pskVisible
                                             }
 
@@ -689,7 +700,8 @@ PopupWindow {
                                         text: root.pskError
                                         color: Theme.danger
                                         font.family: Typography.fontFamily
-                                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                                        font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
+                                        font.weight: Font.Medium
                                     }
                                 }
                             }

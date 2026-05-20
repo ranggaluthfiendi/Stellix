@@ -114,6 +114,7 @@ Item {
 
                 anchors.fill: parent
                 clip: true
+                asynchronous: true
 
                 source: media.hasMedia && media.localArtPath !== ""
                     ? "file://" + media.localArtPath
@@ -121,13 +122,37 @@ Item {
                 fillMode: Image.PreserveAspectCrop
 
                 visible: media.hasMedia && (media.localArtPath !== "" || media.artUrl !== "") && status !== Image.Error
-                opacity: visible ? (parent.artHovered ? 0.25 : 1.0) : 0
+                opacity: visible ? (parent.artHovered ? 0.35 : 1.0) : 0
+
+                Behavior on source {
+                    SequentialAnimation {
+                        NumberAnimation { target: coverArt; property: "opacity"; to: 0; duration: 250; easing.type: Easing.OutCubic }
+                        PropertyAction { target: coverArt; property: "source" }
+                        NumberAnimation { target: coverArt; property: "opacity"; to: 1; duration: 250; easing.type: Easing.InCubic }
+                    }
+                }
 
                 Behavior on opacity {
                     NumberAnimation { duration: 200 }
                 }
 
                 onStatusChanged: if (status === Image.Error) source = ""
+            }
+
+            // Blurred background for better contrast and "smart" look
+            Image {
+                id: blurredBg
+                anchors.fill: parent
+                z: -1
+                source: coverArt.source
+                fillMode: Image.PreserveAspectCrop
+                visible: coverArt.visible
+                opacity: 0.4
+                
+                // Using a layer effect for blurring if available, 
+                // but since we don't know the exact Qt version/modules, 
+                // we'll stick to a simple opacity-based overlay for now.
+                // In Clairova-Shell, this often uses FastBlur.
             }
 
             Item {

@@ -62,7 +62,16 @@ Rectangle {
         visible: status === Image.Ready
         cache: false
         asynchronous: true
-        opacity: 0.15
+        opacity: 0.25
+        
+        Behavior on source {
+            SequentialAnimation {
+                NumberAnimation { target: artBg; property: "opacity"; to: 0; duration: 250; easing.type: Easing.OutCubic }
+                PropertyAction { target: artBg; property: "source" }
+                NumberAnimation { target: artBg; property: "opacity"; to: 0.25; duration: 250; easing.type: Easing.InCubic }
+            }
+        }
+
         onStatusChanged: {
             if (status === Image.Error) {
                 root.failedArtKeyBg = root.displayArtUrl
@@ -73,7 +82,7 @@ Rectangle {
     Rectangle {
         anchors.fill: parent
         color: Theme.bgPrimary
-        opacity: artBg.visible ? 0.7 : 1.0
+        opacity: artBg.visible ? 0.6 : 1.0
     }
 
     Rectangle {
@@ -101,7 +110,16 @@ Rectangle {
             asynchronous: true
             sourceSize.width: root.artSize
             sourceSize.height: root.artSize
-            opacity: visible ? (parent.artHovered ? 0.25 : 1.0) : 0
+            opacity: visible ? (parent.artHovered ? 0.35 : 1.0) : 0
+            
+            Behavior on source {
+                SequentialAnimation {
+                    NumberAnimation { target: art; property: "opacity"; to: 0; duration: 250; easing.type: Easing.OutCubic }
+                    PropertyAction { target: art; property: "source" }
+                    NumberAnimation { target: art; property: "opacity"; to: 1; duration: 250; easing.type: Easing.InCubic }
+                }
+            }
+
             onStatusChanged: {
                 if (status === Image.Error) {
                     root.failedArtKey = root.displayArtUrl

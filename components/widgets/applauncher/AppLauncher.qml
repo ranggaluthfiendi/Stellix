@@ -6,6 +6,8 @@ import Quickshell.Wayland
 import qs.config
 import qs.services
 import qs.components.widgets.rightbar
+import qs.components.widgets.applauncher
+import qs.components.elements
 
 PanelWindow {
     id: root
@@ -16,10 +18,100 @@ PanelWindow {
     property real itemH: Theme.dp(42)
     property int viewMode: 0
     property var contextMenuApp: null
+    property bool wallpaperMode: false
+    property bool showCommands: false
+    property string commandFilter: ""
+    property string commandTrigger: ">"
+    property bool followCursor: true
 
-    readonly property var currentModel: launcher.groupByCategory && launcher.filterMode === 0
-        ? launcher.groupedApps
-        : launcher.filteredApps
+    readonly property var commands: [
+        { name: ">wallpaper", desc: "Switch wallpaper", trigger: ">", icon: "preferences-desktop-wallpaper" },
+        { name: ">color", desc: "Color scheme settings", trigger: ">", icon: "preferences-desktop-color" },
+        { name: ">dark", desc: "Switch to dark mode", trigger: ">", icon: "weather-clear-night" },
+        { name: ">light", desc: "Switch to light mode", trigger: ">", icon: "weather-clear" },
+        { name: ">record", desc: "Screen recording", trigger: ">", icon: "media-record" },
+        { name: ">screenshot", desc: "Take screenshot", trigger: ">", icon: "camera-photo" },
+        { name: ">power", desc: "Power menu", trigger: ">", icon: "system-shutdown" },
+        { name: ">calc", desc: "Calculator", trigger: ">", icon: "accessories-calculator" },
+        { name: "/wallpaper", desc: "Switch wallpaper", trigger: "/", icon: "preferences-desktop-wallpaper" },
+        { name: "/color", desc: "Color scheme settings", trigger: "/", icon: "preferences-desktop-color" },
+        { name: "/dark", desc: "Switch to dark mode", trigger: "/", icon: "weather-clear-night" },
+        { name: "/light", desc: "Switch to light mode", trigger: "/", icon: "weather-clear" },
+        { name: "/record", desc: "Screen recording", trigger: "/", icon: "media-record" },
+        { name: "/screenshot", desc: "Take screenshot", trigger: "/", icon: "camera-photo" },
+        { name: "/power", desc: "Power menu", trigger: "/", icon: "system-shutdown" },
+        { name: "/calc", desc: "Calculator", trigger: "/", icon: "accessories-calculator" },
+        { name: "?help", desc: "Show commands", trigger: "?", icon: "help-about" },
+        { name: "?wallpaper", desc: "Switch wallpaper", trigger: "?", icon: "preferences-desktop-wallpaper" },
+        { name: "?color", desc: "Color scheme settings", trigger: "?", icon: "preferences-desktop-color" },
+        { name: "?dark", desc: "Switch to dark mode", trigger: "?", icon: "weather-clear-night" },
+        { name: "?light", desc: "Switch to light mode", trigger: "?", icon: "weather-clear" },
+        { name: "?record", desc: "Screen recording", trigger: "?", icon: "media-record" },
+        { name: "?screenshot", desc: "Take screenshot", trigger: "?", icon: "camera-photo" },
+        { name: "?power", desc: "Power menu", trigger: "?", icon: "system-shutdown" },
+        { name: "?calc", desc: "Calculator", trigger: "?", icon: "accessories-calculator" }
+    ]
+
+    readonly property var currentModel: root.showCommands
+        ? root.filteredCommands
+        : (launcher.groupByCategory && launcher.filterMode === 0
+            ? launcher.groupedApps
+            : launcher.filteredApps)
+
+    readonly property var filteredCommands: {
+        if (!root.showCommands) return []
+        if (root.commandFilter === "") return root.commands.filter(function(cmd) {
+            return cmd.trigger === root.commandTrigger
+        })
+        return root.commands.filter(function(cmd) {
+            return cmd.trigger === root.commandTrigger && cmd.name.toLowerCase().indexOf(root.commandTrigger + root.commandFilter) >= 0
+        })
+    }
+
+    function executeCommand(cmdName) {
+        var baseName = cmdName.replace(/^[>/?]/, "")
+        searchInput.text = cmdName + " "
+        launcher.searchText = cmdName + " "
+        
+        switch (baseName) {
+            case "wallpaper":
+                root.wallpaperMode = true
+                root.viewMode = 0
+                break
+            case "color":
+                root.viewMode = 5
+                root.wallpaperMode = false
+                break
+            case "record":
+                recordService.toggleRecording()
+                closeLauncher()
+                break
+            case "screenshot":
+                screenshot.screenshotRegion()
+                closeLauncher()
+                break
+            case "power":
+                root.viewMode = 3
+                root.wallpaperMode = false
+                break
+            case "calc":
+                root.viewMode = 4
+                root.wallpaperMode = false
+                break
+            case "dark":
+                colorService.setMode("dark")
+                closeLauncher()
+                break
+            case "light":
+                colorService.setMode("light")
+                closeLauncher()
+                break
+            case "help":
+                root.showCommands = true
+                root.commandFilter = ""
+                break
+        }
+    }
 
     visible: RightBarState.launcherOpen
     color: "transparent"
@@ -43,10 +135,14 @@ PanelWindow {
     }
 
     Rectangle {
-        x: Math.round((parent.width - popupW) / 2)
-        y: Math.round((parent.height - popupH) / 2)
-        width: popupW
-        height: popupH
+        id: mainContainer
+        
+        readonly property point cursor: Quickshell.cursorPosition || Qt.point(root.width / 2, root.height / 2)
+        
+        x: root.followCursor ? Math.min(Math.max(0, cursor.x - width / 2), root.width - width) : Math.round((root.width - width) / 2)
+        y: root.followCursor ? Math.min(Math.max(0, cursor.y - height / 2), root.height - height) : Math.round((root.height - height) / 2)
+        width: Math.min(root.width - Theme.dp(40), Math.max(Theme.dp(400), mainLayout.implicitWidth + Theme.dp(24)))
+        height: Math.min(root.height - Theme.dp(40), Math.max(Theme.dp(300), mainLayout.implicitHeight + Theme.dp(24)))
         color: Theme.bgSecondary
         border.width: 1
         border.color: Theme.border
@@ -64,17 +160,27 @@ PanelWindow {
             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
         }
 
+        Behavior on x {
+            enabled: root.followCursor && RightBarState.launcherOpen
+            NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+        }
+
+        Behavior on y {
+            enabled: root.followCursor && RightBarState.launcherOpen
+            NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
+        }
+
         MouseArea {
             anchors.fill: parent
-            onClicked: mouse.accepted = true
+            onClicked: function(mouse) { mouse.accepted = true }
         }
 
         ColumnLayout {
+            id: mainLayout
             anchors.fill: parent
             anchors.margins: Theme.dp(12)
             spacing: Theme.dp(8)
 
-            // Search input
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.dp(42)
@@ -92,28 +198,19 @@ PanelWindow {
                     anchors.margins: Theme.dp(10)
                     spacing: Theme.dp(8)
 
-                    Image {
+                    StarShape {
                         Layout.preferredWidth: Theme.dp(16)
                         Layout.preferredHeight: Theme.dp(16)
                         Layout.alignment: Qt.AlignVCenter
-                        source: Quickshell.iconPath("system-search", true)
-                        fillMode: Image.PreserveAspectFit
-                        visible: status === Image.Ready
-                    }
-
-                    Text {
-                        text: "⌕"
-                        font.pixelSize: Theme.dp(16)
-                        Layout.alignment: Qt.AlignVCenter
-                        color: Theme.textMuted
-                        visible: parent.children[0].status !== Image.Ready
+                        color: Theme.accent
+                        animate: true
                     }
 
                     TextField {
                         id: searchInput
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
-                        placeholderText: "Search applications..."
+                        placeholderText: root.showCommands ? "Type command..." : (root.wallpaperMode ? "Switch wallpaper..." : "Search... (>, /, ? for commands)")
                         placeholderTextColor: Theme.textMuted
                         text: launcher.searchText
                         color: Theme.textPrimary
@@ -128,39 +225,211 @@ PanelWindow {
                         bottomPadding: 0
                         verticalAlignment: TextInput.AlignVCenter
 
-                        onTextChanged: launcher.searchText = text
+                        onTextChanged: {
+                            launcher.searchText = text
+                            if (text === ">" || text === "/" || text === "?") {
+                                root.showCommands = true
+                                root.commandTrigger = text
+                                root.commandFilter = ""
+                                root.wallpaperMode = false
+                                root.viewMode = 0
+                            } else if (text.length > 1 && (text[0] === ">" || text[0] === "/" || text[0] === "?")) {
+                                root.showCommands = true
+                                root.commandTrigger = text[0]
+                                root.commandFilter = text.substring(1).toLowerCase()
+                                root.wallpaperMode = false
+                                root.viewMode = 0
+                                
+                                var cmd = text.toLowerCase().trim()
+                                if (cmd === ">wallpaper" || cmd === "/wallpaper" || cmd === "?wallpaper") {
+                                    root.showCommands = false
+                                    root.wallpaperMode = true
+                                    root.viewMode = 0
+                                } else if (cmd === ">power" || cmd === "/power" || cmd === "?power") {
+                                    root.showCommands = false
+                                    root.viewMode = 3
+                                } else if (cmd === ">calc" || cmd === "/calc" || cmd === "?calc") {
+                                    root.showCommands = false
+                                    root.viewMode = 4
+                                } else if (cmd === ">color" || cmd === "/color" || cmd === "?color") {
+                                    root.showCommands = false
+                                    root.viewMode = 5
+                                }
+                            } else {
+                                root.showCommands = false
+                                root.wallpaperMode = false
+                                if (root.viewMode >= 3) root.viewMode = 0
+                            }
+                        }
 
                         Keys.onPressed: function(event) {
                             if (event.key === Qt.Key_Escape) {
-                                closeLauncher()
-                                event.accepted = true
-                            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                if (appList.currentIndex >= 0 && appList.currentIndex < root.currentModel.length) {
-                                    launcher.launchApp(root.currentModel[appList.currentIndex])
+                                if (root.wallpaperMode || root.showCommands || root.viewMode >= 3) {
+                                    root.wallpaperMode = false
+                                    root.showCommands = false
+                                    root.viewMode = 0
+                                    searchInput.text = ""
+                                    launcher.searchText = ""
+                                } else {
+                                    closeLauncher()
                                 }
                                 event.accepted = true
+                            } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                                if (root.showCommands && root.filteredCommands.length > 0 && appList.currentIndex >= 0 && appList.currentIndex < root.filteredCommands.length) {
+                                    var cmd = root.filteredCommands[appList.currentIndex].name
+                                    root.executeCommand(cmd)
+                                    root.showCommands = false
+                                    event.accepted = true
+                                } else if (root.wallpaperMode) {
+                                    wallpaperSwitcher.apply()
+                                    event.accepted = true
+                                } else if (root.viewMode === 3) {
+                                    powerPopup.executeCurrent()
+                                    event.accepted = true
+                                } else if (root.viewMode === 4) {
+                                } else if (root.viewMode === 5) {
+                                    colorPopup.applyCurrent()
+                                    event.accepted = true
+                                } else if (appList.currentIndex >= 0 && appList.currentIndex < root.currentModel.length) {
+                                    launcher.launchApp(root.currentModel[appList.currentIndex])
+                                    closeLauncher()
+                                    event.accepted = true
+                                }
                             } else if (event.key === Qt.Key_Down) {
-                                appList.currentIndex = Math.min(appList.currentIndex + 1, root.currentModel.length - 1)
-                                event.accepted = true
+                                if (root.showCommands) {
+                                    appList.currentIndex = Math.min(appList.currentIndex + 1, root.filteredCommands.length - 1)
+                                    event.accepted = true
+                                } else if (root.wallpaperMode) {
+                                    wallpaperSwitcher.checkKonami(event.key)
+                                    wallpaper.next()
+                                    event.accepted = true
+                                } else if (root.viewMode === 3) {
+                                    powerPopup.next()
+                                    event.accepted = true
+                                } else if (root.viewMode === 5) {
+                                    colorPopup.next()
+                                    event.accepted = true
+                                } else {
+                                    appList.currentIndex = Math.min(appList.currentIndex + 1, root.currentModel.length - 1)
+                                    event.accepted = true
+                                }
                             } else if (event.key === Qt.Key_Up) {
-                                appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
-                                event.accepted = true
-                            } else if (event.key === Qt.Key_Tab) {
+                                if (root.showCommands) {
+                                    appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
+                                    event.accepted = true
+                                } else if (root.wallpaperMode) {
+                                    wallpaperSwitcher.checkKonami(event.key)
+                                    wallpaper.prev()
+                                    event.accepted = true
+                                } else if (root.viewMode === 3) {
+                                    powerPopup.prev()
+                                    event.accepted = true
+                                } else if (root.viewMode === 5) {
+                                    colorPopup.prev()
+                                    event.accepted = true
+                                } else {
+                                    appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_Right) {
+                                if (root.wallpaperMode) {
+                                    wallpaper.next()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_Left) {
+                                if (root.wallpaperMode) {
+                                    wallpaper.prev()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier)) {
+                                if (root.showCommands && root.filteredCommands.length > 0) {
+                                    var selectedCmd = root.filteredCommands[appList.currentIndex >= 0 ? appList.currentIndex : 0]
+                                    root.executeCommand(selectedCmd.name)
+                                    root.showCommands = false
+                                    event.accepted = true
+                                } else if (root.wallpaperMode) {
+                                    wallpaper.next()
+                                    event.accepted = true
+                                } else if (root.viewMode === 4) {
+                                    calcPopup.calcInput.forceActiveFocus()
+                                    event.accepted = true
+                                } else {
+                                    appList.forceActiveFocus()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_Backtab) {
+                                if (root.showCommands && root.filteredCommands.length > 0) {
+                                    var prevCmd = root.filteredCommands[appList.currentIndex >= 0 ? appList.currentIndex : 0]
+                                    root.executeCommand(prevCmd.name)
+                                    root.showCommands = false
+                                    event.accepted = true
+                                } else if (root.wallpaperMode) {
+                                    wallpaper.prev()
+                                    event.accepted = true
+                                } else {
+                                    searchInput.forceActiveFocus()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_Control) {
                                 root.viewMode = (root.viewMode + 1) % 2
                                 event.accepted = true
+                            } else if (event.key === Qt.Key_Space) {
+                                if (root.wallpaperMode) {
+                                    wallpaperSwitcher.apply()
+                                    event.accepted = true
+                                } else if (root.viewMode === 5) {
+                                    colorPopup.applyCurrent()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_A) {
+                                if (event.modifiers & Qt.ShiftModifier) {
+                                    root.wallpaperMode = false
+                                    root.showCommands = false
+                                    root.viewMode = 0
+                                    searchInput.text = ""
+                                    launcher.searchText = ""
+                                    event.accepted = true
+                                } else {
+                                    root.followCursor = !root.followCursor
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_T && !event.modifiers) {
+                                if (root.wallpaperMode) {
+                                    wallpaperSwitcher.nextAnim()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_D && !event.modifiers) {
+                                if (root.viewMode === 5) {
+                                    colorService.setMode("dark")
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_L && !event.modifiers) {
+                                if (root.viewMode === 5) {
+                                    colorService.setMode("light")
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_A && !event.modifiers && !root.wallpaperMode) {
+                                if (root.viewMode === 5) {
+                                    colorService.applyTheme()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_M && !event.modifiers) {
+                                if (root.viewMode === 5) {
+                                    colorService.toggleMode()
+                                    event.accepted = true
+                                }
                             }
                         }
                     }
                 }
             }
 
-            // Control bar
             RowLayout {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.dp(26)
                 spacing: Theme.dp(6)
+                visible: !root.wallpaperMode && !root.showCommands && root.viewMode < 3
 
-                // View mode toggle
                 Rectangle {
                     Layout.preferredWidth: Theme.dp(28)
                     Layout.preferredHeight: Theme.dp(26)
@@ -191,7 +460,6 @@ PanelWindow {
                     }
                 }
 
-                // Sort toggle (A-Z / Z-A)
                 Rectangle {
                     Layout.preferredWidth: sortText.width + Theme.dp(14)
                     Layout.preferredHeight: Theme.dp(26)
@@ -225,7 +493,6 @@ PanelWindow {
                     }
                 }
 
-                // Group by category toggle (only when All is selected)
                 Rectangle {
                     Layout.preferredWidth: groupText.width + Theme.dp(14)
                     Layout.preferredHeight: Theme.dp(26)
@@ -265,7 +532,6 @@ PanelWindow {
                     }
                 }
 
-                // "All" button (fixed, not scrollable)
                 Rectangle {
                     Layout.preferredWidth: allText.width + Theme.dp(14)
                     Layout.preferredHeight: Theme.dp(26)
@@ -305,7 +571,6 @@ PanelWindow {
                     }
                 }
 
-                // Category chips (scrollable with mouse wheel)
                 Flickable {
                     id: categoryFlick
                     Layout.fillWidth: true
@@ -381,7 +646,6 @@ PanelWindow {
                     }
                 }
 
-                // App count
                 Text {
                     text: root.currentModel.length + " Apps"
                     color: Theme.accent
@@ -391,17 +655,17 @@ PanelWindow {
                 }
             }
 
-            // App views
             StackLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                currentIndex: root.viewMode
+                currentIndex: root.wallpaperMode ? 2 : root.viewMode
 
-                // LIST VIEW
                 Rectangle {
                     color: "transparent"
                     radius: 0
                     clip: true
+                    Layout.preferredWidth: Theme.dp(536)
+                    Layout.preferredHeight: Theme.dp(360)
 
                     ListView {
                         id: appList
@@ -427,6 +691,7 @@ PanelWindow {
                         section.delegate: Item {
                             width: appList.width
                             height: Theme.dp(28)
+                            visible: !root.showCommands && launcher.groupByCategory && launcher.filterMode === 0
 
                             RowLayout {
                                 anchors.fill: parent
@@ -490,7 +755,7 @@ PanelWindow {
 
                                     Image {
                                         anchors.fill: parent
-                                        source: launcher.getIconPath(modelData)
+                                        source: root.showCommands ? Quickshell.iconPath(modelData.icon, true) : launcher.getIconPath(modelData)
                                         fillMode: Image.PreserveAspectFit
                                         visible: source !== "" && status === Image.Ready
                                     }
@@ -500,13 +765,13 @@ PanelWindow {
                                         color: Theme.bgPrimary
                                         border.width: 1
                                         border.color: Theme.border
-                                        radius: Theme.dp(4)
+                                        radius: 0
                                         visible: !parent.children[0].visible
 
                                         Text {
                                             anchors.centerIn: parent
-                                            text: modelData.name ? modelData.name.charAt(0).toUpperCase() : "?"
-                                            color: Theme.textMuted
+                                            text: root.showCommands ? modelData.trigger : (modelData.name ? modelData.name.charAt(0).toUpperCase() : "?")
+                                            color: Theme.accent
                                             font.family: Typography.fontFamily
                                             font.pixelSize: Math.round(12 * s)
                                             font.weight: Font.Bold
@@ -520,7 +785,7 @@ PanelWindow {
                                     spacing: 2
 
                                     Text {
-                                        text: modelData.name || "Unknown"
+                                        text: root.showCommands ? modelData.name : (modelData.name || "Unknown")
                                         color: Theme.textPrimary
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Math.round(11 * s)
@@ -530,7 +795,7 @@ PanelWindow {
                                     }
 
                                     Text {
-                                        text: modelData.id
+                                        text: root.showCommands ? modelData.desc : (modelData.id || "")
                                         color: Theme.textMuted
                                         font.family: Typography.fontFamily
                                         font.pixelSize: Math.round(8 * s)
@@ -546,10 +811,19 @@ PanelWindow {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: launcher.launchApp(modelData)
+                                onClicked: {
+                                    if (root.showCommands) {
+                                        var cmd = modelData.name
+                                        root.executeCommand(cmd)
+                                        root.showCommands = false
+                                    } else {
+                                        launcher.launchApp(modelData)
+                                        closeLauncher()
+                                    }
+                                }
                                 onEntered: appList.currentIndex = index
                                 onPressed: function(mouse) {
-                                    if (mouse.button === Qt.RightButton) {
+                                    if (mouse.button === Qt.RightButton && !root.showCommands) {
                                         root.contextMenuApp = modelData
                                         contextMenu.popup(mouse.x, mouse.y)
                                     }
@@ -566,11 +840,12 @@ PanelWindow {
                     }
                 }
 
-                // GRID VIEW
                 Rectangle {
                     color: "transparent"
                     radius: 0
                     clip: true
+                    Layout.preferredWidth: Theme.dp(536)
+                    Layout.preferredHeight: Theme.dp(360)
 
                     GridView {
                         id: gridView
@@ -592,6 +867,21 @@ PanelWindow {
                         delegate: Item {
                             width: Theme.dp(72)
                             height: Theme.dp(88)
+
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.margins: Theme.dp(2)
+                                color: gridView.currentIndex === index
+                                    ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
+                                    : gridMouse.containsMouse
+                                        ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.06)
+                                        : "transparent"
+                                radius: 0
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 100 }
+                                }
+                            }
 
                             ColumnLayout {
                                 anchors.centerIn: parent
@@ -641,10 +931,14 @@ PanelWindow {
                             }
 
                             MouseArea {
+                                id: gridMouse
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: launcher.launchApp(modelData)
+                                onClicked: {
+                                    launcher.launchApp(modelData)
+                                    closeLauncher()
+                                }
                                 onEntered: gridView.currentIndex = index
                                 onPressed: function(mouse) {
                                     if (mouse.button === Qt.RightButton) {
@@ -663,39 +957,86 @@ PanelWindow {
                         highlightMoveDuration: 100
                     }
                 }
+
+                WallpaperSwitcher {
+                    id: wallpaperSwitcher
+                }
+
+                PowerPopup {
+                    id: powerPopup
+                    onCloseRequested: {
+                        root.viewMode = 0
+                        searchInput.text = ""
+                        launcher.searchText = ""
+                    }
+                }
+
+                CalcPopup {
+                    id: calcPopup
+                    onCloseRequested: {
+                        root.viewMode = 0
+                        searchInput.text = ""
+                        launcher.searchText = ""
+                    }
+                }
+
+                ColorPopup {
+                    id: colorPopup
+                    onCloseRequested: {
+                        root.viewMode = 0
+                        searchInput.text = ""
+                        launcher.searchText = ""
+                    }
+                }
             }
 
-            // Footer hint
             RowLayout {
+                id: footerHint
                 Layout.fillWidth: true
-                spacing: Theme.dp(10)
+                spacing: Theme.dp(6)
                 Layout.topMargin: Theme.dp(2)
                 Layout.bottomMargin: Theme.dp(2)
+                visible: !root.showCommands && !root.wallpaperMode && root.viewMode !== 5
 
                 Text {
                     text: "↑↓ Navigate"
-                    color: Theme.textMuted
+                    color: Theme.accent
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round(8 * s)
                 }
 
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
                 Text {
-                    text: "Enter Launch"
-                    color: Theme.textMuted
+                    text: root.viewMode === 4 ? "Enter Copy" : "Enter Launch"
+                    color: Theme.accent
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round(8 * s)
                 }
 
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
                 Text {
-                    text: "Tab Switch View"
-                    color: Theme.textMuted
+                    text: "Tab Focus"
+                    color: Theme.accent
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round(8 * s)
                 }
 
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
                 Text {
-                    text: "Esc Close"
-                    color: Theme.textMuted
+                    text: root.viewMode === 0 ? "Ctrl Mode" : "Shift+A Back"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
+
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
+                Text {
+                    text: "Esc Back/Close"
+                    color: Theme.accent
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round(8 * s)
                 }
@@ -703,7 +1044,6 @@ PanelWindow {
         }
     }
 
-    // Context menu
     Rectangle {
         id: contextMenu
         visible: false
@@ -771,7 +1111,6 @@ PanelWindow {
                 Layout.rightMargin: Theme.dp(8)
             }
 
-            // Launch
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.dp(28)
@@ -807,7 +1146,6 @@ PanelWindow {
                 }
             }
 
-            // Categories
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.dp(28)
@@ -848,7 +1186,6 @@ PanelWindow {
                 Layout.rightMargin: Theme.dp(8)
             }
 
-            // Close
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.dp(28)
@@ -888,7 +1225,6 @@ PanelWindow {
         }
     }
 
-    // Keyboard navigation
     Item {
         anchors.fill: parent
         focus: true

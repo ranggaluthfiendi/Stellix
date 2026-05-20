@@ -147,7 +147,6 @@ Item {
                 workingDirectory: app.workingDirectory || StandardPaths.writableLocation(StandardPaths.HomeLocation)
             })
         }
-        root.close()
     }
 
     function getIconPath(app) {

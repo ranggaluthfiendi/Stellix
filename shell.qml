@@ -19,6 +19,30 @@ ShellRoot {
         id: launcher
     }
 
+    WallpaperService {
+        id: wallpaper
+    }
+
+    PowerService {
+        id: power
+    }
+
+    ScreenshotService {
+        id: screenshot
+    }
+
+    CalcService {
+        id: calc
+    }
+
+    ColorService {
+        id: colorService
+    }
+
+    RecordService {
+        id: recordService
+    }
+
     AppLauncher {
         id: appLauncher
     }

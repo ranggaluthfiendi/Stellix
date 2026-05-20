@@ -1,0 +1,15 @@
+[config]
+# Default mode if not specified (light or dark)
+default_mode = "dark"
+
+[templates.quickshell_theme]
+input_path = "config/Theme.qml.template"
+output_path = "config/Theme.qml"
+
+[templates.gtk3]
+input_path = "templates/gtk3-colors.css.template"
+output_path = "../gtk-3.0/colors.css"
+
+[templates.gtk4]
+input_path = "templates/gtk4-colors.css.template"
+output_path = "../gtk-4.0/colors.css"

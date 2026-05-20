@@ -33,14 +33,6 @@ Scope {
                 }
             }
 
-            Image {
-                anchors.fill: parent
-                source: "file:///home/rang/Pictures/Wallpapers/Wallpaper2.png"
-                fillMode: Image.PreserveAspectCrop
-                cache: false
-                asynchronous: true
-            }
-
             NowPlayingWidget {}
             ClockWidget{}
 
