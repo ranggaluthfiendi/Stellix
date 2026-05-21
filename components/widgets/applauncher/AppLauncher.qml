@@ -25,28 +25,32 @@ PanelWindow {
     property bool followCursor: true
 
     readonly property var commands: [
-        { name: ">wallpaper", desc: "Switch wallpaper", trigger: ">", icon: "preferences-desktop-wallpaper" },
-        { name: ">color", desc: "Color scheme settings", trigger: ">", icon: "preferences-desktop-color" },
-        { name: ">record", desc: "Screen recording", trigger: ">", icon: "media-record" },
-        { name: ">screenshot", desc: "Take screenshot", trigger: ">", icon: "camera-photo" },
-        { name: ">power", desc: "Power menu", trigger: ">", icon: "system-shutdown" },
-        { name: ">calc", desc: "Calculator", trigger: ">", icon: "accessories-calculator" },
-        { name: ">currency", desc: "Currency converter", trigger: ">", icon: "accessories-calculator" },
-        { name: "/wallpaper", desc: "Switch wallpaper", trigger: "/", icon: "preferences-desktop-wallpaper" },
+        { name: "/calc", desc: "Calculator", trigger: "/", icon: "accessories-calculator" },
         { name: "/color", desc: "Color scheme settings", trigger: "/", icon: "preferences-desktop-color" },
+        { name: "/currency", desc: "Currency converter", trigger: "/", icon: "accessories-calculator" },
+        { name: "/dark", desc: "Switch to dark mode", trigger: "/", icon: "dark-mode" },
+        { name: "/light", desc: "Switch to light mode", trigger: "/", icon: "light-mode" },
+        { name: "/power", desc: "Power menu", trigger: "/", icon: "system-shutdown" },
         { name: "/record", desc: "Screen recording", trigger: "/", icon: "media-record" },
         { name: "/screenshot", desc: "Take screenshot", trigger: "/", icon: "camera-photo" },
-        { name: "/power", desc: "Power menu", trigger: "/", icon: "system-shutdown" },
-        { name: "/calc", desc: "Calculator", trigger: "/", icon: "accessories-calculator" },
-        { name: "/currency", desc: "Currency converter", trigger: "/", icon: "accessories-calculator" },
-        { name: "?help", desc: "Show commands", trigger: "?", icon: "help-about" },
-        { name: "?wallpaper", desc: "Switch wallpaper", trigger: "?", icon: "preferences-desktop-wallpaper" },
+        { name: "/wallpaper", desc: "Switch wallpaper", trigger: "/", icon: "preferences-desktop-wallpaper" },
+        { name: ">calc", desc: "Calculator", trigger: ">", icon: "accessories-calculator" },
+        { name: ">color", desc: "Color scheme settings", trigger: ">", icon: "preferences-desktop-color" },
+        { name: ">currency", desc: "Currency converter", trigger: ">", icon: "accessories-calculator" },
+        { name: ">power", desc: "Power menu", trigger: ">", icon: "system-shutdown" },
+        { name: ">record", desc: "Screen recording", trigger: ">", icon: "media-record" },
+        { name: ">screenshot", desc: "Take screenshot", trigger: ">", icon: "camera-photo" },
+        { name: ">wallpaper", desc: "Switch wallpaper", trigger: ">", icon: "preferences-desktop-wallpaper" },
+        { name: "?calc", desc: "Calculator", trigger: "?", icon: "accessories-calculator" },
         { name: "?color", desc: "Color scheme settings", trigger: "?", icon: "preferences-desktop-color" },
+        { name: "?currency", desc: "Currency converter", trigger: "?", icon: "accessories-calculator" },
+        { name: "?dark", desc: "Switch to dark mode", trigger: "?", icon: "dark-mode" },
+        { name: "?help", desc: "Show commands", trigger: "?", icon: "help-about" },
+        { name: "?light", desc: "Switch to light mode", trigger: "?", icon: "light-mode" },
+        { name: "?power", desc: "Power menu", trigger: "?", icon: "system-shutdown" },
         { name: "?record", desc: "Screen recording", trigger: "?", icon: "media-record" },
         { name: "?screenshot", desc: "Take screenshot", trigger: "?", icon: "camera-photo" },
-        { name: "?power", desc: "Power menu", trigger: "?", icon: "system-shutdown" },
-        { name: "?calc", desc: "Calculator", trigger: "?", icon: "accessories-calculator" },
-        { name: "?currency", desc: "Currency converter", trigger: "?", icon: "accessories-calculator" }
+        { name: "?wallpaper", desc: "Switch wallpaper", trigger: "?", icon: "preferences-desktop-wallpaper" }
     ]
 
     readonly property var currentModel: root.showCommands
@@ -63,6 +67,34 @@ PanelWindow {
         return root.commands.filter(function(cmd) {
             return cmd.trigger === root.commandTrigger && cmd.name.toLowerCase().indexOf(root.commandTrigger + root.commandFilter) >= 0
         })
+    }
+
+    function findMatchingApp(text) {
+        if (!text || text.length === 0) return null
+        var lower = text.toLowerCase()
+        var apps = launcher.filteredApps || []
+        for (var i = 0; i < apps.length; i++) {
+            var appName = (apps[i].name || "").toLowerCase()
+            if (appName === lower) return apps[i]
+        }
+        return null
+    }
+
+    function autoCompleteApp() {
+        var txt = searchInput.text
+        if (!txt || txt.length === 0) return false
+        var lower = txt.toLowerCase()
+        var apps = launcher.filteredApps || []
+        for (var i = 0; i < apps.length; i++) {
+            var appName = (apps[i].name || "").toLowerCase()
+            if (appName.indexOf(lower) === 0) {
+                searchInput.text = apps[i].name
+                launcher.searchText = apps[i].name
+                appList.currentIndex = i
+                return true
+            }
+        }
+        return false
     }
 
     function executeCommand(cmdName) {
@@ -98,6 +130,24 @@ PanelWindow {
             case "currency":
                 root.viewMode = 6
                 root.wallpaperMode = false
+                break
+            case "dark":
+                colorService.setMode("dark")
+                root.showCommands = false
+                root.wallpaperMode = false
+                root.viewMode = 0
+                searchInput.text = ""
+                launcher.searchText = ""
+                closeLauncher()
+                break
+            case "light":
+                colorService.setMode("light")
+                root.showCommands = false
+                root.wallpaperMode = false
+                root.viewMode = 0
+                searchInput.text = ""
+                launcher.searchText = ""
+                closeLauncher()
                 break
             case "help":
                 root.showCommands = true
@@ -249,7 +299,10 @@ PanelWindow {
                                     root.viewMode = 6
                                 } else if (cmd === ">color" || cmd === "/color" || cmd === "?color") {
                                     root.showCommands = false
+                                    root.wallpaperMode = false
                                     root.viewMode = 5
+                                    searchInput.text = ""
+                                    launcher.searchText = ""
                                 }
                             } else {
                                 root.showCommands = false
@@ -259,8 +312,35 @@ PanelWindow {
                         }
 
                         Keys.onPressed: function(event) {
+                            if (event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete) {
+                                var txt = searchInput.text
+                                if (txt.length > 1 && (txt[0] === ">" || txt[0] === "/" || txt[0] === "?")) {
+                                    var baseName = txt.substring(1).trim().toLowerCase()
+                                    var knownCmds = ["wallpaper", "color", "calc", "currency", "power", "record", "screenshot", "dark", "light", "help"]
+                                    if (knownCmds.indexOf(baseName) >= 0) {
+                                        searchInput.text = ""
+                                        launcher.searchText = ""
+                                        root.showCommands = false
+                                        root.wallpaperMode = false
+                                        root.viewMode = 0
+                                        event.accepted = true
+                                    }
+                                }
+                                if (!event.accepted) {
+                                    if (root.findMatchingApp(txt)) {
+                                        searchInput.text = ""
+                                        launcher.searchText = ""
+                                        event.accepted = true
+                                    }
+                                }
+                            }
                             if (event.key === Qt.Key_Escape) {
-                                if (root.wallpaperMode || root.showCommands || root.viewMode >= 3) {
+                                if (root.viewMode === 7) {
+                                    root.viewMode = 0
+                                    root.contextMenuApp = null
+                                } else if (deleteConfirmDialog.visible) {
+                                    deleteConfirmDialog.hide()
+                                } else if (root.wallpaperMode || root.showCommands || root.viewMode >= 3) {
                                     root.wallpaperMode = false
                                     root.showCommands = false
                                     root.viewMode = 0
@@ -271,7 +351,10 @@ PanelWindow {
                                 }
                                 event.accepted = true
                             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                                if (root.showCommands && root.filteredCommands.length > 0 && appList.currentIndex >= 0 && appList.currentIndex < root.filteredCommands.length) {
+                                if (root.viewMode === 7) {
+                                    if (root.contextMenuApp) launcher.launchApp(root.contextMenuApp)
+                                    root.viewMode = 0
+                                } else if (root.showCommands && root.filteredCommands.length > 0 && appList.currentIndex >= 0 && appList.currentIndex < root.filteredCommands.length) {
                                     var cmd = root.filteredCommands[appList.currentIndex].name
                                     root.executeCommand(cmd)
                                     root.showCommands = false
@@ -282,15 +365,14 @@ PanelWindow {
                                 } else if (root.viewMode === 3) {
                                     powerPopup.executeCurrent()
                                     event.accepted = true
-                } else if (root.viewMode === 4) {
-                                } else if (root.viewMode === 6) {
-                                    if (currencyPopup) currencyPopup.currencyInput.forceActiveFocus()
+                                } else if (root.viewMode === 4) {
+                                    if (calcPopup && calcPopup.calcInput) calcPopup.calcInput.forceActiveFocus()
                                     event.accepted = true
                                 } else if (root.viewMode === 5) {
                                     if (colorPopup) colorPopup.applyCurrent()
                                     event.accepted = true
                                 } else if (root.viewMode === 6) {
-                                    if (currencyPopup) currencyPopup.closeRequested()
+                                    if (currencyPopup) currencyPopup.currencyInput.forceActiveFocus()
                                     event.accepted = true
                                 } else if (appList.currentIndex >= 0 && appList.currentIndex < root.currentModel.length) {
                                     launcher.launchApp(root.currentModel[appList.currentIndex])
@@ -370,6 +452,8 @@ PanelWindow {
                                 } else if (root.viewMode === 6) {
                                     if (currencyPopup && currencyPopup.currencyInput) currencyPopup.currencyInput.forceActiveFocus()
                                     event.accepted = true
+                                } else if (root.autoCompleteApp()) {
+                                    event.accepted = true
                                 } else {
                                     appList.forceActiveFocus()
                                     event.accepted = true
@@ -388,8 +472,17 @@ PanelWindow {
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_Control) {
-                                root.viewMode = (root.viewMode + 1) % 2
-                                event.accepted = true
+                                if (root.viewMode >= 0 && root.viewMode < 3 && !root.showCommands && !root.wallpaperMode) {
+                                    var idx = appList.currentIndex
+                                    if (idx >= 0 && idx < root.currentModel.length) {
+                                        root.contextMenuApp = root.currentModel[idx]
+                                        root.viewMode = 7
+                                    }
+                                    event.accepted = true
+                                } else {
+                                    root.viewMode = (root.viewMode + 1) % 2
+                                    event.accepted = true
+                                }
                             } else if (event.key === Qt.Key_Space) {
                                 if (root.wallpaperMode) {
                                     wallpaperSwitcher.apply()
@@ -399,6 +492,16 @@ PanelWindow {
                                     event.accepted = true
                                 } else if (root.viewMode === 6) {
                                     if (currencyPopup) currencyPopup.closeRequested()
+                                    event.accepted = true
+                                } else if (root.showCommands && root.filteredCommands.length > 0) {
+                                    var selectedCmd = root.filteredCommands[appList.currentIndex >= 0 ? appList.currentIndex : 0]
+                                    root.executeCommand(selectedCmd.name)
+                                    root.showCommands = false
+                                    event.accepted = true
+                                } else if (root.autoCompleteApp()) {
+                                    event.accepted = true
+                                } else {
+                                    searchInput.forceActiveFocus()
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_A) {
@@ -593,6 +696,13 @@ PanelWindow {
                     contentWidth: categoryRow.implicitWidth
                     interactive: contentWidth > width
                     clip: true
+                    flickableDirection: Flickable.HorizontalFlick
+                    maximumFlickVelocity: 2000
+
+                    Behavior on contentX {
+                        enabled: !categoryFlick.moving
+                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                    }
 
                     ScrollBar.horizontal: ScrollBar {
                         policy: ScrollBar.AsNeeded
@@ -673,7 +783,7 @@ PanelWindow {
             StackLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                currentIndex: root.wallpaperMode ? 2 : root.viewMode
+                currentIndex: root.wallpaperMode ? 2 : (root.viewMode === 7 ? 7 : root.viewMode)
 
                 Rectangle {
                     color: "transparent"
@@ -681,6 +791,20 @@ PanelWindow {
                     clip: true
                     Layout.preferredWidth: Theme.dp(536)
                     Layout.preferredHeight: Theme.dp(360)
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+                        onClicked: function(mouse) {
+                            if (mouse.button === Qt.RightButton && root.viewMode < 3 && !root.showCommands && !root.wallpaperMode) {
+                                var idx = appList.currentIndex
+                                if (idx >= 0 && idx < root.currentModel.length) {
+                                    root.contextMenuApp = root.currentModel[idx]
+                                    root.viewMode = 7
+                                }
+                            }
+                        }
+                    }
 
                     ListView {
                         id: appList
@@ -819,42 +943,6 @@ PanelWindow {
                                         opacity: 0.7
                                     }
                                 }
-
-                                Rectangle {
-                                    Layout.preferredWidth: Theme.dp(28)
-                                    Layout.preferredHeight: Theme.dp(28)
-                                    Layout.alignment: Qt.AlignVCenter
-                                    color: actionMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
-                                    radius: Theme.dp(4)
-                                    visible: !root.showCommands
-
-                                    Behavior on color {
-                                        ColorAnimation { duration: 100 }
-                                    }
-
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: "⋮"
-                                        color: actionMouse.containsMouse ? Theme.accent : Theme.textMuted
-                                        font.pixelSize: Math.round(14 * s)
-                                    }
-
-                                    MouseArea {
-                                        id: actionMouse
-                                        anchors.fill: parent
-                                        cursorShape: Qt.PointingHandCursor
-                                        hoverEnabled: true
-                                        propagateComposedEvents: false
-                                        onClicked: function(mouse) {
-                                            mouse.accepted = true
-                                            root.contextMenuApp = modelData
-                                            contextMenu.popup(mouse.x, mouse.y)
-                                        }
-                                        onPressed: function(mouse) {
-                                            mouse.accepted = true
-                                        }
-                                    }
-                                }
                             }
 
                             MouseArea {
@@ -873,12 +961,6 @@ PanelWindow {
                                     }
                                 }
                                 onEntered: appList.currentIndex = index
-                                onPressed: function(mouse) {
-                                    if (mouse.button === Qt.RightButton && !root.showCommands) {
-                                        root.contextMenuApp = modelData
-                                        contextMenu.popup(mouse.x, mouse.y)
-                                    }
-                                }
                             }
                         }
 
@@ -888,6 +970,8 @@ PanelWindow {
                         }
 
                         highlightMoveDuration: 100
+                        flickDeceleration: 500
+                        maximumFlickVelocity: 5000
                     }
                 }
 
@@ -895,8 +979,22 @@ PanelWindow {
                     color: "transparent"
                     radius: 0
                     clip: true
-                    Layout.preferredWidth: Theme.dp(536)
+                    Layout.preferredWidth: Theme.dp(504)
                     Layout.preferredHeight: Theme.dp(360)
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+                        onClicked: function(mouse) {
+                            if (mouse.button === Qt.RightButton && root.viewMode === 1) {
+                                var idx = gridView.currentIndex
+                                if (idx >= 0 && idx < root.currentModel.length) {
+                                    root.contextMenuApp = root.currentModel[idx]
+                                    root.viewMode = 7
+                                }
+                            }
+                        }
+                    }
 
                     GridView {
                         id: gridView
@@ -905,6 +1003,7 @@ PanelWindow {
                         cellWidth: Theme.dp(72)
                         cellHeight: Theme.dp(88)
                         currentIndex: 0
+                        flow: GridView.FlowLeftToRight
 
                         add: Transition {
                             NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 150 }
@@ -986,17 +1085,13 @@ PanelWindow {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    launcher.launchApp(modelData)
-                                    closeLauncher()
-                                }
-                                onEntered: gridView.currentIndex = index
-                                onPressed: function(mouse) {
-                                    if (mouse.button === Qt.RightButton) {
-                                        root.contextMenuApp = modelData
-                                        contextMenu.popup(mouse.x, mouse.y)
+                                onClicked: function(mouse) {
+                                    if (mouse.button === Qt.LeftButton) {
+                                        launcher.launchApp(modelData)
+                                        closeLauncher()
                                     }
                                 }
+                                onEntered: gridView.currentIndex = index
                             }
                         }
 
@@ -1006,6 +1101,8 @@ PanelWindow {
                         }
 
                         highlightMoveDuration: 100
+                        flickDeceleration: 500
+                        maximumFlickVelocity: 5000
                     }
                 }
 
@@ -1048,6 +1145,251 @@ PanelWindow {
                         launcher.searchText = ""
                     }
                 }
+
+                Rectangle {
+                    color: Theme.bgSecondary
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    MouseArea {
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+                        onClicked: function(mouse) {
+                            if (mouse.button === Qt.RightButton) {
+                                root.viewMode = 0
+                                root.contextMenuApp = null
+                            }
+                        }
+                    }
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.margins: Theme.dp(16)
+                        spacing: Theme.dp(12)
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Theme.dp(60)
+                            color: Theme.bgPrimary
+                            border.width: 1
+                            border.color: Theme.border
+                            radius: 0
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: Theme.dp(10)
+                                spacing: Theme.dp(12)
+
+                                Item {
+                                    Layout.preferredWidth: Theme.dp(40)
+                                    Layout.preferredHeight: Theme.dp(40)
+                                    Layout.alignment: Qt.AlignVCenter
+
+                                    Image {
+                                        anchors.fill: parent
+                                        source: root.contextMenuApp ? launcher.getIconPath(root.contextMenuApp) : ""
+                                        fillMode: Image.PreserveAspectFit
+                                        visible: source !== "" && status === Image.Ready
+                                    }
+
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        color: Theme.bgPrimary
+                                        border.width: 1
+                                        border.color: Theme.border
+                                        radius: 0
+                                        visible: !parent.children[0].visible
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: root.contextMenuApp ? (root.contextMenuApp.name ? root.contextMenuApp.name.charAt(0).toUpperCase() : "?") : "?"
+                                            color: Theme.accent
+                                            font.family: Typography.fontFamily
+                                            font.pixelSize: Math.round(16 * s)
+                                            font.weight: Font.Bold
+                                        }
+                                    }
+                                }
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignVCenter
+                                    spacing: 2
+
+                                    Text {
+                                        text: root.contextMenuApp ? (root.contextMenuApp.name || "Unknown") : ""
+                                        color: Theme.textPrimary
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: Math.round(12 * s)
+                                        font.weight: Font.Bold
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                    }
+
+                                    Text {
+                                        text: root.contextMenuApp ? (root.contextMenuApp.id || "") : ""
+                                        color: Theme.textMuted
+                                        font.family: Typography.fontFamily
+                                        font.pixelSize: Math.round(9 * s)
+                                        elide: Text.ElideRight
+                                        Layout.fillWidth: true
+                                        opacity: 0.7
+                                    }
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Theme.dp(36)
+                            color: actLaunchMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
+                            border.width: 1
+                            border.color: Theme.border
+                            radius: 0
+
+                            Behavior on color { ColorAnimation { duration: 80 } }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: Theme.dp(10)
+                                spacing: Theme.dp(8)
+
+                                Text { text: "▶"; color: Theme.accent; font.pixelSize: Math.round(14 * s) }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Launch"
+                                    color: Theme.textPrimary
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round(11 * s)
+                                    font.weight: Font.Medium
+                                }
+                            }
+
+                            MouseArea {
+                                id: actLaunchMouse
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: {
+                                    if (root.contextMenuApp) launcher.launchApp(root.contextMenuApp)
+                                    root.viewMode = 0
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Theme.dp(36)
+                            color: actCatMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
+                            border.width: 1
+                            border.color: Theme.border
+                            radius: 0
+
+                            Behavior on color { ColorAnimation { duration: 80 } }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: Theme.dp(10)
+                                spacing: Theme.dp(8)
+
+                                Text { text: "📁"; color: Theme.accent; font.pixelSize: Math.round(14 * s) }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.contextMenuApp ? launcher.getAppCategories(root.contextMenuApp) : ""
+                                    color: Theme.textMuted
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round(10 * s)
+                                    elide: Text.ElideRight
+                                }
+                            }
+
+                            MouseArea {
+                                id: actCatMouse
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: {}
+                            }
+                        }
+
+                        Item { Layout.fillHeight: true }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Theme.dp(36)
+                            color: actDeleteMouse.containsMouse ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.15) : "transparent"
+                            border.width: 1
+                            border.color: Theme.danger
+                            radius: 0
+
+                            Behavior on color { ColorAnimation { duration: 80 } }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: Theme.dp(10)
+                                spacing: Theme.dp(8)
+
+                                Text { text: "🗑"; color: Theme.danger; font.pixelSize: Math.round(14 * s) }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Delete"
+                                    color: Theme.danger
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round(11 * s)
+                                    font.weight: Font.Medium
+                                }
+                            }
+
+                            MouseArea {
+                                id: actDeleteMouse
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: {
+                                    deleteConfirmDialog.show()
+                                }
+                            }
+                        }
+
+                        Rectangle {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Theme.dp(36)
+                            color: actCancelMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : "transparent"
+                            border.width: 1
+                            border.color: Theme.border
+                            radius: 0
+
+                            Behavior on color { ColorAnimation { duration: 80 } }
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: Theme.dp(10)
+                                spacing: Theme.dp(8)
+
+                                Text { text: "✕"; color: Theme.textPrimary; font.pixelSize: Math.round(14 * s) }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: "Cancel"
+                                    color: Theme.textPrimary
+                                    font.family: Typography.fontFamily
+                                    font.pixelSize: Math.round(11 * s)
+                                    font.weight: Font.Medium
+                                }
+                            }
+
+                            MouseArea {
+                                id: actCancelMouse
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: {
+                                    root.viewMode = 0
+                                    root.contextMenuApp = null
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             RowLayout {
@@ -1056,7 +1398,7 @@ PanelWindow {
                 spacing: Theme.dp(6)
                 Layout.topMargin: Theme.dp(2)
                 Layout.bottomMargin: Theme.dp(2)
-                visible: !root.showCommands && !root.wallpaperMode && root.viewMode !== 5 && root.viewMode !== 6
+                visible: !root.showCommands && !root.wallpaperMode && root.viewMode !== 5 && root.viewMode !== 6 && root.viewMode !== 7
 
                 Text {
                     text: "↑↓ Navigate"
@@ -1086,7 +1428,7 @@ PanelWindow {
                 Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
 
                 Text {
-                    text: root.viewMode === 0 ? "Ctrl Mode" : "Shift+A Back"
+                    text: root.viewMode === 0 ? "Ctrl/Right-click Action" : "Shift+A Back"
                     color: Theme.accent
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round(8 * s)
@@ -1101,187 +1443,231 @@ PanelWindow {
                     font.pixelSize: Math.round(8 * s)
                 }
             }
+
+            RowLayout {
+                id: footerHintActions
+                Layout.fillWidth: true
+                spacing: Theme.dp(6)
+                Layout.topMargin: Theme.dp(2)
+                Layout.bottomMargin: Theme.dp(2)
+                visible: root.viewMode === 7
+
+                Text {
+                    text: "Enter Launch"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
+
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
+                Text {
+                    text: "Esc/Right-click Cancel"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
+            }
         }
     }
 
     Rectangle {
-        id: contextMenu
+        id: deleteConfirmDialog
         visible: false
-        z: 100
-        width: Theme.dp(200)
-        height: menuCol.implicitHeight + Theme.dp(8)
+        z: 200
+        width: Theme.dp(320)
+        height: deleteCol.implicitHeight + Theme.dp(24)
         color: Theme.bgSecondary
         border.width: 1
         border.color: Theme.border
         radius: 0
 
-        property real menuX: 0
-        property real menuY: 0
-
-        function popup(x, y) {
-            menuX = x
-            menuY = y
-            visible = true
-        }
-
-        function hide() {
-            visible = false
-            root.contextMenuApp = null
-        }
-
-        x: Math.min(menuX, parent.width - width - Theme.dp(12))
-        y: Math.min(menuY, parent.height - height - Theme.dp(12))
+        x: Math.round((parent.width - width) / 2)
+        y: Math.round((parent.height - height) / 2)
 
         opacity: visible ? 1 : 0
         scale: visible ? 1 : 0.95
 
         Behavior on opacity {
-            NumberAnimation { duration: 100; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
         }
 
         Behavior on scale {
-            NumberAnimation { duration: 100; easing.type: Easing.OutCubic }
+            NumberAnimation { duration: 120; easing.type: Easing.OutCubic }
         }
 
-        ColumnLayout {
-            id: menuCol
-            anchors.fill: parent
-            anchors.margins: Theme.dp(4)
-            spacing: Theme.dp(2)
-
-            Text {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.dp(28)
-                text: root.contextMenuApp ? root.contextMenuApp.name : ""
-                color: Theme.textPrimary
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(10 * s)
-                font.weight: Font.Bold
-                elide: Text.ElideRight
-                Layout.leftMargin: Theme.dp(8)
-                Layout.rightMargin: Theme.dp(8)
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: Theme.border
-                Layout.leftMargin: Theme.dp(8)
-                Layout.rightMargin: Theme.dp(8)
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.dp(28)
-                color: launchMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
-                radius: Theme.dp(6)
-
-                Behavior on color { ColorAnimation { duration: 80 } }
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.dp(6)
-                    spacing: Theme.dp(8)
-
-                    Text {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Launch"
-                        color: Theme.textPrimary
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round(9 * s)
-                    }
-                }
-
-                MouseArea {
-                    id: launchMouse
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    onClicked: {
-                        if (root.contextMenuApp) launcher.launchApp(root.contextMenuApp)
-                        contextMenu.hide()
-                    }
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.dp(28)
-                color: catMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
-                radius: Theme.dp(6)
-
-                Behavior on color { ColorAnimation { duration: 80 } }
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.dp(6)
-                    spacing: Theme.dp(8)
-
-                    Text {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: root.contextMenuApp ? launcher.getAppCategories(root.contextMenuApp) : ""
-                        color: Theme.textMuted
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round(8 * s)
-                        elide: Text.ElideRight
-                    }
-                }
-
-                MouseArea {
-                    id: catMouse
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: contextMenu.hide()
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: Theme.border
-                Layout.leftMargin: Theme.dp(8)
-                Layout.rightMargin: Theme.dp(8)
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.dp(28)
-                color: closeMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
-                radius: Theme.dp(6)
-
-                Behavior on color { ColorAnimation { duration: 80 } }
-
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.margins: Theme.dp(6)
-                    spacing: Theme.dp(8)
-
-                    Text {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        text: "Close"
-                        color: Theme.textPrimary
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round(9 * s)
-                    }
-                }
-
-                MouseArea {
-                    id: closeMouse
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    onClicked: contextMenu.hide()
-                }
-            }
+        function show() {
+            deletePassword = ""
+            deleteError = ""
+            visible = true
+            Qt.callLater(function() { deletePasswordField.forceActiveFocus() })
         }
+
+        function hide() {
+            visible = false
+        }
+
+        function doDelete() {
+            if (!deleteConfirmDialog.deletePassword || deleteConfirmDialog.deletePassword.length === 0) {
+                deleteConfirmDialog.deleteError = "Password is required"
+                return
+            }
+            if (!root.contextMenuApp) return
+
+            var appName = root.contextMenuApp.name || ""
+            var appExec = root.contextMenuApp.exec || ""
+            var appDesktop = root.contextMenuApp.desktopFilePath || ""
+
+            deleteConfirmDialog.deleteError = ""
+            deleteConfirmDialog.visible = false
+
+            Quickshell.execDetached({
+                command: ["sh", "-c",
+                    "echo '" + deleteConfirmDialog.deletePassword.replace(/'/g, "'\\''") + "' | pkexec --disable-internal-agent sh -c '" +
+                    "if command -v flatpak >/dev/null 2>&1 && flatpak list --columns=application | grep -qF \"" + appExec + "\"; then " +
+                    "  flatpak uninstall -y \"" + appExec + "\"; " +
+                    "elif command -v apt >/dev/null 2>&1 && dpkg -l | grep -qF \"" + appExec + "\"; then " +
+                    "  apt remove -y \"" + appExec + "\"; " +
+                    "elif [ -f \"" + appDesktop + "\" ]; then " +
+                    "  rm -f \"" + appDesktop + "\" && update-desktop-database ~/.local/share/applications/ 2>/dev/null; " +
+                    "else " +
+                    "  echo \"Could not determine package for " + appName + "\"; " +
+                    "fi'"
+                ]
+            })
+        }
+
+        property string deletePassword: ""
+        property string deleteError: ""
 
         MouseArea {
             anchors.fill: parent
-            onClicked: mouse.accepted = true
+            onClicked: function(mouse) { mouse.accepted = true }
+        }
+
+        ColumnLayout {
+            id: deleteCol
+            anchors.fill: parent
+            anchors.margins: Theme.dp(12)
+            spacing: Theme.dp(10)
+
+            Text {
+                Layout.fillWidth: true
+                text: "Delete " + (root.contextMenuApp ? root.contextMenuApp.name : "app") + "?"
+                color: Theme.textPrimary
+                font.family: Typography.fontFamily
+                font.pixelSize: Math.round(12 * s)
+                font.weight: Font.Bold
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: "This will uninstall the application. This action cannot be undone."
+                color: Theme.textMuted
+                font.family: Typography.fontFamily
+                font.pixelSize: Math.round(9 * s)
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Theme.dp(32)
+                color: Theme.bgPrimary
+                border.width: 1
+                border.color: deleteConfirmDialog.deleteError.length > 0 ? Theme.danger : Theme.border
+                radius: 0
+
+                TextField {
+                    id: deletePasswordField
+                    anchors.fill: parent
+                    anchors.margins: Theme.dp(8)
+                    text: deleteConfirmDialog.deletePassword
+                    echoMode: TextInput.Password
+                    placeholderText: "Password (required)"
+                    placeholderTextColor: Theme.textMuted
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(11 * s)
+                    color: Theme.textPrimary
+                    background: Item {}
+                    verticalAlignment: TextInput.AlignVCenter
+
+                    onTextChanged: deleteConfirmDialog.deletePassword = text
+                    onAccepted: deleteConfirmDialog.doDelete()
+                }
+            }
+
+            Text {
+                visible: deleteConfirmDialog.deleteError.length > 0
+                Layout.fillWidth: true
+                text: deleteConfirmDialog.deleteError
+                color: Theme.danger
+                font.family: Typography.fontFamily
+                font.pixelSize: Math.round(9 * s)
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.dp(8)
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(30)
+                    color: deleteCancelMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : "transparent"
+                    border.width: 1
+                    border.color: Theme.border
+                    radius: 0
+
+                    Behavior on color { ColorAnimation { duration: 80 } }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Cancel"
+                        color: Theme.textPrimary
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round(10 * s)
+                        font.weight: Font.Medium
+                    }
+
+                    MouseArea {
+                        id: deleteCancelMouse
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: deleteConfirmDialog.hide()
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(30)
+                    color: deleteConfirmMouse.containsMouse ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.25) : Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.1)
+                    border.width: 1
+                    border.color: Theme.danger
+                    radius: 0
+
+                    Behavior on color { ColorAnimation { duration: 80 } }
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "Delete"
+                        color: Theme.danger
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round(10 * s)
+                        font.weight: Font.Bold
+                    }
+
+                    MouseArea {
+                        id: deleteConfirmMouse
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: deleteConfirmDialog.doDelete()
+                    }
+                }
+            }
         }
     }
 
@@ -1291,14 +1677,20 @@ PanelWindow {
         Keys.enabled: true
         Keys.onPressed: function(event) {
             if (event.key === Qt.Key_Escape) {
-                if (contextMenu.visible) {
-                    contextMenu.hide()
+                if (root.viewMode === 7) {
+                    root.viewMode = 0
+                    root.contextMenuApp = null
+                } else if (deleteConfirmDialog.visible) {
+                    deleteConfirmDialog.hide()
                 } else {
                     closeLauncher()
                 }
                 event.accepted = true
             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                if (appList.currentIndex >= 0 && appList.currentIndex < root.currentModel.length) {
+                if (root.viewMode === 7) {
+                    if (root.contextMenuApp) launcher.launchApp(root.contextMenuApp)
+                    root.viewMode = 0
+                } else if (appList.currentIndex >= 0 && appList.currentIndex < root.currentModel.length) {
                     launcher.launchApp(root.currentModel[appList.currentIndex])
                 }
                 event.accepted = true
@@ -1308,6 +1700,15 @@ PanelWindow {
             } else if (event.key === Qt.Key_Up) {
                 appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
                 event.accepted = true
+            } else if (event.key === Qt.Key_Control) {
+                if (root.viewMode < 3 && !root.showCommands && !root.wallpaperMode) {
+                    var idx = appList.currentIndex
+                    if (idx >= 0 && idx < root.currentModel.length) {
+                        root.contextMenuApp = root.currentModel[idx]
+                        root.viewMode = 7
+                    }
+                    event.accepted = true
+                }
             }
         }
     }

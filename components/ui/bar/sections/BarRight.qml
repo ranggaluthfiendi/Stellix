@@ -79,6 +79,7 @@ RowLayout {
             onEntered: notifBox.hovered = true
             onExited: notifBox.hovered = false
             onClicked: {
+                RightBarState.closeAll()
                 RightBarState.notifPanelRequested = true
             }
         }

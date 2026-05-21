@@ -33,6 +33,7 @@ PanelWindow {
     color: "transparent"
     onVisibleChanged: {
         if (visible) {
+            wsService.focusedId = wsService.activeWorkspaceId;
             wsService.refreshTrigger++;
             wsService.ensureFocusedVisible();
             animY = -Theme.dp(12);
@@ -123,32 +124,43 @@ PanelWindow {
                 root.closeRequested()
                 event.accepted = true;
             } else if (event.key === Qt.Key_Left) {
-                var prevWs = Math.max(1, wsService.focusedId - 1);
-                Hyprland.dispatch("workspace " + prevWs);
+                wsService.focusedId = Math.max(1, wsService.focusedId - 1);
+                wsService.ensureFocusedVisible();
                 event.accepted = true;
             } else if (event.key === Qt.Key_Right) {
                 if (wsService.focusedId >= wsService.maxWorkspaceId) {
                     wsService.addWorkspace();
                 } else {
-                    var nextWs = wsService.focusedId + 1;
-                    Hyprland.dispatch("workspace " + nextWs);
+                    wsService.focusedId = wsService.focusedId + 1;
+                    wsService.ensureFocusedVisible();
                 }
                 event.accepted = true;
             } else if (event.key === Qt.Key_Backtab) {
-                var prevWs = Math.max(1, wsService.focusedId - 1);
-                Hyprland.dispatch("workspace " + prevWs);
+                wsService.focusedId = Math.max(1, wsService.focusedId - 1);
+                wsService.ensureFocusedVisible();
                 event.accepted = true;
             } else if (event.key === Qt.Key_Tab) {
                 if (wsService.focusedId >= wsService.maxWorkspaceId) {
                     wsService.addWorkspace();
                 } else {
-                    var nextWs = wsService.focusedId + 1;
-                    Hyprland.dispatch("workspace " + nextWs);
+                    wsService.focusedId = wsService.focusedId + 1;
+                    wsService.ensureFocusedVisible();
                 }
                 event.accepted = true;
             } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter || event.key === Qt.Key_Space) {
                 wsService.activateWorkspace(wsService.focusedId);
                 root.closeRequested();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
+                wsService.handleDeleteOrBackspace();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_1 || event.key === Qt.Key_2 || event.key === Qt.Key_3 || event.key === Qt.Key_4 || event.key === Qt.Key_5) {
+                var targetWs = event.key - Qt.Key_1 + 1;
+                wsService.activateWorkspace(targetWs);
+                root.closeRequested();
+                event.accepted = true;
+            } else if (event.key === Qt.Key_X) {
+                wsService.toggleExpandablePanel();
                 event.accepted = true;
             }
         }

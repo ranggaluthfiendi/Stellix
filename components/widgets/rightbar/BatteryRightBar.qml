@@ -44,12 +44,25 @@ Scope {
     // ── Notif: always below bar when bar open, at top when bar closed ──
     readonly property real notifY: RightBarState.open ? (panel.implicitHeight + popupGap) : 0
 
+    // ── Expose panel height for notification popup ──
+    readonly property real panelHeight: panel.implicitHeight
+
     // ── Track whether notif popup was opened by user ──
     property bool notifPopupUserOpened: false
 
     onNotifYChanged: scheduleNotifAnchorRefresh()
-    onNotifPopupOpenChanged: scheduleNotifAnchorRefresh()
-    onVolumeExpandedChanged: scheduleNotifAnchorRefresh()
+    onNotifPopupOpenChanged: {
+        if (notifPopupOpen && RightBarState.open) {
+            RightBarState.open = false
+        }
+        scheduleNotifAnchorRefresh()
+    }
+    onVolumeExpandedChanged: {
+        if (volumeExpanded) {
+            root.closeNotifPopup()
+        }
+        scheduleNotifAnchorRefresh()
+    }
 
     Timer {
         id: notifAnchorRefreshTimer
@@ -74,17 +87,27 @@ Scope {
     Connections {
         target: RightBarState
         function onOpenChanged() {
-            if (!RightBarState.open) {
+            if (RightBarState.open) {
+                root.closeNotifPopup()
+                root.scheduleNotifAnchorRefresh()
+            } else {
                 root.wifiPopupOpen = false
                 root.btPopupOpen = false
                 root.powerPopupOpen = false
                 root.notifPopupOpen = false
                 RightBarState.calendarOpen = false
-            } else {
-                root.scheduleNotifAnchorRefresh()
             }
         }
-
+        function onCalendarOpenChanged() {
+            if (RightBarState.calendarOpen) {
+                root.closeNotifPopup()
+            }
+        }
+        function onWorkspaceSwitcherOpenChanged() {
+            if (RightBarState.workspaceSwitcherOpen) {
+                root.closeNotifPopup()
+            }
+        }
     }
 
     property int _notifReqVersion: 0
@@ -115,17 +138,20 @@ Scope {
             wifiPopupOpen  = !wifiPopupOpen
             if (wifiPopupOpen) {
                 powerPopupOpen = false
+                root.closeNotifPopup()
             }
         } else if (name === "bluetooth") {
             btPopupOpen = !btPopupOpen
             if (btPopupOpen) {
                 powerPopupOpen = false
+                root.closeNotifPopup()
             }
         } else if (name === "power") {
             powerPopupOpen = !powerPopupOpen
             if (powerPopupOpen) {
                 wifiPopupOpen = false
                 btPopupOpen = false
+                root.closeNotifPopup()
             }
         }
     }
@@ -331,6 +357,7 @@ Scope {
         grabFocus: false
         trackedNotifs: root.trackedNotifs
         closeCallback: function() { root.notifPopupOpen = false }
+        barRightPanelHeight: root.panelHeight
 
         // Use popupAnchor as a stable reference window
         anchor.window: popupAnchor

@@ -53,7 +53,10 @@ Item {
                 id: leftMouse
                 anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                 onClicked: {
-                    if (wsService.focusedId > 1) Hyprland.dispatch("workspace " + (wsService.focusedId - 1));
+                    if (wsService.focusedId > 1) {
+                        wsService.focusedId = wsService.focusedId - 1;
+                        wsService.ensureFocusedVisible();
+                    }
                 }
                 onEntered: { if (wsService.draggingToplevel && wsService.pageStart > 1 && wsService.leftDragPageTimer) wsService.leftDragPageTimer.restart() }
                 onExited: { if (wsService.leftDragPageTimer) wsService.leftDragPageTimer.stop() }
@@ -91,7 +94,10 @@ Item {
                 anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                 onClicked: {
                     if (wsService.focusedId >= wsService.maxWorkspaceId) wsService.addWorkspace();
-                    else Hyprland.dispatch("workspace " + (wsService.focusedId + 1));
+                    else {
+                        wsService.focusedId = wsService.focusedId + 1;
+                        wsService.ensureFocusedVisible();
+                    }
                 }
                 onEntered: { if (wsService.draggingToplevel && wsService.rightDragPageTimer) wsService.rightDragPageTimer.restart() }
                 onExited: { if (wsService.rightDragPageTimer) wsService.rightDragPageTimer.stop() }

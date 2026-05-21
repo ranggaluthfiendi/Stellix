@@ -15,4 +15,9 @@ Singleton {
             root.currentScheme = Theme.schemeName
         }
     }
+
+    // Initialize from Theme on startup
+    Component.onCompleted: {
+        root.currentScheme = Theme.schemeName
+    }
 }

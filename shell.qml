@@ -1,5 +1,6 @@
 import Quickshell
 import Quickshell.Hyprland
+import Quickshell.Io
 import QtQuick
 import qs.screens
 import qs.services
@@ -51,6 +52,27 @@ ShellRoot {
         id: appLauncher
     }
 
+    GuidePopup {
+        id: guidePopup
+    }
+
+    GlobalShortcut {
+        id: guideShortcut
+        name: "guide-popup"
+        description: "Open shortcut guide"
+
+        onPressedChanged: {
+            if (pressed) {
+                if (RightBarState.guideOpen) {
+                    RightBarState.guideOpen = false
+                } else {
+                    RightBarState.closeAll()
+                    RightBarState.guideOpen = true
+                }
+            }
+        }
+    }
+
     GlobalShortcut {
         id: wsSwitcherShortcut
         name: "workspace-switcher"
@@ -58,11 +80,13 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.launcherOpen) {
-                    RightBarState.launcherOpen = false
-                    launcher.close()
+                if (RightBarState.workspaceSwitcherOpen) {
+                    RightBarState.workspaceSwitcherOpen = false
+                } else {
+                    RightBarState.closeAll()
+                    RightBarState.workspaceSwitcherOpen = true
+                    RightBarState.notifPanelRequested = false
                 }
-                RightBarState.workspaceSwitcherOpen = !RightBarState.workspaceSwitcherOpen
             }
         }
     }
@@ -103,6 +127,7 @@ ShellRoot {
                 var nextWs = currentWs + 1
                 Hyprland.dispatch("workspace " + nextWs)
                 RightBarState.workspaceSwitcherOpen = true
+                RightBarState.notifPanelRequested = false
                 wsFlashTimer.restart()
             }
         }
@@ -123,7 +148,25 @@ ShellRoot {
                 var prevWs = Math.max(1, currentWs - 1)
                 Hyprland.dispatch("workspace " + prevWs)
                 RightBarState.workspaceSwitcherOpen = true
+                RightBarState.notifPanelRequested = false
                 wsFlashTimer.restart()
+            }
+        }
+    }
+
+    GlobalShortcut {
+        id: openRightbarShortcut
+        name: "open-rightbar"
+        description: "Open rightbar popup"
+
+        onPressedChanged: {
+            if (pressed) {
+                if (RightBarState.open) {
+                    RightBarState.open = false
+                } else {
+                    RightBarState.closeAll()
+                    RightBarState.open = true
+                }
             }
         }
     }
@@ -143,6 +186,14 @@ ShellRoot {
         
         onCloseRequested: {
             RightBarState.workspaceSwitcherOpen = false
+        }
+    }
+
+    // IPC Handler untuk Volume/Brightness Indicator
+    IpcHandler {
+        target: "indicator"
+        function show(type: string, value: real, muted: bool): void {
+            RightBarState.showIndicator(type, value, muted)
         }
     }
 }

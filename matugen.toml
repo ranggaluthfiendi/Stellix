@@ -2,14 +2,57 @@
 # Default mode if not specified (light or dark)
 default_mode = "dark"
 
-[templates.quickshell_theme]
-input_path = "config/Theme.qml.template"
-output_path = "config/Theme.qml"
+# Image types to process
+image_formats = ["jpg", "jpeg", "png", "webp", "bmp", "gif"]
 
-[templates.gtk3]
-input_path = "templates/gtk3-colors.css.template"
-output_path = "../gtk-3.0/colors.css"
+# Color scheme type
+scheme_type = "content"
 
-[templates.gtk4]
-input_path = "templates/gtk4-colors.css.template"
-output_path = "../gtk-4.0/colors.css"
+# Variants - generate both dark and light simultaneously
+variants = ["dark", "light"]
+
+[config.custom_colors]
+# Custom color definitions if needed
+
+[templates.quickshell_json]
+input_path = "~/.config/matugen/templates/colors-dms.json"
+output_path = "~/.config/quickshell/savedata/matugen-colors.json"
+
+[templates.gtk3_colors]
+input_path = "~/.config/matugen/templates/gtk3-colors.css.template"
+output_path = "~/.config/gtk-3.0/colors.css"
+post_hook = "echo 'GTK3 theme updated'"
+
+[templates.gtk4_colors]
+input_path = "~/.config/matugen/templates/gtk4-colors.css.template"
+output_path = "~/.config/gtk-4.0/colors.css"
+post_hook = "echo 'GTK4 theme updated'"
+
+[templates.kde_colors]
+input_path = "~/.config/matugen/templates/kdeglobals.template"
+output_path = "~/.config/kdeglobals"
+post_hook = "echo 'KDE theme updated'"
+
+[templates.qt5ct]
+input_path = "~/.config/matugen/templates/qt5ct-colors.template"
+output_path = "~/.config/qt5ct/colors/Matugen.conf"
+post_hook = "echo 'Qt5ct theme updated'"
+
+[templates.qt6ct]
+input_path = "~/.config/matugen/templates/qt6ct-colors.template"
+output_path = "~/.config/qt6ct/colors/Matugen.conf"
+post_hook = "echo 'Qt6ct theme updated'"
+
+[templates.hyprland]
+input_path = "~/.config/matugen/templates/hyprland-colors.conf.template"
+output_path = "~/.config/hypr/colors.conf"
+post_hook = "hyprctl reload 2>/dev/null || true"
+
+[templates.kitty]
+input_path = "~/.config/matugen/templates/kitty.conf.template"
+output_path = "~/.config/kitty/theme.conf"
+post_hook = "killall -USR1 kitty 2>/dev/null || true"
+
+[templates.fish]
+input_path = "~/.config/matugen/templates/fish_colors.fish.template"
+output_path = "~/.config/fish/conf.d/matugen_colors.fish"

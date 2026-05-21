@@ -10,7 +10,8 @@ Item {
     // ── Core Properties ──
     readonly property var workspaces: Hyprland.workspaces
     readonly property var toplevels: Hyprland.toplevels
-    readonly property int focusedId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
+    readonly property int activeWorkspaceId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
+    property int focusedId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
     readonly property var focusedMonitor: Hyprland.focusedMonitor
 
     property int pageStart: 1
@@ -321,6 +322,25 @@ Item {
         pageStart = Math.max(1, Math.min(pageStart, Math.max(1, targetId - visibleCount + 1)));
         Hyprland.refreshWorkspaces();
         Hyprland.refreshToplevels();
+    }
+
+    function handleDeleteOrBackspace() {
+        var wsId = focusedId;
+        var wins = windowsForWorkspace(wsId);
+        if (wins.length > 0) {
+            closeWorkspaceWindows();
+        } else if (wsId >= 6) {
+            if (wsId === maxWorkspaceId) {
+                removeWorkspace();
+            } else {
+                var targetId = Math.max(1, wsId - 1);
+                pageStart = Math.max(1, Math.min(pageStart, Math.max(1, targetId - visibleCount + 1)));
+                Hyprland.dispatch("destroyworkspace " + wsId);
+                Hyprland.refreshWorkspaces();
+                Hyprland.refreshToplevels();
+                focusedId = targetId;
+            }
+        }
     }
 
     function moveWindowToWorkspace(toplevel, workspaceId) {

@@ -14,10 +14,11 @@ Item {
     property string lastWallpaper: ""
     property bool initDone: false
     property int lastMatugenRun: 0
+    property var allSchemesData: ({})
 
     readonly property string matugenConf: Quickshell.env("HOME") + "/.config/matugen/matugen.toml"
-    readonly property string themeOutput: Quickshell.env("HOME") + "/.config/quickshell/config/Theme.qml"
     readonly property string savedataPath: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata/color-state.json"
+    readonly property string allSchemesPath: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata/all-schemes.json"
 
     readonly property var schemeTypes: [
         { name: "Tonal Spot", value: "scheme-tonal-spot", desc: "Balanced, natural tones" },
@@ -37,6 +38,34 @@ Item {
             }
         }
         return "Unknown"
+    }
+
+    // FileView to watch all-schemes.json
+    FileView {
+        id: allSchemesFile
+        path: "file://" + root.allSchemesPath
+        watchChanges: true
+        blockLoading: false
+        onFileChanged: {
+            try {
+                if (allSchemesFile.text && allSchemesFile.text.length > 10) {
+                    root.allSchemesData = JSON.parse(allSchemesFile.text)
+                }
+            } catch (e) {
+                console.warn("[ColorService] Failed to parse all-schemes.json:", e)
+            }
+        }
+    }
+
+    function getSchemeColor(schemeValue, colorName, fallback) {
+        var key = schemeValue.replace("scheme-", "")
+        if (root.allSchemesData[key] && root.allSchemesData[key][colorName]) {
+            var mode = Theme.schemeName
+            if (root.allSchemesData[key][colorName][mode] && root.allSchemesData[key][colorName][mode].color) {
+                return root.allSchemesData[key][colorName][mode].color
+            }
+        }
+        return fallback
     }
 
     StdioCollector { id: readCollector }
@@ -93,6 +122,11 @@ Item {
         // Sync Theme.isDark with loaded state
         Theme.isDark = (root.currentScheme === "dark")
         GlobalState.currentScheme = root.currentScheme
+
+        // Run matugen on startup if wallpaper exists
+        if (wallpaper.currentWallpaperPath && wallpaper.currentWallpaperPath !== "") {
+            root.extractFromWallpaper(wallpaper.currentWallpaperPath)
+        }
     }
 
     onCurrentSchemeChanged: {
@@ -101,19 +135,6 @@ Item {
 
     onCurrentTypeChanged: {
         root.saveState()
-    }
-
-    // Listen to Theme.isDark changes and run matugen + reload
-    Connections {
-        target: Theme
-        function onIsDarkChanged() {
-            if (!root.initDone) return
-            var newScheme = Theme.schemeName
-            if (newScheme !== root.currentScheme) {
-                root.currentScheme = newScheme
-                root.runMatugenAndReload()
-            }
-        }
     }
 
     StdioCollector { id: matugenCollector }
@@ -127,36 +148,27 @@ Item {
             root.isGenerating = false
 
             if (exitCode === 0) {
-                Quickshell.reload(false)
+                // Theme.qml will auto-reload via FileView when colors.json changes
             } else {
-                // Matugen failed, silently reload anyway
+                console.warn("[ColorService] Matugen failed:", output)
             }
         }
     }
 
-    function runMatugenAndReload() {
+    function runMatugen(targetPath, mode) {
         var now = new Date().getTime()
         if (root.isGenerating || (now - root.lastMatugenRun < 1500)) return
         root.lastMatugenRun = now
 
-        var targetPath = root.lastWallpaper
         if (!targetPath) {
-            if (wallpaper.currentWallpaperPath && wallpaper.currentWallpaperPath !== "") {
-                targetPath = wallpaper.currentWallpaperPath
-            } else if (wallpaper.wallpapers.length > 0 && wallpaper.currentIndex >= 0) {
-                targetPath = wallpaper.wallpapers[wallpaper.currentIndex]
-            }
-        }
-        if (!targetPath) {
-            Quickshell.reload(false)
+            console.warn("[ColorService] No wallpaper path available")
             return
         }
 
         root.isGenerating = true
         root.lastWallpaper = targetPath
 
-        var mode = Theme.schemeName
-
+        // Matugen will generate both dark and light variants
         matugenProcess.exec(["sh", "-c",
             "matugen image '" + targetPath + "' " +
             "-m " + mode + " " +
@@ -167,10 +179,6 @@ Item {
     }
 
     function extractFromWallpaper(path) {
-        var now = new Date().getTime()
-        if (root.isGenerating || (now - root.lastMatugenRun < 1500)) return
-        root.lastMatugenRun = now
-
         var targetPath = path || root.lastWallpaper
         if (!targetPath) {
             if (wallpaper.currentWallpaperPath && wallpaper.currentWallpaperPath !== "") {
@@ -180,25 +188,29 @@ Item {
             }
         }
         if (!targetPath) {
+            console.warn("[ColorService] No wallpaper found for extraction")
             return
         }
 
-        root.isGenerating = true
-        root.lastWallpaper = targetPath
-
         var mode = Theme.schemeName
+        root.runMatugen(targetPath, mode)
 
-        matugenProcess.exec(["sh", "-c",
-            "matugen image '" + targetPath + "' " +
-            "-m " + mode + " " +
-            "-t " + root.currentType + " " +
-            "-c " + root.matugenConf + " " +
-            "--prefer=darkness 2>&1"
-        ])
+        // Also generate all schemes for preview
+        root.generateAllSchemes(targetPath, mode)
+    }
+
+    function generateAllSchemes(wallpaperPath, mode) {
+        if (!wallpaperPath) return
+        Quickshell.execDetached({
+            command: ["sh", "-c",
+                "~/.config/matugen/generate-all-schemes.sh '" + wallpaperPath + "' '" + mode + "' &"
+            ]
+        })
     }
 
     function toggleMode() {
         Theme.toggleMode()
+        // Matugen will be triggered via Theme.isDark change if needed
     }
 
     function setMode(mode) {
@@ -226,25 +238,5 @@ Item {
 
     function applyTheme() {
         extractFromWallpaper("")
-    }
-
-    function applySystemTheme() {
-        applyProcess.exec(["sh", "-c",
-            "bash " + Quickshell.env("HOME") + "/.config/matugen/apply-theme.sh " + root.currentScheme + " " + root.lastWallpaper + " 2>&1"
-        ])
-    }
-
-    StdioCollector { id: applyCollector }
-
-    Process {
-        id: applyProcess
-        stdout: applyCollector
-        stderr: applyCollector
-        onExited: function(exitCode, exitStatus) {
-            var output = applyCollector.text.trim()
-            if (exitCode === 0) {
-            } else {
-            }
-        }
     }
 }

@@ -13,11 +13,37 @@ Item {
     property bool calendarOpen: false
     property bool workspaceSwitcherOpen: false
     property bool launcherOpen: false
+    property bool guideOpen: false
     property bool dndEnabled: false
     property int calendarMonthOffset: 0
     property bool notifPanelRequested: false
     // Updated by BatteryRightBar's NotificationServer
     property int notifCount: 0
+
+    // Volume/Brightness indicator
+    property bool indicatorVisible: false
+    property string indicatorType: "volume"
+    property real indicatorValue: 0
+    property bool indicatorMuted: false
+
+    Timer {
+        id: indicatorHideTimer
+        interval: 1500
+        repeat: false
+        onTriggered: {
+            root.indicatorVisible = false
+        }
+    }
+
+    function showIndicator(type, value, muted) {
+        root.indicatorType = type
+        root.indicatorValue = value
+        root.indicatorMuted = muted || false
+        root.indicatorVisible = true
+        indicatorHideTimer.restart()
+        // Close calendar when indicator shows
+        root.calendarOpen = false
+    }
 
     readonly property string dndPath: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata/dnd-state.json"
 
@@ -64,6 +90,7 @@ Item {
         calendarOpen = false
         workspaceSwitcherOpen = false
         launcherOpen = false
+        guideOpen = false
     }
 
     function prevMonth() {

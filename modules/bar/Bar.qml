@@ -157,10 +157,10 @@ Scope {
         }
     }
 
-    // ── Calendar outside overlay ──
+    // ── Calendar/VB Indicator outside overlay ──
     PanelWindow {
         id: calendarOutsideOverlay
-        visible: RightBarState.calendarOpen
+        visible: RightBarState.calendarOpen || RightBarState.indicatorVisible
         color: "transparent"
 
         anchors {
@@ -181,14 +181,41 @@ Scope {
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
-            onPressed: RightBarState.calendarOpen = false
+            onPressed: {
+                RightBarState.calendarOpen = false
+                RightBarState.indicatorVisible = false
+            }
+        }
+    }
+
+    // ── Volume/Brightness Indicator ──
+    PopupWindow {
+        id: vbIndicatorPopup
+        visible: RightBarState.indicatorVisible
+        color: "transparent"
+        grabFocus: false
+
+        anchor.window: bar
+        anchor.rect.x: Math.round((bar.width - vbIndicator.implicitWidth) / 2)
+        anchor.rect.y: bar.height + Theme.dp(4)
+
+        implicitWidth: vbIndicator.implicitWidth
+        implicitHeight: vbIndicator.implicitHeight
+
+        VolumeBrightnessIndicator {
+            id: vbIndicator
+            anchors.fill: parent
+            indicatorType: RightBarState.indicatorType
+            indicatorValue: RightBarState.indicatorValue
+            indicatorMuted: RightBarState.indicatorMuted
+            animating: RightBarState.indicatorVisible
         }
     }
 
     // ── Calendar popup ──
     PopupWindow {
         id: calendarPopup
-        visible: RightBarState.calendarOpen
+        visible: RightBarState.calendarOpen && !RightBarState.indicatorVisible
         color: "transparent"
         grabFocus: false
 

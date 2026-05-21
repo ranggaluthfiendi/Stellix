@@ -15,6 +15,7 @@ PopupWindow {
     property var closeCallback: null
     property var trackedNotifs: []
     visible: false
+    property real barRightPanelHeight: 0
 
     property bool slideIn: false
     property real slideY: -Theme.dp(30)
@@ -32,12 +33,13 @@ PopupWindow {
 
     property int expandedNotifIndex: -1
 
-    readonly property real maxListH: Theme.dp(220)
+    readonly property real refPanelH: root.barRightPanelHeight > 0 ? root.barRightPanelHeight : Theme.dp(380)
+    readonly property real maxListH: root.refPanelH - Theme.dp(80)
     readonly property real listH: root.calcListH()
     readonly property bool needsScroll: root.listH > root.maxListH
 
     implicitWidth: Theme.dp(372)
-    implicitHeight: Theme.dp(32) + Theme.dp(4) + root.catRowH + Theme.dp(1) + root.maxListH + Theme.dp(8)
+    implicitHeight: root.calcTotalH()
     grabFocus: false
 
     property real s: Scales.uiScale
@@ -51,6 +53,13 @@ PopupWindow {
         } else {
             root.expandedNotifIndex = -1
         }
+    }
+
+    function calcTotalH() {
+        var headerH = Theme.dp(32) + Theme.dp(4) + root.catRowH + Theme.dp(1)
+        var footerH = Theme.dp(8)
+        var actualListH = root.needsScroll ? root.maxListH : root.listH
+        return headerH + actualListH + footerH
     }
 
     function calcListH() {

@@ -28,19 +28,13 @@ Item {
         var names = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
         return names[now.getMonth()]
     }
-    readonly property string dateTimeStr: {
-        var h = now.getHours()
-        var m = now.getMinutes()
-        return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m + ", " + dayName + " " + now.getDate() + " " + monthNameFull + " " + now.getFullYear()
-    }
 
-    readonly property real headerH: Theme.dp(28)
-    readonly property real dividerH: Theme.dp(1)
-    readonly property real weekdayH: Theme.dp(14)
-    readonly property real gridH: Theme.dp(150)
+    readonly property real headerH: Theme.dp(56)
+    readonly property real weekdayH: Theme.dp(18)
+    readonly property real gridH: Theme.dp(168)
     readonly property real footerH: Theme.dp(28)
-    readonly property real navH: Theme.dp(26)
-    readonly property real totalH: headerH + dividerH + weekdayH + gridH + dividerH + footerH + dividerH + navH
+    readonly property real navH: Theme.dp(32)
+    readonly property real totalH: headerH + weekdayH + gridH + footerH + navH
 
     implicitHeight: totalH
 
@@ -96,18 +90,60 @@ Item {
             anchors.fill: parent
             spacing: 0
 
-            // ── Top: datetime ──
+            // ── Header: Day number + time ──
             Item {
                 width: parent.width
-                height: Theme.dp(28)
+                height: root.headerH
 
-                Text {
-                    anchors.centerIn: parent
-                    text: root.dateTimeStr
-                    color: Theme.textPrimary
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
-                    font.weight: Typography.weightMedium || Font.Normal
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.margins: Theme.dp(10)
+                    spacing: Theme.dp(10)
+
+                    Rectangle {
+                        Layout.preferredWidth: Theme.dp(42)
+                        Layout.preferredHeight: Theme.dp(42)
+                        color: Theme.accent
+                        radius: 0
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.now.getDate()
+                            color: Theme.bgPrimary
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round(18 * s)
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        spacing: Theme.dp(2)
+
+                        Item { Layout.fillHeight: true }
+
+                        Text {
+                            text: {
+                                var h = root.now.getHours()
+                                var m = root.now.getMinutes()
+                                return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m
+                            }
+                            color: Theme.textPrimary
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round(14 * s)
+                            font.weight: Font.Bold
+                        }
+
+                        Text {
+                            text: root.dayName + ", " + root.now.getDate() + " " + root.monthNameFull + " " + root.now.getFullYear()
+                            color: Theme.textMuted
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round(9 * s)
+                        }
+
+                        Item { Layout.fillHeight: true }
+                    }
                 }
             }
 
@@ -120,7 +156,7 @@ Item {
             // ── Weekday headers ──
             Item {
                 width: parent.width
-                height: Theme.dp(14)
+                height: root.weekdayH
 
                 Repeater {
                     model: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
@@ -135,15 +171,22 @@ Item {
                         text: modelData
                         color: Theme.textMuted
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                        font.pixelSize: Math.round(8 * s)
+                        font.weight: Font.Medium
                     }
                 }
+            }
+
+            Rectangle {
+                width: parent.width
+                height: Theme.dp(1)
+                color: Theme.border
             }
 
             // ── Calendar grid ──
             Item {
                 width: parent.width
-                height: Theme.dp(150)
+                height: root.gridH
 
                 readonly property real cellW: width / 7
                 readonly property real cellH: height / 6
@@ -168,9 +211,9 @@ Item {
                         width: parent.cellW
                         height: parent.cellH
                         color: {
-                            if (cellMouse.containsMouse && !isToday) return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
                             if (isToday) return Theme.accent
-                            if (pinned) return Qt.rgba(1, 1, 1, 0.06)
+                            if (cellMouse.containsMouse && inMonth) return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
+                            if (pinned) return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
                             return "transparent"
                         }
                         radius: 0
@@ -185,11 +228,12 @@ Item {
                             color: {
                                 if (!inMonth) return Theme.textMuted
                                 if (isToday) return Theme.bgPrimary
+                                if (pinned) return Theme.accent
                                 return Theme.textPrimary
                             }
                             font.family: Typography.fontFamily
-                            font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
-                            font.weight: isToday ? (Typography.weightBold || Font.Bold) : (Typography.weightRegular || Font.Normal)
+                            font.pixelSize: Math.round(10 * s)
+                            font.weight: isToday ? Font.Bold : Font.Normal
                         }
 
                         MouseArea {
@@ -212,20 +256,20 @@ Item {
             // ── Footer: pinned count + clear ──
             Item {
                 width: parent.width
-                height: Theme.dp(28)
+                height: root.footerH
 
                 RowLayout {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: Theme.dp(6)
+                    anchors.margins: Theme.dp(4)
                     spacing: Theme.dp(4)
 
                     Text {
                         text: root.pinnedCountInShownMonth() > 0 ? (root.pinnedCountInShownMonth() + " pinned") : "Click a date to pin"
                         color: Theme.textMuted
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
+                        font.pixelSize: Math.round(8 * s)
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -261,67 +305,34 @@ Item {
                 height: root.navH
 
                 RowLayout {
-                    anchors.centerIn: parent
-                    spacing: Theme.dp(4)
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.margins: Theme.dp(4)
+                    spacing: 0
 
-                    Rectangle {
-                        Layout.preferredWidth: Theme.dp(22)
-                        Layout.preferredHeight: Theme.dp(22)
-                        color: chevronsLeftMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
-                        border.width: 1
-                        border.color: chevronsLeftMouse.containsMouse ? Theme.textPrimary : Theme.border
-                        radius: 0
+                    // Left side: prev controls
+                    RowLayout {
+                        spacing: Theme.dp(2)
+                        Layout.alignment: Qt.AlignLeft
 
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
-                        }
-
-                        Loader {
-                            anchors.centerIn: parent
-                            sourceComponent: chevronsLeftComp
-                        }
-                        Component { id: chevronsLeftComp; IconChevronsLeft { iconSize: Theme.dp(12); iconColor: chevronsLeftMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
-
-                        MouseArea {
-                            id: chevronsLeftMouse
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
+                        NavButton {
+                            iconSource: chevronsLeftComp
                             onClicked: RightBarState.calendarMonthOffset -= 12
                         }
-                    }
 
-                    Rectangle {
-                        Layout.preferredWidth: Theme.dp(22)
-                        Layout.preferredHeight: Theme.dp(22)
-                        color: chevronLeftMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
-                        border.width: 1
-                        border.color: chevronLeftMouse.containsMouse ? Theme.textPrimary : Theme.border
-                        radius: 0
-
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
-                        }
-
-                        Loader {
-                            anchors.centerIn: parent
-                            sourceComponent: chevronLeftComp
-                        }
-                        Component { id: chevronLeftComp; IconChevronLeft { iconSize: Theme.dp(12); iconColor: chevronLeftMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
-
-                        MouseArea {
-                            id: chevronLeftMouse
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
+                        NavButton {
+                            iconSource: chevronLeftComp
                             onClicked: RightBarState.prevMonth()
                         }
                     }
 
-                    // ── Month label (tengah) ──
+                    // Center: month label
+                    Item { Layout.fillWidth: true }
+
                     Rectangle {
-                        Layout.preferredWidth: Theme.dp(86)
-                        Layout.preferredHeight: Theme.dp(22)
+                        Layout.preferredWidth: Theme.dp(78)
+                        Layout.preferredHeight: Theme.dp(20)
                         color: monthMouse.containsMouse
                             ? (root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
                             : (root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.bgSecondary : Theme.bgPrimary)
@@ -334,13 +345,12 @@ Item {
                         }
 
                         Text {
-                            id: monthLabel
                             anchors.centerIn: parent
                             text: root.monthNameShort(root.shownMonth) + " " + root.shownYear
                             color: root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.accent : Theme.textPrimary
                             font.family: Typography.fontFamily
-                            font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
-                            font.weight: Typography.weightBold || Font.Bold
+                            font.pixelSize: Math.round(8 * s)
+                            font.weight: Font.Bold
                         }
 
                         MouseArea {
@@ -352,56 +362,20 @@ Item {
                         }
                     }
 
-                    Rectangle {
-                        Layout.preferredWidth: Theme.dp(22)
-                        Layout.preferredHeight: Theme.dp(22)
-                        color: chevronRightMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
-                        border.width: 1
-                        border.color: chevronRightMouse.containsMouse ? Theme.textPrimary : Theme.border
-                        radius: 0
+                    // Right side: next controls
+                    Item { Layout.fillWidth: true }
 
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
-                        }
+                    RowLayout {
+                        spacing: Theme.dp(2)
+                        Layout.alignment: Qt.AlignRight
 
-                        Loader {
-                            anchors.centerIn: parent
-                            sourceComponent: chevronRightComp
-                        }
-                        Component { id: chevronRightComp; IconChevronRight { iconSize: Theme.dp(12); iconColor: chevronRightMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
-
-                        MouseArea {
-                            id: chevronRightMouse
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
+                        NavButton {
+                            iconSource: chevronRightComp
                             onClicked: RightBarState.nextMonth()
                         }
-                    }
 
-                    Rectangle {
-                        Layout.preferredWidth: Theme.dp(22)
-                        Layout.preferredHeight: Theme.dp(22)
-                        color: chevronsRightMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
-                        border.width: 1
-                        border.color: chevronsRightMouse.containsMouse ? Theme.textPrimary : Theme.border
-                        radius: 0
-
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
-                        }
-
-                        Loader {
-                            anchors.centerIn: parent
-                            sourceComponent: chevronsRightComp
-                        }
-                        Component { id: chevronsRightComp; IconChevronsRight { iconSize: Theme.dp(12); iconColor: chevronsRightMouse.containsMouse ? Theme.textPrimary : Theme.textPrimary } }
-
-                        MouseArea {
-                            id: chevronsRightMouse
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
+                        NavButton {
+                            iconSource: chevronsRightComp
                             onClicked: RightBarState.calendarMonthOffset += 12
                         }
                     }
@@ -409,4 +383,37 @@ Item {
             }
         }
     }
+
+    component NavButton: Rectangle {
+        property var iconSource
+        signal clicked
+        Layout.preferredWidth: Theme.dp(22)
+        Layout.preferredHeight: Theme.dp(22)
+        color: navMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
+        border.width: 1
+        border.color: navMouse.containsMouse ? Theme.textPrimary : Theme.border
+        radius: 0
+
+        Behavior on color {
+            ColorAnimation { duration: 120 }
+        }
+
+        Loader {
+            anchors.centerIn: parent
+            sourceComponent: iconSource
+        }
+
+        MouseArea {
+            id: navMouse
+            anchors.fill: parent
+            cursorShape: Qt.PointingHandCursor
+            hoverEnabled: true
+            onClicked: parent.clicked()
+        }
+    }
+
+    Component { id: chevronsLeftComp; IconChevronsLeft { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+    Component { id: chevronLeftComp; IconChevronLeft { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+    Component { id: chevronRightComp; IconChevronRight { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+    Component { id: chevronsRightComp; IconChevronsRight { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
 }

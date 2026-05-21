@@ -578,5 +578,14 @@ Rectangle {
         function onCurrentWallpaperPathChanged() {
             root.playTransition()
         }
+        function onTransitionTypeChanged() {
+            var idx = root.animNames.indexOf(wallpaper.transitionType)
+            if (idx >= 0) root.animIndex = idx
+        }
+    }
+
+    Component.onCompleted: {
+        var idx = root.animNames.indexOf(wallpaper.transitionType)
+        if (idx >= 0) root.animIndex = idx
     }
 }
