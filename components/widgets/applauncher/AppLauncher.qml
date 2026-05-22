@@ -25,6 +25,8 @@ PanelWindow {
     property bool followCursor: true
 
     readonly property var commands: [
+        { name: "Stellix Control", desc: "Advanced System Settings", trigger: "", icon: "preferences-system" },
+        { name: "/settings", desc: "Open Stellix Control Center", trigger: "/", icon: "preferences-system" },
         { name: "/calc", desc: "Calculator", trigger: "/", icon: "accessories-calculator" },
         { name: "/color", desc: "Color scheme settings", trigger: "/", icon: "preferences-desktop-color" },
         { name: "/currency", desc: "Currency converter", trigger: "/", icon: "accessories-calculator" },
@@ -40,6 +42,7 @@ PanelWindow {
         { name: ">power", desc: "Power menu", trigger: ">", icon: "system-shutdown" },
         { name: ">record", desc: "Screen recording", trigger: ">", icon: "media-record" },
         { name: ">screenshot", desc: "Take screenshot", trigger: ">", icon: "camera-photo" },
+        { name: ">settings", desc: "System Settings", trigger: ">", icon: "preferences-system" },
         { name: ">wallpaper", desc: "Switch wallpaper", trigger: ">", icon: "preferences-desktop-wallpaper" },
         { name: "?calc", desc: "Calculator", trigger: "?", icon: "accessories-calculator" },
         { name: "?color", desc: "Color scheme settings", trigger: "?", icon: "preferences-desktop-color" },
@@ -106,6 +109,11 @@ PanelWindow {
             case "wallpaper":
                 root.wallpaperMode = true
                 root.viewMode = 0
+                break
+            case "settings":
+                RightBarState.closeAll()
+                RightBarState.settingsOpen = true
+                closeLauncher()
                 break
             case "color":
                 root.viewMode = 5
@@ -303,6 +311,13 @@ PanelWindow {
                                     root.viewMode = 5
                                     searchInput.text = ""
                                     launcher.searchText = ""
+                                } else if (cmd === ">settings" || cmd === "/settings" || cmd === "?settings") {
+                                    root.showCommands = false
+                                    RightBarState.closeAll()
+                                    RightBarState.settingsOpen = true
+                                    searchInput.text = ""
+                                    launcher.searchText = ""
+                                    closeLauncher()
                                 }
                             } else {
                                 root.showCommands = false
@@ -955,6 +970,10 @@ PanelWindow {
                                         var cmd = modelData.name
                                         root.executeCommand(cmd)
                                         root.showCommands = false
+                                    } else if (modelData.name === "Stellix Control") {
+                                        RightBarState.closeAll()
+                                        RightBarState.settingsOpen = true
+                                        closeLauncher()
                                     } else {
                                         launcher.launchApp(modelData)
                                         closeLauncher()

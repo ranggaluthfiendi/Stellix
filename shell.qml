@@ -6,6 +6,7 @@ import qs.screens
 import qs.services
 import qs.components.widgets.systemtray
 import qs.components.widgets.rightbar
+import qs.components.widgets.rightbar.services
 import qs.components.widgets.workspaceswitcher
 import qs.components.widgets.applauncher
 import qs.modules.bar
@@ -44,6 +45,18 @@ ShellRoot {
         id: colorService
     }
 
+    SystemInfoService {
+        id: systemInfo
+    }
+
+    PipewireService {
+        id: pwService
+    }
+
+    SettingsData {
+        id: settingsData
+    }
+
     RecordService {
         id: recordService
     }
@@ -52,8 +65,33 @@ ShellRoot {
         id: appLauncher
     }
 
+    SettingsPopup {
+        id: settingsPopup
+        wallpaper: wallpaper
+        systemInfo: systemInfo
+        pwService: pwService
+        colorService: colorService
+        settingsData: settingsData
+    }
+
     GuidePopup {
         id: guidePopup
+    }
+
+    GlobalShortcut {
+        id: settingsShortcut
+        name: "system-settings"
+        description: "Open system settings"
+        onPressedChanged: {
+            if (pressed) {
+                if (RightBarState.settingsOpen) {
+                    RightBarState.settingsOpen = false
+                } else {
+                    RightBarState.closeAll()
+                    RightBarState.settingsOpen = true
+                }
+            }
+        }
     }
 
     GlobalShortcut {

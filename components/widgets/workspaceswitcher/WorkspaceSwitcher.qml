@@ -14,6 +14,8 @@ PanelWindow {
 
     signal closeRequested()
 
+    property real s: Scales.uiScale
+
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: wsService.commandRunning ? WlrKeyboardFocus.None : WlrKeyboardFocus.Exclusive
     WlrLayershell.exclusiveZone: -1
@@ -110,6 +112,59 @@ PanelWindow {
             // ── Options Panel ──
             OptionsPanel {
                 wsService: wsService
+            }
+
+            // ── Keyboard Hints (Footer) ──
+            RowLayout {
+                id: footerHint
+                Layout.fillWidth: true
+                Layout.preferredHeight: wsService.hintsH
+                spacing: Theme.dp(6)
+                Layout.topMargin: Theme.dp(2)
+                Layout.bottomMargin: Theme.dp(2)
+
+                Text {
+                    text: "←→ Navigate"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
+
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
+                Text {
+                    text: "Enter Select"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
+
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
+                Text {
+                    text: "1-5 Switch"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
+
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
+                Text {
+                    text: "X Options"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
+
+                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
+
+                Text {
+                    text: "Esc Close"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                }
             }
         }
     }

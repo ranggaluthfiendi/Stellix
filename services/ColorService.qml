@@ -137,6 +137,19 @@ Item {
         root.saveState()
     }
 
+    Connections {
+        target: Theme
+        function onIsDarkChanged() {
+            if (root.initDone) {
+                var newScheme = Theme.isDark ? "dark" : "light"
+                if (root.currentScheme !== newScheme) {
+                    root.currentScheme = newScheme
+                    root.extractFromWallpaper("")
+                }
+            }
+        }
+    }
+
     StdioCollector { id: matugenCollector }
 
     Process {

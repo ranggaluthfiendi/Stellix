@@ -169,9 +169,10 @@ Item {
     readonly property real previewW: (popupInnerW - (visibleCount - 1) * previewGap) / visibleCount
     readonly property real previewH: previewW / monitorAspect
     readonly property real navH: Theme.dp(30)
+    readonly property real hintsH: Theme.dp(24)
     readonly property real overlayH: {
-        var h = previewH + navH + Theme.dp(40);
-        if (expandablePanelOpen) h += calcExpandHeight();
+        var h = previewH + navH + hintsH + Theme.dp(48);
+        if (expandablePanelOpen) h += calcExpandHeight() + Theme.dp(8);
         return h;
     }
 

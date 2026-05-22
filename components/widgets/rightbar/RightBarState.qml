@@ -13,6 +13,7 @@ Item {
     property bool calendarOpen: false
     property bool workspaceSwitcherOpen: false
     property bool launcherOpen: false
+    property bool settingsOpen: false
     property bool guideOpen: false
     property bool dndEnabled: false
     property int calendarMonthOffset: 0
@@ -90,6 +91,7 @@ Item {
         calendarOpen = false
         workspaceSwitcherOpen = false
         launcherOpen = false
+        settingsOpen = false
         guideOpen = false
     }
 
