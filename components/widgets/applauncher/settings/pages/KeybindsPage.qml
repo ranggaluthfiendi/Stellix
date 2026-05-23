@@ -37,7 +37,8 @@ VabContentPage {
     focusIndex: page.contentFocusIndex
 
     ScrollView {
-        anchors.fill: parent
+        Layout.fillWidth: true
+        Layout.fillHeight: true
         clip: true
         contentWidth: availableWidth
 

@@ -67,6 +67,7 @@ Rectangle {
             Layout.fillWidth: true
             spacing: Theme.dp(16)
             
+            // Title/Desc on Left
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignVCenter
@@ -91,14 +92,10 @@ Rectangle {
                 }
             }
             
-            // Spacer to push actions to the right
-            Item { Layout.fillWidth: true; Layout.minimumWidth: Theme.dp(10) }
-            
             RowLayout {
                 id: headerActionsContainer
                 Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
                 spacing: Theme.dp(10)
-                // Important: children will be buttons, switches, etc.
             }
         }
 

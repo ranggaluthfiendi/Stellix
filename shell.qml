@@ -16,6 +16,8 @@ ShellRoot {
     Screen {}
     SysTrayFocusHandler {}
     SysTrayGlobalOverlay {}
+    CalendarGlobalOverlay {}
+    WelcomeScreen { settingsData: settingsData }
 
     AppLauncherService {
         id: launcher
@@ -87,6 +89,15 @@ ShellRoot {
 
     SettingsPopup {
         id: settingsPopup
+        wallpaper: wallpaper
+        systemInfo: systemInfo
+        pwService: pwService
+        colorService: colorService
+        settingsData: settingsData
+    }
+
+    SettingsWindow {
+        id: settingsWindow
         wallpaper: wallpaper
         systemInfo: systemInfo
         pwService: pwService

@@ -1,12 +1,18 @@
 pragma Singleton
 import QtQuick
+import qs.components.widgets.rightbar
 
 QtObject {
     property var openedMenu: null
+    onOpenedMenuChanged: if (openedMenu) RightBarState.calendarOpen = false
+
     property var openedSubmenuEntry: null
     property var openedSubmenuPopup: null
     property var openedOverflow: null
+    onOpenedOverflowChanged: if (openedOverflow) RightBarState.calendarOpen = false
+
     property var openedTrayPanel: null
+    onOpenedTrayPanelChanged: if (openedTrayPanel) RightBarState.calendarOpen = false
 
     property bool blockClose: false
 

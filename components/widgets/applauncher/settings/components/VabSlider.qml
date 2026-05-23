@@ -9,8 +9,10 @@ Slider {
     property bool muted: false
     
     // Allow external layout control
-    Layout.fillWidth: false
-    Layout.preferredWidth: Theme.dp(260)
+    Layout.fillWidth: true
+    Layout.minimumWidth: Theme.dp(100)
+    Layout.maximumWidth: Theme.dp(300)
+    Layout.preferredWidth: Theme.dp(200)
     Layout.preferredHeight: Theme.dp(24)
     stepSize: 0.02
     

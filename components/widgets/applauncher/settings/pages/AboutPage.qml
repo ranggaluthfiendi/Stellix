@@ -6,15 +6,22 @@ import qs.services
 import qs.components.elements
 import "../components"
 
-Item {
+VabContentPage {
     id: page
     
     // External data passed from main SettingsPopup
     property var systemInfo: null
     
+    // Properties for VabContentPage
+    property int currentCategory: 0
+    property bool focusInContent: false
+    property int contentFocusIndex: 0
+    
+    active: page.focusInContent && page.currentCategory === 6
+    focusIndex: page.contentFocusIndex
+
     ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: Theme.dp(20)
+        Layout.fillWidth: true
         spacing: Theme.dp(30)
         
         // --- Stellix Shell Section ---
@@ -137,6 +144,7 @@ Item {
 
     // Helper component for tech stack items
     component VabTechItem: Item {
+        id: techItem
         property string name: ""
         property string url: ""
         property string icon: ""
@@ -146,16 +154,16 @@ Item {
         ColumnLayout {
             anchors.centerIn: parent; spacing: 10
             Image { 
-                source: root.icon !== "" ? root.icon : ""
-                visible: root.icon !== ""
+                source: (techItem.icon && techItem.icon !== "") ? techItem.icon : ""
+                visible: (techItem.icon && techItem.icon !== "")
                 Layout.preferredWidth: Theme.dp(54); Layout.preferredHeight: Theme.dp(54); fillMode: Image.PreserveAspectFit; Layout.alignment: Qt.AlignHCenter 
             }
-            Text { text: root.name; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); font.weight: Font.Bold; Layout.alignment: Qt.AlignHCenter }
+            Text { text: techItem.name ? techItem.name : ""; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); font.weight: Font.Bold; Layout.alignment: Qt.AlignHCenter }
         }
         
         MouseArea {
             id: techM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-            onClicked: if(root.url !== "") Quickshell.execDetached({command: ["xdg-open", root.url]})
+            onClicked: if(techItem.url && techItem.url !== "") Quickshell.execDetached({command: ["xdg-open", techItem.url]})
         }
     }
 }

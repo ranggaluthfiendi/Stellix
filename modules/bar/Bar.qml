@@ -200,10 +200,10 @@ Scope {
         }
     }
 
-    // ── Overlay to close calendar/VB indicator ──
+    // ── Overlay to close VB indicator ──
     PanelWindow {
-        id: calendarOutsideOverlay
-        visible: RightBarState.calendarOpen || RightBarState.indicatorVisible
+        id: indicatorOutsideOverlay
+        visible: RightBarState.indicatorVisible
         color: "transparent"
 
         anchors {
@@ -214,10 +214,10 @@ Scope {
         }
 
         Component.onCompleted: {
-            if (calendarOutsideOverlay.WlrLayershell) {
-                calendarOutsideOverlay.WlrLayershell.layer = WlrLayer.Top
-                calendarOutsideOverlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
-                calendarOutsideOverlay.WlrLayershell.exclusiveZone = -1
+            if (indicatorOutsideOverlay.WlrLayershell) {
+                indicatorOutsideOverlay.WlrLayershell.layer = WlrLayer.Top
+                indicatorOutsideOverlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
+                indicatorOutsideOverlay.WlrLayershell.exclusiveZone = -1
             }
         }
 
@@ -225,7 +225,6 @@ Scope {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
             onPressed: {
-                RightBarState.calendarOpen = false
                 RightBarState.indicatorVisible = false
             }
         }
@@ -263,16 +262,6 @@ Scope {
             return Math.round(pos.x + root.clockItem.width / 2 - vbIndicator.implicitWidth / 2)
         } catch(e) {
             return Math.round((bar.width - vbIndicator.implicitWidth) / 2)
-        }
-    }
-
-    function computeCalendarX() {
-        if (!root.clockItem) return Math.round((bar.width - Theme.dp(244)) / 2)
-        try {
-            var pos = root.clockItem.mapToGlobal(0, 0)
-            return Math.round(pos.x + root.clockItem.width / 2 - Theme.dp(244) / 2)
-        } catch(e) {
-            return Math.round((bar.width - Theme.dp(244)) / 2)
         }
     }
 
@@ -322,62 +311,6 @@ Scope {
             anchors.fill: parent
             isPinned: root.pinned
             animating: root._pinIndicatorAnimating
-        }
-    }
-
-    // ── Calendar popup ──
-    PopupWindow {
-        id: calendarPopup
-        visible: RightBarState.calendarOpen && !RightBarState.indicatorVisible
-        color: "transparent"
-        grabFocus: false
-
-        anchor.window: clockAnchorWin
-        anchor.rect.x: root.computeCalendarX()
-        anchor.rect.y: root.isBottom
-            ? -(implicitHeight + Theme.dp(4))
-            : (root.clockItem ? root.clockItem.height : bar.height) + Theme.dp(4)
-
-        implicitWidth: Theme.dp(244)
-        implicitHeight: calendarCard.implicitHeight
-
-        Rectangle {
-            id: calendarBg
-            anchors.fill: parent
-            color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.calendarOpacity)
-            border.width: 1
-            border.color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, BarLayoutState.calendarOpacity)
-            radius: 0
-
-            property real animOpacity: 0
-            opacity: animOpacity
-            y: root.isBottom ? Theme.dp(8) : -Theme.dp(8)
-
-            states: State {
-                name: "visible"
-                when: calendarPopup.visible
-                PropertyChanges { target: calendarBg; animOpacity: 1; y: 0 }
-            }
-
-            transitions: [
-                Transition {
-                    from: ""
-                    to: "visible"
-                    NumberAnimation { target: calendarBg; property: "animOpacity"; duration: 180; easing.type: Easing.OutCubic }
-                    NumberAnimation { target: calendarBg; property: "y"; duration: 200; easing.type: Easing.OutCubic }
-                },
-                Transition {
-                    from: "visible"
-                    to: ""
-                    NumberAnimation { target: calendarBg; property: "animOpacity"; duration: 140; easing.type: Easing.InCubic }
-                    NumberAnimation { target: calendarBg; property: "y"; duration: 140; easing.type: Easing.InCubic }
-                }
-            ]
-
-            CalendarCard {
-                id: calendarCard
-                anchors.fill: parent
-            }
         }
     }
 }

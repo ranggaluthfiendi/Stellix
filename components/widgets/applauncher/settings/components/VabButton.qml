@@ -8,7 +8,9 @@ Rectangle {
     property string text: ""
     signal clicked()
     Layout.preferredHeight: Theme.dp(34)
-    Layout.preferredWidth: Math.max(bt.implicitWidth + Theme.dp(24), Theme.dp(80))
+    Layout.preferredWidth: bt.implicitWidth + Theme.dp(24)
+    implicitWidth: bt.implicitWidth + Theme.dp(24)
+    implicitHeight: Theme.dp(34)
     radius: 0
     color: btnMouse.pressed ? Theme.accent : (btnMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.12) : "transparent")
     border.width: 1

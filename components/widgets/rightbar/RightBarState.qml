@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 import QtCore
+import qs.services
 
 Item {
     id: root
@@ -10,7 +11,20 @@ Item {
     visible: false
 
     property bool open: false
+    onOpenChanged: {
+        if (open) {
+            calendarOpen = false
+            SysTrayState.forceCloseAll()
+        }
+    }
+
     property bool calendarOpen: false
+    onCalendarOpenChanged: {
+        if (calendarOpen) {
+            open = false
+            SysTrayState.forceCloseAll()
+        }
+    }
     property bool workspaceSwitcherOpen: false
     property bool launcherOpen: false
     property bool settingsOpen: false
@@ -22,6 +36,7 @@ Item {
     property int notifCount: 0
 
     signal launcherToggleRequested()
+    signal welcomeRequested()
 
     // Volume/Brightness indicator
     property bool indicatorVisible: false

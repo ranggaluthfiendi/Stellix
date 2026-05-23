@@ -15,17 +15,24 @@ Item {
     property bool workspaceExp: true
     property bool systemExp: true
 
+    property bool showWelcomeScreen: true
+    property bool settingsFloating: false
+
     onAppearanceExpChanged: save()
     onConnectivityExpChanged: save()
     onWorkspaceExpChanged: save()
     onSystemExpChanged: save()
+    onShowWelcomeScreenChanged: save()
+    onSettingsFloatingChanged: save()
 
     function save() {
         var data = {
             appearanceExp: root.appearanceExp,
             connectivityExp: root.connectivityExp,
             workspaceExp: root.workspaceExp,
-            systemExp: root.systemExp
+            systemExp: root.systemExp,
+            showWelcomeScreen: root.showWelcomeScreen,
+            settingsFloating: root.settingsFloating
         }
         var json = JSON.stringify(data)
         writeProcess.exec(["sh", "-c", "mkdir -p $(dirname '" + root.savePath + "') && echo '" + json + "' > '" + root.savePath + "'"])
@@ -49,6 +56,8 @@ Item {
                     if (data.hasOwnProperty("connectivityExp")) root.connectivityExp = data.connectivityExp
                     if (data.hasOwnProperty("workspaceExp")) root.workspaceExp = data.workspaceExp
                     if (data.hasOwnProperty("systemExp")) root.systemExp = data.systemExp
+                    if (data.hasOwnProperty("showWelcomeScreen")) root.showWelcomeScreen = data.showWelcomeScreen
+                    if (data.hasOwnProperty("settingsFloating")) root.settingsFloating = data.settingsFloating
                 } catch (e) {}
             }
         }

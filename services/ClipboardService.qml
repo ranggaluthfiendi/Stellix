@@ -14,7 +14,7 @@ Item {
     property int totalCount: 0
     property int pinnedCount: 0
 
-    property string _savePath: Quickshell.configPath("savedata/clipboard-pins.json")
+    property string _savePath: Quickshell.shellPath("savedata/clipboard-pins.json")
 
     Component.onCompleted: {
         loadPins()

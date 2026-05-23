@@ -4,12 +4,14 @@ import QtQuick.Controls
 import Quickshell
 import qs.config
 import qs.services
+import qs.components.widgets.rightbar
 import "../components"
 
 VabContentPage {
     id: page
     
     // External data
+    property var settingsData: null
     property var systemInfo: null
     property int currentCategory: 0
     property bool focusInContent: false
@@ -37,18 +39,65 @@ VabContentPage {
             } 
         }
 
+        VabSettingsCard {
+            itemIndex: 1
+            isFocused: page.focusInContent && page.contentFocusIndex === 1
+            title: "Welcome Screen"; desc: "Show a welcoming screen on startup"
+            headerActions: RowLayout {
+                spacing: Theme.dp(8)
+                VabButton {
+                    text: "Show Now"
+                    onClicked: {
+                        RightBarState.settingsOpen = false
+                        RightBarState.welcomeRequested()
+                    }
+                }
+                VabSwitch {
+                    checked: settingsData ? settingsData.showWelcomeScreen : true
+                    onToggled: if(settingsData) settingsData.showWelcomeScreen = !settingsData.showWelcomeScreen
+                }
+            }
+        }
+
+        VabSettingsCard {
+            itemIndex: 2
+            isFocused: page.focusInContent && page.contentFocusIndex === 2
+            title: "Windowed Settings"; desc: "Use a floating window instead of an overlay"
+            headerActions: VabSwitch {
+                checked: settingsData ? settingsData.settingsFloating : false
+                onToggled: if(settingsData) settingsData.settingsFloating = !settingsData.settingsFloating
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Theme.dp(36)
+                color: Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.1)
+                border.width: 1; border.color: Theme.danger; radius: 0
+                visible: settingsData ? settingsData.settingsFloating : false
+                
+                RowLayout {
+                    anchors.fill: parent; anchors.margins: Theme.dp(8); spacing: Theme.dp(8)
+                    Text { text: "⚠"; color: Theme.danger; font.pixelSize: Theme.dp(14); font.weight: Font.Bold }
+                    Text {
+                        text: "EXPERIMENTAL: This mode may cause UI scaling or focus issues on some monitors."
+                        color: Theme.danger; font.pixelSize: Theme.dp(8); Layout.fillWidth: true; wrapMode: Text.WordWrap
+                    }
+                }
+            }
+        }
+
         VabSectionHeader { title: "Hardware Details"; Layout.topMargin: Theme.dp(10) }
 
         // --- Kernel ---
-        VabSettingsCard { itemIndex: 1; isFocused: page.focusInContent && page.contentFocusIndex === 1; title: "Kernel Version"; desc: page.systemInfo ? page.systemInfo.kernel : "Unknown" }
+        VabSettingsCard { itemIndex: 3; isFocused: page.focusInContent && page.contentFocusIndex === 3; title: "Kernel Version"; desc: page.systemInfo ? page.systemInfo.kernel : "Unknown" }
         
         // --- CPU ---
-        VabSettingsCard { itemIndex: 2; isFocused: page.focusInContent && page.contentFocusIndex === 2; title: "CPU Model"; desc: page.systemInfo ? page.systemInfo.cpuModel : "Unknown" }
+        VabSettingsCard { itemIndex: 4; isFocused: page.focusInContent && page.contentFocusIndex === 4; title: "CPU Model"; desc: page.systemInfo ? page.systemInfo.cpuModel : "Unknown" }
 
         // --- GPU ---
         VabSettingsCard { 
-            itemIndex: 3
-            isFocused: page.focusInContent && page.contentFocusIndex === 3
+            itemIndex: 5
+            isFocused: page.focusInContent && page.contentFocusIndex === 5
             title: "GPU"
             
             ColumnLayout {
@@ -72,22 +121,36 @@ VabContentPage {
             }
         }
         
-        VabSettingsCard { itemIndex: 4; isFocused: page.focusInContent && page.contentFocusIndex === 4; title: "Storage Usage"; desc: page.systemInfo ? "Root Partition: " + page.systemInfo.storageInfo : "Unknown" }
+        VabSettingsCard { itemIndex: 6; isFocused: page.focusInContent && page.contentFocusIndex === 6; title: "Storage Usage"; desc: page.systemInfo ? "Root Partition: " + page.systemInfo.storageInfo : "Unknown" }
 
         VabSectionHeader { title: "Live Metrics"; Layout.topMargin: Theme.dp(10) }
         
         RowLayout {
-            spacing: Theme.dp(12); Layout.fillWidth: true
-            VabInfoBox { label: "Uptime"; value: page.systemInfo ? page.systemInfo.uptime : "0h 0m" }
-            VabInfoBox { label: "RAM Used"; value: page.systemInfo ? Math.round(page.systemInfo.memUsed) + " MB" : "0 MB" }
-            VabInfoBox { label: "RAM Total"; value: page.systemInfo ? Math.round(page.systemInfo.memTotal) + " MB" : "0 MB" }
+            spacing: Theme.dp(12)
+            Layout.fillWidth: true
+            
+            VabInfoBox { 
+                label: "Uptime"
+                value: page.systemInfo ? page.systemInfo.uptime : "0h 0m"
+                Layout.fillWidth: true
+            }
+            VabInfoBox { 
+                label: "RAM Used"
+                value: page.systemInfo ? Math.round(page.systemInfo.memUsed) + " MB" : "0 MB"
+                Layout.fillWidth: true
+            }
+            VabInfoBox { 
+                label: "RAM Total"
+                value: page.systemInfo ? Math.round(page.systemInfo.memTotal) + " MB" : "0 MB"
+                Layout.fillWidth: true
+            }
         }
         
         VabSectionHeader { title: "Maintenance"; Layout.topMargin: Theme.dp(10) }
         
         VabSettingsCard { 
-            itemIndex: 5
-            isFocused: page.focusInContent && page.contentFocusIndex === 5
+            itemIndex: 7
+            isFocused: page.focusInContent && page.contentFocusIndex === 7
             title: "System Updates"; desc: page.systemInfo ? page.systemInfo.updatesCount + " packages pending" : "0 packages pending"
             
             headerActions: RowLayout {
