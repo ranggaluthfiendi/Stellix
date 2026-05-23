@@ -17,6 +17,7 @@ Item {
 
     readonly property var currentWallpaperPath: wallpapers.length > 0 ? wallpapers[root.currentIndex] : ""
     readonly property string statePath: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata/wallpaper-state.json"
+    readonly property string defaultDir: Quickshell.env("HOME") + "/Pictures/Wallpapers"
 
     StdioCollector { id: lsCollector }
     StdioCollector { id: applyCollector }
@@ -32,6 +33,7 @@ Item {
                     if (data.transitionType) root.transitionType = data.transitionType
                     if (data.transitionDuration) root.transitionDuration = data.transitionDuration
                     if (data.transitionFps) root.transitionFps = data.transitionFps
+                    if (data.wallpaperDir) root.wallpaperDir = data.wallpaperDir
                 } catch (e) {}
             }
         }
@@ -47,7 +49,8 @@ Item {
         var json = JSON.stringify({
             transitionType: root.transitionType,
             transitionDuration: root.transitionDuration,
-            transitionFps: root.transitionFps
+            transitionFps: root.transitionFps,
+            wallpaperDir: root.wallpaperDir
         }).replace(/'/g, "'\\''")
 
         writeProcess.exec(["sh", "-c",
@@ -59,7 +62,8 @@ Item {
         var fallback = JSON.stringify({
             transitionType: "fade",
             transitionDuration: 0.5,
-            transitionFps: 60
+            transitionFps: 60,
+            wallpaperDir: root.defaultDir
         }).replace(/'/g, "'\\''")
 
         readProcess.exec(["sh", "-c",
@@ -77,6 +81,21 @@ Item {
 
     onTransitionFpsChanged: {
         root.saveState()
+    }
+
+    onWallpaperDirChanged: {
+        root.saveState()
+        root.refresh()
+    }
+
+    function setWallpaperDir(path) {
+        if (path && path.length > 0) {
+            root.wallpaperDir = path
+        }
+    }
+
+    function resetWallpaperDir() {
+        root.wallpaperDir = root.defaultDir
     }
 
     Process {

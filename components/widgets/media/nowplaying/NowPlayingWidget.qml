@@ -37,8 +37,11 @@ Item {
 
         property real mediaOffset: media.hasMedia ? 0 : -(140 * s)
 
-        x: defaultX
-        y: defaultY
+        x: NowPlayingState.posX !== -1 ? NowPlayingState.posX : defaultX
+        y: NowPlayingState.posY !== -1 ? NowPlayingState.posY : defaultY
+
+        onXChanged: if (x !== -1 && draggable.moved) NowPlayingState.save(x, y)
+        onYChanged: if (y !== -1 && draggable.moved) NowPlayingState.save(x, y)
 
         layer.enabled: true
         layer.smooth: true
@@ -321,6 +324,7 @@ Item {
         }
 
         Draggable {
+            id: draggable
             anchors.fill: parent
             target: container
 

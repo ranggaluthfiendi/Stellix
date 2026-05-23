@@ -8,7 +8,6 @@ import qs.components.widgets.systemtray
 import qs.components.elements
 import qs.config
 import qs.services
-
 Item {
     id: root
 
@@ -78,6 +77,7 @@ Item {
 
     PopupWindow {
         id: menuPopup
+        color: "transparent"
 
         property var menuModel: null
         property bool internalVisible: false
@@ -95,7 +95,9 @@ Item {
             : Theme.dp(30)
 
         anchor.item: root
-        anchor.rect: Qt.rect(0, root.height + Theme.dp(6), 0, 0)
+        anchor.rect: BarLayoutState.isBottom
+            ? Qt.rect(0, -(implicitHeight + Theme.dp(6)), 0, 0)
+            : Qt.rect(0, root.height + Theme.dp(6), 0, 0)
 
         onInternalVisibleChanged: {
             if (internalVisible) slideY = -Theme.dp(12)
@@ -104,7 +106,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             y: menuPopup.slideY
-            color: Theme.bgSecondary
+            color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.systrayOpacity)
 
             Behavior on y {
                 NumberAnimation {
@@ -153,6 +155,7 @@ Item {
 
     PopupWindow {
         id: trayPopup
+        color: "transparent"
 
         property bool open: false
         property real slideY: -Theme.dp(12)
@@ -172,7 +175,9 @@ Item {
         }
 
         anchor.item: launcher
-        anchor.rect: Qt.rect(0, launcher.height + Theme.dp(6), 0, 0)
+        anchor.rect: BarLayoutState.isBottom
+            ? Qt.rect(0, -(implicitHeight + Theme.dp(6)), 0, 0)
+            : Qt.rect(0, launcher.height + Theme.dp(6), 0, 0)
 
         onOpenChanged: {
             if (open) slideY = -Theme.dp(12)
@@ -187,8 +192,7 @@ Item {
             anchors.fill: parent
             y: trayPopup.slideY
             radius: 0
-            color: Theme.bgPrimary
-            opacity: 1
+            color: Qt.rgba(Theme.bgPrimary.r, Theme.bgPrimary.g, Theme.bgPrimary.b, BarLayoutState.systrayOpacity)
 
             Behavior on y {
                 NumberAnimation {
@@ -363,6 +367,7 @@ Item {
 
     PopupWindow {
         id: overflowPopup
+        color: "transparent"
 
         property bool open: false
         property real slideX: -Theme.dp(12)
@@ -393,8 +398,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             x: overflowPopup.slideX
-            color: Theme.bgSecondary
-            opacity: Theme.opacityPanel
+            color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.systrayOpacity)
 
             Behavior on x {
                 NumberAnimation {
@@ -512,6 +516,7 @@ Item {
 
     PopupWindow {
         id: subMenuPopup
+        color: "transparent"
 
         property var menuData: null
         property var anchorItem: null
@@ -539,7 +544,7 @@ Item {
         Rectangle {
             anchors.fill: parent
             x: subMenuPopup.slideX
-            color: Theme.bgSecondary
+            color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.systrayOpacity)
 
             Behavior on x {
                 NumberAnimation {

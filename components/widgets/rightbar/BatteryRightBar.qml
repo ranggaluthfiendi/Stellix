@@ -5,6 +5,7 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.UPower
 import qs.config
+import qs.services
 import qs.components.widgets.rightbar
 import qs.components.widgets.rightbar.popups
 import qs.components.widgets.rightbar.services
@@ -15,6 +16,8 @@ Scope {
     id: root
 
     property real s: Scales.uiScale
+
+    readonly property bool isBottom: BarLayoutState.isBottom
 
     readonly property var battery: UPower.displayDevice
 
@@ -31,24 +34,40 @@ Scope {
 
     readonly property real popupGap: Theme.dp(8)
 
-    // ── Fixed heights for stacking calculations ──
+    readonly property string batterySection: BarLayoutState.findItemSection("battery")
+    readonly property string notifSection: BarLayoutState.findItemSection("notif")
+    readonly property bool batteryIsLeft: batterySection === "left"
+    readonly property bool batteryIsCenter: batterySection === "center"
+    readonly property bool batteryIsRight: batterySection === "right"
+    readonly property bool notifIsLeft: notifSection === "left"
+    readonly property bool notifIsCenter: notifSection === "center"
+    readonly property bool notifIsRight: notifSection === "right"
+
+    readonly property real panelW: Theme.dp(372)
+    readonly property real screenW: panel.screen ? panel.screen.width : 1920
+    readonly property real centerMargin: Math.max(0, (screenW - panelW) / 2)
+
     readonly property real powerPopupH: Theme.dp(22) + Theme.dp(1) + 4 * Theme.dp(38) + Theme.dp(16)
     readonly property real wifiPopupH: wifiPopupOpen ? wifiPopup.implicitHeight : Theme.dp(200)
     readonly property real btPopupH: btPopupOpen ? btPopup.implicitHeight : Theme.dp(150)
 
-    // ── Stacking: power → wifi → bt → (bar) → notif ──
-    readonly property real powerY: 0
-    readonly property real wifiY: powerPopupOpen ? (powerPopup.implicitHeight + popupGap) : 0
-    readonly property real btY: (powerPopupOpen ? powerPopup.implicitHeight + popupGap : 0) + (wifiPopupOpen ? wifiPopup.implicitHeight + popupGap : 0)
+    readonly property real powerY: isBottom ? -powerPopup.implicitHeight : 0
+    readonly property real wifiY: isBottom
+        ? -(powerPopupOpen ? (powerPopup.implicitHeight + popupGap + wifiPopup.implicitHeight) : wifiPopup.implicitHeight)
+        : (powerPopupOpen ? (powerPopup.implicitHeight + popupGap) : 0)
+    readonly property real btY: isBottom
+        ? -((powerPopupOpen ? powerPopup.implicitHeight + popupGap : 0) + (wifiPopupOpen ? wifiPopup.implicitHeight + popupGap : 0) + btPopup.implicitHeight)
+        : ((powerPopupOpen ? powerPopup.implicitHeight + popupGap : 0) + (wifiPopupOpen ? wifiPopup.implicitHeight + popupGap : 0))
 
-    // ── Notif: always below bar when bar open, at top when bar closed ──
-    readonly property real notifY: RightBarState.open ? (panel.implicitHeight + popupGap) : 0
+    readonly property real notifY: isBottom
+        ? -(notifPopup.implicitHeight + Theme.dp(5))
+        : (RightBarState.open ? (panel.implicitHeight + Theme.dp(5)) : Theme.dp(5))
 
-    // ── Expose panel height for notification popup ──
     readonly property real panelHeight: panel.implicitHeight
 
-    // ── Track whether notif popup was opened by user ──
     property bool notifPopupUserOpened: false
+
+    readonly property var notifItemRef: BarLayoutState.getItem("notif")
 
     onNotifYChanged: scheduleNotifAnchorRefresh()
     onNotifPopupOpenChanged: {
@@ -80,7 +99,7 @@ Scope {
         if (!root.notifPopupOpen)
             return
 
-        notifPopup.anchor.rect = Qt.rect(0, Math.round(root.notifY), 1, 1)
+        notifPopup.anchor.rect = Qt.rect(Math.round(root.computeNotifX()), Math.round(root.notifY), 1, 1)
         notifPopup.anchor.updateAnchor()
     }
 
@@ -180,7 +199,6 @@ Scope {
     readonly property int notifCount: notifSvc.notifCount
     readonly property var trackedNotifs: notifSvc.trackedNotifs
 
-    // ── Outside overlay (covers everything except the main bar area) ──
     PanelWindow {
         id: outsideOverlay
         visible: RightBarState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen
@@ -190,8 +208,8 @@ Scope {
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         WlrLayershell.exclusiveZone: -1
 
-        // Allow the main bar buttons (like battery) to remain interactive
-        margins.top: Dimens.barHeight * root.s
+        margins.top: root.isBottom ? 0 : BarLayoutState.barHeight * root.s
+        margins.bottom: root.isBottom ? BarLayoutState.barHeight * root.s : 0
 
         anchors {
             top: true
@@ -214,7 +232,6 @@ Scope {
         }
     }
 
-    // ── Main panel ──
     PanelWindow {
         id: panel
         visible: RightBarState.open
@@ -225,18 +242,21 @@ Scope {
         WlrLayershell.exclusiveZone: 0
 
         anchors {
-            top: true
+            top: !root.isBottom
+            bottom: root.isBottom
+            left: true
             right: true
         }
 
-        implicitWidth: Theme.dp(372)
+        implicitWidth: root.panelW
         implicitHeight: content.implicitHeight + Theme.dp(16)
 
         onImplicitHeightChanged: root.scheduleNotifAnchorRefresh()
 
-        margins.top: Theme.dp(5)
-        margins.right: Theme.dp(5)
-        margins.bottom: Theme.dp(5)
+        margins.top: root.isBottom ? 0 : Theme.dp(5)
+        margins.bottom: root.isBottom ? Theme.dp(5) : 0
+        margins.left: root.batteryIsLeft ? Theme.dp(5) : (root.batteryIsCenter ? root.centerMargin : root.screenW - root.panelW - Theme.dp(5))
+        margins.right: root.batteryIsRight ? Theme.dp(5) : (root.batteryIsCenter ? root.centerMargin : root.screenW - root.panelW - Theme.dp(5))
 
         Component.onCompleted: {
             brightnessSvc.init()
@@ -293,7 +313,6 @@ Scope {
         }
     }
 
-    // ── Single anchor for all side popups ──
     PanelWindow {
         id: popupAnchor
         visible: true
@@ -304,18 +323,21 @@ Scope {
         WlrLayershell.exclusiveZone: 0
 
         anchors {
-            top: true
+            top: !root.isBottom
+            bottom: root.isBottom
+            left: true
             right: true
         }
 
         implicitWidth: Theme.dp(1)
         implicitHeight: Theme.dp(1)
 
-        margins.top: Theme.dp(5)
-        margins.right: Theme.dp(5)
+        margins.top: root.isBottom ? 0 : Theme.dp(5)
+        margins.bottom: root.isBottom ? Theme.dp(5) : 0
+        margins.left: root.batteryIsLeft ? Theme.dp(5) : (root.batteryIsCenter ? root.centerMargin : root.screenW - root.panelW - Theme.dp(5))
+        margins.right: root.batteryIsRight ? Theme.dp(5) : (root.batteryIsCenter ? root.centerMargin : root.screenW - root.panelW - Theme.dp(5))
     }
 
-    // ── Power popup (top) ──
     PowerPopup {
         id: powerPopup
         popupPanel: popupAnchor
@@ -324,10 +346,12 @@ Scope {
         onVisibleChanged: {
             if (!visible) root.powerPopupOpen = false
         }
+        anchor.rect.x: root.batteryIsLeft
+            ? root.panelW + Theme.dp(8)
+            : -(implicitWidth + Theme.dp(8))
         anchor.rect.y: root.powerY
     }
 
-    // ── WiFi popup (below power) ──
     WifiPopup {
         id: wifiPopup
         popupPanel: popupAnchor
@@ -335,10 +359,12 @@ Scope {
         onVisibleChanged: {
             if (!visible) root.wifiPopupOpen = false
         }
+        anchor.rect.x: root.batteryIsLeft
+            ? root.panelW + Theme.dp(8)
+            : -(implicitWidth + Theme.dp(8))
         anchor.rect.y: root.wifiY
     }
 
-    // ── Bluetooth popup (below wifi) ──
     BluetoothPopup {
         id: btPopup
         popupPanel: popupAnchor
@@ -346,23 +372,57 @@ Scope {
         onVisibleChanged: {
             if (!visible) root.btPopupOpen = false
         }
+        anchor.rect.x: root.batteryIsLeft
+            ? root.panelW + Theme.dp(8)
+            : -(implicitWidth + Theme.dp(8))
         anchor.rect.y: root.btY
     }
 
-    // ── Notification popup (below bar when bar open) ──
+    PanelWindow {
+        id: notifAnchorWin
+        visible: true
+        color: "transparent"
+
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.exclusiveZone: -1
+
+        anchors {
+            top: !root.isBottom
+            bottom: root.isBottom
+            left: true
+        }
+
+        implicitWidth: Theme.dp(1)
+        implicitHeight: Theme.dp(1)
+
+        margins.top: root.isBottom ? 0 : BarLayoutState.barHeight * root.s
+        margins.bottom: root.isBottom ? BarLayoutState.barHeight * root.s : 0
+        margins.left: 0
+    }
+
+    function computeNotifX() {
+        if (!root.notifItemRef) return root.screenW / 2 - notifPopup.implicitWidth / 2
+        try {
+            var pos = root.notifItemRef.mapToGlobal(0, 0)
+            return pos.x + root.notifItemRef.width / 2 - notifPopup.implicitWidth / 2
+        } catch(e) {
+            return root.screenW / 2 - notifPopup.implicitWidth / 2
+        }
+    }
+
     NotificationPopup {
         id: notifPopup
-        popupPanel: popupAnchor
+        popupPanel: notifAnchorWin
         visible: root.notifPopupOpen
         grabFocus: false
         trackedNotifs: root.trackedNotifs
         closeCallback: function() { root.notifPopupOpen = false }
         barRightPanelHeight: root.panelHeight
 
-        // Use popupAnchor as a stable reference window
-        anchor.window: popupAnchor
+        anchor.window: notifAnchorWin
 
-        anchor.rect: Qt.rect(0, Math.round(root.notifY), 1, 1)
+        anchor.rect: Qt.rect(Math.round(root.computeNotifX()), Math.round(root.notifY), 1, 1)
 
         onVisibleChanged: {
             if (visible) root.scheduleNotifAnchorRefresh()

@@ -5,12 +5,13 @@ import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
 import qs.config
+import qs.services
 
 Item {
     id: root
 
     readonly property int focusedId: Hyprland.focusedWorkspace ? Hyprland.focusedWorkspace.id : 1
-    readonly property int wsCount: 5
+    readonly property int wsCount: BarLayoutState.workspaceCount
 
     property int wsBaseIndex: {
         if (focusedId <= wsCount) return 1;
@@ -22,8 +23,8 @@ Item {
 
     property var workspacesWithClients: []
 
-    width: Scales.dp(90)
-    height: Scales.dp(24)
+    implicitWidth: wsRow.implicitWidth
+    implicitHeight: Scales.dp(24)
 
     Process {
         id: clientsProc
@@ -87,6 +88,7 @@ Item {
     }
 
     Row {
+        id: wsRow
         anchors.centerIn: parent
         spacing: Scales.dp(5)
 

@@ -4,6 +4,7 @@ import QtQuick.Controls
 import Quickshell
 import qs.config
 import qs.services
+import "./settings/components"
 
 Rectangle {
     id: root
@@ -25,24 +26,43 @@ Rectangle {
         if (root.wallpaper) root.wallpaper.applyWallpaper(root.monitorIndex)
     }
 
+    function nextAnim() {
+        if (root.wallpaper) root.wallpaper.cycleTransition()
+    }
+
+    function checkKonami(key) {
+    }
+
     ColumnLayout {
         anchors.fill: parent
         spacing: Theme.dp(12)
 
-        // Header (Optional)
-        ColumnLayout {
+        // Header
+        RowLayout {
             visible: root.showHints
             Layout.fillWidth: true
-            spacing: 2
-            Text { text: "Wallpaper Switcher"; color: Theme.textPrimary; font.pixelSize: Theme.dp(12); font.weight: Font.Bold }
-            Text { text: "Images: ~/Pictures/Wallpapers"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+            spacing: Theme.dp(8)
+            Text { 
+                text: "Wallpaper Switcher"
+                color: Theme.accent
+                font.family: Typography.fontFamily
+                font.pixelSize: Math.round(14 * s)
+                font.weight: Font.Bold 
+            }
+            Item { Layout.fillWidth: true }
+            Text { 
+                text: root.wallpaper ? root.wallpaper.wallpaperDir.replace(Quickshell.env("HOME"), "~") : "~/Pictures/Wallpapers"
+                color: Theme.textMuted
+                font.family: Typography.fontFamily
+                font.pixelSize: Math.round(8 * s)
+            }
         }
 
-        // Preview Area (Always visible if space permits)
+        // Preview Area
         Rectangle {
             visible: root.showPreview
             Layout.fillWidth: true
-            Layout.preferredHeight: Theme.dp(160)
+            Layout.preferredHeight: Theme.dp(100)
             color: Theme.bgPrimary; border.width: 1; border.color: Theme.border; radius: 0; clip: true
 
             Image {
@@ -57,16 +77,32 @@ Rectangle {
             Rectangle {
                 anchors.bottom: parent.bottom; width: parent.width; height: Theme.dp(24)
                 color: Qt.rgba(0,0,0,0.6)
-                Text {
-                    anchors.centerIn: parent; text: root.wallpaper ? root.wallpaper.getWallpaperName(root.wallpaper.currentIndex) : ""
-                    color: "white"; font.pixelSize: Theme.dp(9); font.weight: Font.Medium
+                RowLayout {
+                    anchors.fill: parent; anchors.leftMargin: Theme.dp(8); anchors.rightMargin: Theme.dp(8); spacing: Theme.dp(8)
+                    Text {
+                        text: root.wallpaper ? root.wallpaper.getWallpaperName(root.wallpaper.currentIndex) : ""
+                        color: "white"
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round(9 * s)
+                        font.weight: Font.Medium
+                        Layout.fillWidth: true; elide: Text.ElideRight
+                    }
+                    Text {
+                        text: "Transition: " + (root.wallpaper ? root.wallpaper.transitionType : "fade")
+                        color: Theme.accent
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round(9 * s)
+                        font.weight: Font.Bold
+                    }
                 }
             }
         }
 
         // Wallpaper Grid
         Rectangle {
-            Layout.fillWidth: true; Layout.fillHeight: true
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.minimumHeight: Theme.dp(100)
             color: "transparent"; radius: 0; clip: true
 
             GridView {
@@ -107,15 +143,141 @@ Rectangle {
                     }
                 }
                 
-                ScrollBar.vertical: ScrollBar { width: Theme.dp(4); policy: ScrollBar.AsNeeded }
+                ScrollBar.vertical: ScrollBar { 
+                    width: Theme.dp(4)
+                    policy: ScrollBar.AsNeeded
+                    contentItem: Rectangle {
+                        implicitWidth: Theme.dp(4)
+                        radius: 0
+                        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                    }
+                }
             }
         }
 
-        // Footer Hints (Optional)
-        RowLayout {
+        // Transition Settings
+        ColumnLayout {
             visible: root.showHints
-            Layout.fillWidth: true; spacing: 10
-            Text { text: "↑↓←→ Navigate | Enter Apply | T Transition"; color: Theme.accent; font.pixelSize: Theme.dp(8) }
+            Layout.fillWidth: true
+            spacing: Theme.dp(4)
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.dp(8)
+                Text { 
+                    text: "Duration:"
+                    color: Theme.textSecondary
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(9 * s)
+                    Layout.preferredWidth: Theme.dp(60) 
+                }
+                VabSlider {
+                    id: durationSlider
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: -1
+                    from: 0.1; to: 3.0; stepSize: 0.1
+                    value: root.wallpaper ? root.wallpaper.transitionDuration : 0.5
+                    onValueChanged: if (root.wallpaper) root.wallpaper.transitionDuration = value
+                }
+                Text { 
+                    text: (root.wallpaper ? root.wallpaper.transitionDuration.toFixed(1) : "0.5") + "s"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(9 * s)
+                    Layout.preferredWidth: Theme.dp(36)
+                    horizontalAlignment: Text.AlignRight 
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Theme.dp(8)
+                Text { 
+                    text: "FPS:"
+                    color: Theme.textSecondary
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(9 * s)
+                    Layout.preferredWidth: Theme.dp(60) 
+                }
+                VabSlider {
+                    id: fpsSlider
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: -1
+                    from: 30; to: 144; stepSize: 1
+                    value: root.wallpaper ? root.wallpaper.transitionFps : 60
+                    onValueChanged: if (root.wallpaper) root.wallpaper.transitionFps = Math.round(value)
+                }
+                Text { 
+                    text: (root.wallpaper ? root.wallpaper.transitionFps : 60) + " fps"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(9 * s)
+                    Layout.preferredWidth: Theme.dp(36)
+                    horizontalAlignment: Text.AlignRight 
+                }
+            }
         }
+
+        // --- Footer Navigation Section ---
+        Rectangle {
+            visible: root.showHints
+            Layout.fillWidth: true
+            Layout.preferredHeight: Theme.dp(28)
+            color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+            radius: 0
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.dp(12)
+                anchors.rightMargin: Theme.dp(12)
+                spacing: Theme.dp(10)
+
+                FooterHint { label: "Navigate"; keys: "Arrows" }
+                FooterSeparator {}
+                FooterHint { label: "Apply"; keys: "Enter" }
+                FooterSeparator {}
+                FooterHint { label: "Transition"; keys: "T" }
+                FooterSeparator {}
+                FooterHint { label: "Close"; keys: "Esc" }
+                
+                Item { Layout.fillWidth: true }
+                
+                Text {
+                    text: "Stellix Wallpaper"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                    font.weight: Font.Bold
+                    opacity: 0.6
+                }
+            }
+        }
+    }
+
+    component FooterHint: RowLayout {
+        property string label: ""
+        property string keys: ""
+        spacing: Theme.dp(4)
+        
+        Text {
+            text: keys
+            color: Theme.accent
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+            font.weight: Font.Bold
+        }
+        Text {
+            text: label
+            color: Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+        }
+    }
+
+    component FooterSeparator: Rectangle {
+        Layout.preferredWidth: 1
+        Layout.preferredHeight: Theme.dp(12)
+        color: Theme.border
+        opacity: 0.5
     }
 }

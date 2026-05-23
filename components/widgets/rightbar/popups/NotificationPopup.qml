@@ -5,12 +5,14 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
 import qs.config
+import qs.services
 import qs.components.widgets.rightbar
 import qs.components.elements
 import Quickshell.Wayland
 
 PopupWindow {
     id: root
+    color: "transparent"
     property var popupPanel: null
     property var closeCallback: null
     property var trackedNotifs: []
@@ -175,9 +177,9 @@ PopupWindow {
     Rectangle {
         anchors.fill: parent
         y: root.slideY
-        color: Theme.bgSecondary
+        color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.notifOpacity)
         border.width: 1
-        border.color: Theme.border
+        border.color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, BarLayoutState.notifOpacity)
         radius: 0
 
         Behavior on y {

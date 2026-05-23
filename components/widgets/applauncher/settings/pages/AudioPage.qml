@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Quickshell
+import Quickshell.Services.Pipewire
 import qs.config
 import qs.services
 import qs.components.elements
@@ -100,7 +101,7 @@ VabContentPage {
                                 Text { text: page.pwService ? page.pwService.nodeName(modelData) : ""; color: (page.pwService && page.pwService.sink === modelData) ? Theme.accent : Theme.textPrimary; font.pixelSize: Theme.dp(9); Layout.fillWidth: true; elide: Text.ElideRight }
                                 Text { text: "✓"; visible: (page.pwService && page.pwService.sink === modelData); color: Theme.accent; font.pixelSize: Theme.dp(10) }
                             }
-                            MouseArea { id: m; anchors.fill: parent; hoverEnabled: true; onClicked: if(page.pwService) page.pwService.preferredDefaultAudioSink = modelData }
+                            MouseArea { id: m; anchors.fill: parent; hoverEnabled: true; onClicked: { Pipewire.preferredDefaultAudioSink = modelData } }
                         }
                     }
                 }
@@ -178,7 +179,7 @@ VabContentPage {
                                 Text { text: page.pwService ? page.pwService.nodeName(modelData) : ""; color: (page.pwService && page.pwService.source === modelData) ? Theme.accent : Theme.textPrimary; font.pixelSize: Theme.dp(9); Layout.fillWidth: true; elide: Text.ElideRight }
                                 Text { text: "✓"; visible: (page.pwService && page.pwService.source === modelData); color: Theme.accent; font.pixelSize: Theme.dp(10) }
                             }
-                            MouseArea { id: ms; anchors.fill: parent; hoverEnabled: true; onClicked: if(page.pwService) page.pwService.preferredDefaultAudioSource = modelData }
+                            MouseArea { id: ms; anchors.fill: parent; hoverEnabled: true; onClicked: { Pipewire.preferredDefaultAudioSource = modelData } }
                         }
                     }
                 }

@@ -58,10 +58,15 @@ PanelWindow {
     property var keybindMap: ({
         "terminal": { linePattern: "bind = $win, return", action: "exec", target: "$terminal", display: "SUPER + RETURN" },
         "launcher": { linePattern: "bind = ALT, space", action: "global", target: "quickshell:app-launcher", display: "ALT + SPACE" },
+        "clipboard": { linePattern: "bind = $win, V", action: "global", target: "quickshell:clipboard", display: "SUPER + V" },
         "settings": { linePattern: "bind = $win, I", action: "global", target: "quickshell:system-settings", display: "SUPER + I" },
+        "guide": { linePattern: "bind = $win, slash", action: "global", target: "quickshell:guide-popup", display: "SUPER + /" },
         "files": { linePattern: "bind = $win, E", action: "exec", target: "$fileManager", display: "SUPER + E" },
         "browser": { linePattern: "bind = $win, W", action: "exec", target: "$brave", display: "SUPER + W" },
-        "code": { linePattern: "bind = $win, C", action: "exec", target: "$code", display: "SUPER + C" },
+        "code": { label: "VS Code", linePattern: "bind = $win, C", action: "exec", target: "$code", display: "SUPER + C" },
+        "discord": { linePattern: "bind = $win, D", action: "exec", target: "$discord", display: "SUPER + D" },
+        "steam": { linePattern: "bind = $win, G", action: "exec", target: "$steam", display: "SUPER + G" },
+        "obs": { linePattern: "bind = $win, O", action: "exec", target: "$obs", display: "SUPER + O" },
         "kill": { linePattern: "bind = $win, Q", action: "killactive", target: "", display: "SUPER + Q" },
         "screenshot": { linePattern: "bind = $win, S", action: "exec", target: "hyprshot -m window", display: "SUPER + S" },
         "ws_tab": { linePattern: "bind = $win, Tab", action: "global", target: "quickshell:workspace-switcher", display: "SUPER + TAB" },
@@ -203,6 +208,7 @@ PanelWindow {
                     // --- Appearance ---
                     VabSidebarHeader { title: "Appearance"; expanded: settingsData.appearanceExp; onToggled: settingsData.appearanceExp = !settingsData.appearanceExp }
                     VabNavItem { label: "Personalization"; index: 0; active: !root.isSearching && root.currentCategory === 0; visible: settingsData.appearanceExp }
+                    VabNavItem { label: "Bar Layout"; index: 9; active: !root.isSearching && root.currentCategory === 9; visible: settingsData.appearanceExp }
                     
                     // --- Connectivity ---
                     VabSidebarHeader { title: "Connectivity"; expanded: settingsData.connectivityExp; onToggled: settingsData.connectivityExp = !settingsData.connectivityExp; Layout.topMargin: Theme.dp(8) }
@@ -231,7 +237,7 @@ PanelWindow {
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: Theme.dp(20); anchors.rightMargin: Theme.dp(20); spacing: Theme.dp(16)
                         Text {
-                            text: root.isSearching ? "Search Results" : ["Appearance", "Workspaces", "Audio", "Wi-Fi", "Keybindings", "System", "About", "Search", "Bluetooth"][root.currentCategory]
+                            text: root.isSearching ? "Search Results" : ["Appearance", "Workspaces", "Audio", "Wi-Fi", "Keybindings", "System", "About", "Search", "Bluetooth", "Bar Layout"][root.currentCategory]
                             color: Theme.textPrimary; font.pixelSize: Theme.dp(16); font.weight: Font.Bold; Layout.preferredWidth: Theme.dp(140)
                         }
                         Rectangle {
@@ -286,7 +292,7 @@ PanelWindow {
                     SystemPage { systemInfo: root.systemInfo; currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     AboutPage { systemInfo: root.systemInfo }
                     SearchResultsPage { 
-                        searchQuery: root.searchQuery; settingsData: settingsData; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; 
+                        searchQuery: root.searchQuery; settingsData: root.settingsData; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; 
                         onGoToCategory: function(cat, title){ 
                             root.highlightTitle = title;
                             root.searchQuery = ""; 
@@ -295,14 +301,32 @@ PanelWindow {
                         } 
                     }
                     BluetoothPage { systemInfo: root.systemInfo; currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    BarLayoutPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; subFocusActive: root.subFocusActive; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                 }
 
                 Rectangle { // Hint bar
-                    Layout.fillWidth: true; Layout.preferredHeight: Theme.dp(32); color: Theme.bgSecondary
+                    Layout.fillWidth: true; Layout.preferredHeight: Theme.dp(32); color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
                     RowLayout {
-                        anchors.fill: parent; anchors.leftMargin: Theme.dp(16); anchors.rightMargin: Theme.dp(16); spacing: Theme.dp(16)
-                        Text { text: "↑↓ Navigate  |  ←→ Switch Area  |  Enter Deep Focus  |  ESC Back"; color: Theme.textMuted; font.pixelSize: Theme.dp(10) }
+                        anchors.fill: parent; anchors.leftMargin: Theme.dp(16); anchors.rightMargin: Theme.dp(16); spacing: Theme.dp(10)
+                        
+                        FooterHint { label: "Navigate"; keys: "↑/↓" }
+                        FooterSeparator {}
+                        FooterHint { label: "Switch Area"; keys: "←/→" }
+                        FooterSeparator {}
+                        FooterHint { label: "Deep Focus"; keys: "Enter" }
+                        FooterSeparator {}
+                        FooterHint { label: "Back/Close"; keys: "Esc" }
+                        
                         Item { Layout.fillWidth: true }
+                        
+                        Text {
+                            text: "Stellix Control"
+                            color: Theme.accent
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round(8 * s)
+                            font.weight: Font.Bold
+                            opacity: 0.6
+                        }
                     }
                 }
             }
@@ -323,7 +347,7 @@ PanelWindow {
                 if (root.subFocusActive) root.subFocusActive = false; else if (root.focusInContent) root.focusInContent = false; else RightBarState.settingsOpen = false
                 event.accepted = true; return
             }
-            var navOrder = [0, 3, 8, 2, 4, 5, 6]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
+            var navOrder = [0, 9, 3, 8, 2, 4, 5, 6]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
             if (event.key === Qt.Key_Right && !root.focusInContent) { root.focusInContent = true; root.contentFocusIndex = 0; event.accepted = true; return }
             if (event.key === Qt.Key_Left && root.focusInContent && !root.subFocusActive) { root.focusInContent = false; event.accepted = true; return }
             if (event.key === Qt.Key_Up) {
@@ -331,7 +355,7 @@ PanelWindow {
                     root.focusedNavItem = navOrder[(currentIdx - 1 + navOrder.length) % navOrder.length];
                     root.currentCategory = root.focusedNavItem;
                 } else if (!root.subFocusActive) {
-                    root.contentFocusIndex = (root.contentFocusIndex - 1 + 15) % 15
+                    root.contentFocusIndex = (root.contentFocusIndex - 1 + 30) % 30
                 }
                 event.accepted = true; return
             }
@@ -340,7 +364,7 @@ PanelWindow {
                     root.focusedNavItem = navOrder[(currentIdx + 1) % navOrder.length];
                     root.currentCategory = root.focusedNavItem;
                 } else if (!root.subFocusActive) {
-                    root.contentFocusIndex = (root.contentFocusIndex + 1) % 15
+                    root.contentFocusIndex = (root.contentFocusIndex + 1) % 30
                 }
                 event.accepted = true; return
             }
@@ -380,5 +404,32 @@ PanelWindow {
         Rectangle { anchors.left: parent.left; anchors.top: parent.top; anchors.bottom: parent.bottom; width: active ? Theme.dp(4) : 0; color: Theme.accent; radius: 0; Behavior on width { NumberAnimation { duration: 120 } } }
         Text { anchors.left: parent.left; anchors.leftMargin: active || isFocused ? Theme.dp(16) : Theme.dp(12); anchors.verticalCenter: parent.verticalCenter; text: label; color: active || isFocused ? Theme.textPrimary : Theme.textMuted; font.pixelSize: Theme.dp(12); font.weight: active || isFocused ? Font.Bold : Font.Normal }
         MouseArea { anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: function(){ root.searchQuery = ""; searchInput.text = ""; root.currentCategory = index; root.focusedNavItem = index; root.focusInContent = false } }
+    }
+
+    component FooterHint: RowLayout {
+        property string label: ""
+        property string keys: ""
+        spacing: Theme.dp(4)
+        
+        Text {
+            text: keys
+            color: Theme.accent
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+            font.weight: Font.Bold
+        }
+        Text {
+            text: label
+            color: Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+        }
+    }
+
+    component FooterSeparator: Rectangle {
+        Layout.preferredWidth: 1
+        Layout.preferredHeight: Theme.dp(12)
+        color: Theme.border
+        opacity: 0.5
     }
 }

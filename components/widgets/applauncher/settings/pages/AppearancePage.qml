@@ -104,7 +104,7 @@ VabContentPage {
                 wallpaper: page.wallpaper
                 anchors.fill: parent; anchors.margins: Theme.dp(4)
                 showHints: false
-                showPreview: false // We need to add this property to WallpaperSwitcher
+                showPreview: false
                 focus: page.focusInContent && page.contentFocusIndex === 1 && page.subFocusActive
             }
             
@@ -116,10 +116,121 @@ VabContentPage {
             }
         }
 
+        VabSettingsCard {
+            id: wallpaperDirCard
+            property bool expanded: false
+            itemIndex: 2
+            isFocused: page.focusInContent && page.contentFocusIndex === 2
+            title: "Wallpaper Directory"; desc: page.wallpaper ? page.wallpaper.wallpaperDir : "~/Pictures/Wallpapers"
+
+            headerActions: RowLayout {
+                spacing: Theme.dp(8)
+                VabButton {
+                    text: "Reset"
+                    onClicked: if (page.wallpaper) page.wallpaper.resetWallpaperDir()
+                }
+                VabButton {
+                    text: wallpaperDirCard.expanded ? "Close" : "Change"
+                    onClicked: wallpaperDirCard.expanded = !wallpaperDirCard.expanded
+                }
+            }
+
+            Rectangle {
+                visible: wallpaperDirCard.expanded
+                Layout.fillWidth: true
+                Layout.preferredHeight: Theme.dp(40)
+                color: "transparent"
+
+                RowLayout {
+                    anchors.fill: parent
+                    spacing: Theme.dp(8)
+
+                    TextField {
+                        id: dirInput
+                        Layout.fillWidth: true
+                        text: page.wallpaper ? page.wallpaper.wallpaperDir : ""
+                        placeholderText: "~/Pictures/Wallpapers"
+                        color: Theme.textPrimary
+                        font.pixelSize: Theme.dp(10)
+                        background: Rectangle {
+                            color: Theme.bgPrimary
+                            border.width: 1
+                            border.color: dirInput.activeFocus ? Theme.accent : Theme.border
+                            radius: 0
+                        }
+                        onAccepted: if (page.wallpaper) page.wallpaper.setWallpaperDir(text)
+                    }
+
+                    Rectangle {
+                        width: Theme.dp(60)
+                        height: Theme.dp(28)
+                        color: dirApplyMouse.containsMouse ? Theme.accent : "transparent"
+                        border.width: 1
+                        border.color: Theme.accent
+                        radius: 0
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Apply"
+                            color: dirApplyMouse.containsMouse ? Theme.bgPrimary : Theme.accent
+                            font.pixelSize: Theme.dp(9)
+                            font.weight: Font.Bold
+                        }
+
+                        MouseArea {
+                            id: dirApplyMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: if (page.wallpaper) page.wallpaper.setWallpaperDir(dirInput.text)
+                        }
+                    }
+                }
+            }
+        }
+
+        VabSettingsCard {
+            itemIndex: 3
+            isFocused: page.focusInContent && page.contentFocusIndex === 3
+            title: "Transition Duration"; desc: "Wallpaper transition speed in seconds"
+
+            headerActions: RowLayout {
+                spacing: Theme.dp(8)
+                VabSlider {
+                    from: 0.1; to: 3.0; value: page.wallpaper ? page.wallpaper.transitionDuration : 0.5; stepSize: 0.1
+                    onValueChanged: if (page.wallpaper) page.wallpaper.transitionDuration = value
+                }
+                Text {
+                    text: (page.wallpaper ? page.wallpaper.transitionDuration.toFixed(1) : "0.5") + "s"
+                    color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold
+                    Layout.preferredWidth: Theme.dp(36); horizontalAlignment: Text.AlignRight
+                }
+            }
+        }
+
+        VabSettingsCard {
+            itemIndex: 4
+            isFocused: page.focusInContent && page.contentFocusIndex === 4
+            title: "Transition FPS"; desc: "Frames per second for wallpaper transition"
+
+            headerActions: RowLayout {
+                spacing: Theme.dp(8)
+                VabSlider {
+                    from: 30; to: 144; value: page.wallpaper ? page.wallpaper.transitionFps : 60; stepSize: 1
+                    onValueChanged: if (page.wallpaper) page.wallpaper.transitionFps = Math.round(value)
+                }
+                Text {
+                    text: (page.wallpaper ? page.wallpaper.transitionFps : 60) + " fps"
+                    color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold
+                    Layout.preferredWidth: Theme.dp(36); horizontalAlignment: Text.AlignRight
+                }
+            }
+        }
+
         VabSectionHeader { title: "Colors & Theme"; Layout.topMargin: Theme.dp(10) }
 
         VabSettingsCard { 
-            itemIndex: 2; isFocused: page.focusInContent && page.contentFocusIndex === 2; title: "Dark Mode"; desc: "System-wide color preference"
+            itemIndex: 5; isFocused: page.focusInContent && page.contentFocusIndex === 5; title: "Dark Mode"; desc: "System-wide color preference"
             headerActions: VabSwitch { 
                 checked: Theme.isDark; 
                 onToggled: {
@@ -131,7 +242,7 @@ VabContentPage {
         VabSettingsCard { 
             id: matugenCard
             property bool expanded: false
-            itemIndex: 3; isFocused: page.focusInContent && page.contentFocusIndex === 3; 
+            itemIndex: 7; isFocused: page.focusInContent && page.contentFocusIndex === 7; 
             title: "Matugen Theme"; 
             desc: page.colorService ? page.colorService.currentTypeName : "Standard Tonal"
             
@@ -191,17 +302,23 @@ VabContentPage {
         VabSectionHeader { title: "Desktop Effects"; Layout.topMargin: Theme.dp(10) }
 
         VabSettingsCard { 
-            itemIndex: 4
-            isFocused: page.focusInContent && page.contentFocusIndex === 4
+            id: blurCard
+            itemIndex: 8
+            isFocused: page.focusInContent && page.contentFocusIndex === 8
             title: "Blur Radius"; desc: "Glass effect intensity"
             
             headerActions: RowLayout {
                 spacing: Theme.dp(12)
                 VabSlider { 
-                    from: 0; to: 100; value: 40 
+                    id: blurSlider
+                    from: 0; to: 100; stepSize: 1
+                    Component.onCompleted: value = HyprlandDecoration.blurSize
+                    onValueChanged: {
+                        if (pressed) HyprlandDecoration.setBlurSize(value)
+                    }
                 }
                 Text { 
-                    text: Math.round(parent.children[0].value) + "px"; 
+                    text: blurSlider.value + "px"; 
                     color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold; 
                     Layout.preferredWidth: Theme.dp(36); horizontalAlignment: Text.AlignRight 
                 }
@@ -209,17 +326,23 @@ VabContentPage {
         }
         
         VabSettingsCard { 
-            itemIndex: 5
-            isFocused: page.focusInContent && page.contentFocusIndex === 5
+            id: transparencyCard
+            itemIndex: 9
+            isFocused: page.focusInContent && page.contentFocusIndex === 9
             title: "Transparency"; desc: "Panel background opacity"
             
             headerActions: RowLayout {
                 spacing: Theme.dp(12)
                 VabSlider { 
-                    from: 0; to: 100; value: 90 
+                    id: transparencySlider
+                    from: 0; to: 100; stepSize: 1
+                    Component.onCompleted: value = Math.round(HyprlandDecoration.transparency * 100)
+                    onValueChanged: {
+                        if (pressed) HyprlandDecoration.setTransparency(value / 100)
+                    }
                 }
                 Text { 
-                    text: Math.round(parent.children[0].value) + "%"; 
+                    text: transparencySlider.value + "%"; 
                     color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold; 
                     Layout.preferredWidth: Theme.dp(36); horizontalAlignment: Text.AlignRight 
                 }

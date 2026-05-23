@@ -32,7 +32,7 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Theme.dp(12)
-        spacing: Theme.dp(10)
+        spacing: Theme.dp(12)
 
         RowLayout {
             Layout.fillWidth: true
@@ -41,9 +41,9 @@ Rectangle {
 
             Text {
                 text: "Power Menu"
-                color: Theme.textPrimary
+                color: Theme.accent
                 font.family: Typography.fontFamily
-                font.pixelSize: Math.round(13 * s)
+                font.pixelSize: Math.round(14 * s)
                 font.weight: Font.Bold
             }
 
@@ -59,7 +59,7 @@ Rectangle {
 
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: Theme.dp(240)
+            Layout.fillHeight: true
             color: "transparent"
             clip: true
 
@@ -86,6 +86,8 @@ Rectangle {
                         : powerMouse.containsMouse
                             ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.06)
                             : "transparent"
+                    border.width: powerList.currentIndex === index ? 1 : 0
+                    border.color: Theme.accent
                     radius: 0
 
                     Behavior on color {
@@ -95,14 +97,14 @@ Rectangle {
                     RowLayout {
                         anchors.fill: parent
                         anchors.margins: Theme.dp(12)
-                        spacing: Theme.dp(10)
+                        spacing: Theme.dp(12)
 
                         Text {
                             Layout.preferredWidth: Theme.dp(24)
                             Layout.preferredHeight: Theme.dp(24)
                             Layout.alignment: Qt.AlignVCenter
                             text: modelData.icon
-                            color: Theme.textPrimary
+                            color: powerList.currentIndex === index ? Theme.accent : Theme.textPrimary
                             font.pixelSize: Math.round(18 * s)
                             horizontalAlignment: Text.AlignHCenter
                             verticalAlignment: Text.AlignVCenter
@@ -113,7 +115,7 @@ Rectangle {
                             color: Theme.textPrimary
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round(12 * s)
-                            font.weight: Font.Medium
+                            font.weight: powerList.currentIndex === index ? Font.Bold : Font.Normal
                             Layout.fillWidth: true
                         }
                     }
@@ -133,8 +135,72 @@ Rectangle {
                 ScrollBar.vertical: ScrollBar {
                     policy: ScrollBar.AsNeeded
                     width: Theme.dp(4)
+                    contentItem: Rectangle {
+                        implicitWidth: Theme.dp(4)
+                        radius: 0
+                        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                    }
                 }
             }
         }
+
+        // --- Footer Navigation Section ---
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: Theme.dp(28)
+            color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+            radius: 0
+
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.dp(12)
+                anchors.rightMargin: Theme.dp(12)
+                spacing: Theme.dp(10)
+
+                FooterHint { label: "Select"; keys: "↑/↓" }
+                FooterSeparator {}
+                FooterHint { label: "Execute"; keys: "Enter" }
+                FooterSeparator {}
+                FooterHint { label: "Close"; keys: "Esc" }
+                
+                Item { Layout.fillWidth: true }
+                
+                Text {
+                    text: "Stellix Power"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                    font.weight: Font.Bold
+                    opacity: 0.6
+                }
+            }
+        }
+    }
+
+    component FooterHint: RowLayout {
+        property string label: ""
+        property string keys: ""
+        spacing: Theme.dp(4)
+        
+        Text {
+            text: keys
+            color: Theme.accent
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+            font.weight: Font.Bold
+        }
+        Text {
+            text: label
+            color: Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+        }
+    }
+
+    component FooterSeparator: Rectangle {
+        Layout.preferredWidth: 1
+        Layout.preferredHeight: Theme.dp(12)
+        color: Theme.border
+        opacity: 0.5
     }
 }

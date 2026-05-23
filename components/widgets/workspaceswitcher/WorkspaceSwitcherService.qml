@@ -403,13 +403,14 @@ Item {
     // ── Panel Animation ──
     function calcExpandHeight() {
         var h = _panelPadding;
+        h += Theme.dp(20);
         h += _headerH;
         h += _separatorH;
         var count = windowsForWorkspace(panelWorkspace).length;
         var visibleH = Math.max(count, _layerVisibleItems) * _layerItemH;
         h += visibleH;
         h += _layoutBtnH;
-        h += Theme.dp(4);
+        h += Theme.dp(24);
         return h;
     }
 

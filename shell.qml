@@ -61,8 +61,28 @@ ShellRoot {
         id: recordService
     }
 
+    ClipboardService {
+        id: clipboardService
+    }
+
     AppLauncher {
         id: appLauncher
+        wallpaper: wallpaper
+        clipboardService: clipboardService
+    }
+
+    Connections {
+        target: RightBarState
+        function onLauncherToggleRequested() {
+            if (RightBarState.launcherOpen) {
+                RightBarState.launcherOpen = false
+                launcher.close()
+            } else {
+                RightBarState.closeAll()
+                RightBarState.launcherOpen = true
+                launcher.open()
+            }
+        }
     }
 
     SettingsPopup {
@@ -138,11 +158,32 @@ ShellRoot {
             if (pressed) {
                 if (RightBarState.workspaceSwitcherOpen)
                     RightBarState.workspaceSwitcherOpen = false
-                if (RightBarState.launcherOpen) {
+                if (RightBarState.launcherOpen && appLauncher.viewMode === 0) {
                     RightBarState.launcherOpen = false
                     launcher.close()
                 } else {
                     RightBarState.closeAll()
+                    appLauncher.viewMode = 0
+                    RightBarState.launcherOpen = true
+                    launcher.open()
+                }
+            }
+        }
+    }
+
+    GlobalShortcut {
+        id: clipboardShortcut
+        name: "clipboard"
+        description: "Open clipboard history"
+
+        onPressedChanged: {
+            if (pressed) {
+                if (RightBarState.launcherOpen && appLauncher.viewMode === 8) {
+                    RightBarState.launcherOpen = false
+                    launcher.close()
+                } else {
+                    RightBarState.closeAll()
+                    appLauncher.viewMode = 8
                     RightBarState.launcherOpen = true
                     launcher.open()
                 }

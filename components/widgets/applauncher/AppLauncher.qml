@@ -23,6 +23,8 @@ PanelWindow {
     property string commandFilter: ""
     property string commandTrigger: ">"
     property bool followCursor: true
+    property var wallpaper: null
+    property var clipboardService: null
 
     readonly property var commands: [
         { name: "Stellix Control", desc: "Advanced System Settings", trigger: "", icon: "preferences-system" },
@@ -36,6 +38,7 @@ PanelWindow {
         { name: "/record", desc: "Screen recording", trigger: "/", icon: "media-record" },
         { name: "/screenshot", desc: "Take screenshot", trigger: "/", icon: "camera-photo" },
         { name: "/wallpaper", desc: "Switch wallpaper", trigger: "/", icon: "preferences-desktop-wallpaper" },
+        { name: "/clipboard", desc: "Clipboard history", trigger: "/", icon: "edit-paste" },
         { name: ">calc", desc: "Calculator", trigger: ">", icon: "accessories-calculator" },
         { name: ">color", desc: "Color scheme settings", trigger: ">", icon: "preferences-desktop-color" },
         { name: ">currency", desc: "Currency converter", trigger: ">", icon: "accessories-calculator" },
@@ -44,6 +47,7 @@ PanelWindow {
         { name: ">screenshot", desc: "Take screenshot", trigger: ">", icon: "camera-photo" },
         { name: ">settings", desc: "System Settings", trigger: ">", icon: "preferences-system" },
         { name: ">wallpaper", desc: "Switch wallpaper", trigger: ">", icon: "preferences-desktop-wallpaper" },
+        { name: ">clipboard", desc: "Clipboard history", trigger: ">", icon: "edit-paste" },
         { name: "?calc", desc: "Calculator", trigger: "?", icon: "accessories-calculator" },
         { name: "?color", desc: "Color scheme settings", trigger: "?", icon: "preferences-desktop-color" },
         { name: "?currency", desc: "Currency converter", trigger: "?", icon: "accessories-calculator" },
@@ -53,7 +57,8 @@ PanelWindow {
         { name: "?power", desc: "Power menu", trigger: "?", icon: "system-shutdown" },
         { name: "?record", desc: "Screen recording", trigger: "?", icon: "media-record" },
         { name: "?screenshot", desc: "Take screenshot", trigger: "?", icon: "camera-photo" },
-        { name: "?wallpaper", desc: "Switch wallpaper", trigger: "?", icon: "preferences-desktop-wallpaper" }
+        { name: "?wallpaper", desc: "Switch wallpaper", trigger: "?", icon: "preferences-desktop-wallpaper" },
+        { name: "?clipboard", desc: "Clipboard history", trigger: "?", icon: "edit-paste" }
     ]
 
     readonly property var currentModel: root.showCommands
@@ -137,6 +142,10 @@ PanelWindow {
                 break
             case "currency":
                 root.viewMode = 6
+                root.wallpaperMode = false
+                break
+            case "clipboard":
+                root.viewMode = 8
                 root.wallpaperMode = false
                 break
             case "dark":
@@ -327,11 +336,46 @@ PanelWindow {
                         }
 
                         Keys.onPressed: function(event) {
+                            // --- Priority 1: Specialized View Key Handling ---
+                            if (root.viewMode >= 3 && root.viewMode !== 7) {
+                                if (event.key === Qt.Key_Escape) {
+                                    root.viewMode = 0
+                                    root.showCommands = false
+                                    root.wallpaperMode = false
+                                    searchInput.text = ""
+                                    launcher.searchText = ""
+                                    event.accepted = true
+                                    return
+                                }
+                                
+                                if (root.viewMode === 8) { // Clipboard Mode
+                                    if (event.key === Qt.Key_Delete) {
+                                        if (clipboardPopup) {
+                                            if (event.modifiers & Qt.AltModifier) {
+                                                if (root.clipboardService) root.clipboardService.clearHistory()
+                                            } else {
+                                                clipboardPopup.deleteCurrent()
+                                            }
+                                        }
+                                        event.accepted = true; return
+                                    }
+                                    if (event.key === Qt.Key_P && (event.modifiers & Qt.AltModifier)) {
+                                        if (clipboardPopup) clipboardPopup.togglePinCurrent()
+                                        event.accepted = true; return
+                                    }
+                                    if (event.key === Qt.Key_Down) { if (clipboardPopup) clipboardPopup.next(); event.accepted = true; return }
+                                    if (event.key === Qt.Key_Up) { if (clipboardPopup) clipboardPopup.prev(); event.accepted = true; return }
+                                    if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) { if (clipboardPopup) clipboardPopup.selectCurrent(); event.accepted = true; return }
+                                }
+                                // ... other specialized modes will bubble down or return here
+                            }
+
+                            // --- Priority 2: Command Clearing ---
                             if (event.key === Qt.Key_Backspace || event.key === Qt.Key_Delete) {
                                 var txt = searchInput.text
                                 if (txt.length > 1 && (txt[0] === ">" || txt[0] === "/" || txt[0] === "?")) {
                                     var baseName = txt.substring(1).trim().toLowerCase()
-                                    var knownCmds = ["wallpaper", "color", "calc", "currency", "power", "record", "screenshot", "dark", "light", "help"]
+                                    var knownCmds = ["wallpaper", "color", "calc", "currency", "power", "record", "screenshot", "dark", "light", "help", "clipboard"]
                                     if (knownCmds.indexOf(baseName) >= 0) {
                                         searchInput.text = ""
                                         launcher.searchText = ""
@@ -412,7 +456,13 @@ PanelWindow {
                                     if (currencyPopup) currencyPopup.currencyInput.forceActiveFocus()
                                     event.accepted = true
                                 } else {
-                                    appList.currentIndex = Math.min(appList.currentIndex + 1, root.currentModel.length - 1)
+                                    var maxIdx = root.currentModel.length - 1
+                                    if (root.viewMode === 1) { // Grid Mode
+                                        var nextGridIdx = appList.currentIndex + 6
+                                        appList.currentIndex = Math.min(nextGridIdx, maxIdx)
+                                    } else {
+                                        appList.currentIndex = Math.min(appList.currentIndex + 1, maxIdx)
+                                    }
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_Up) {
@@ -433,7 +483,12 @@ PanelWindow {
                                     if (currencyPopup) currencyPopup.currencyInput.forceActiveFocus()
                                     event.accepted = true
                                 } else {
-                                    appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
+                                    if (root.viewMode === 1) { // Grid Mode
+                                        var prevGridIdx = appList.currentIndex - 6
+                                        appList.currentIndex = Math.max(prevGridIdx, 0)
+                                    } else {
+                                        appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
+                                    }
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_Right) {
@@ -443,6 +498,9 @@ PanelWindow {
                                 } else if (root.viewMode === 6) {
                                     if (currencyPopup) currencyPopup.doSwap()
                                     event.accepted = true
+                                } else if (root.viewMode === 1) { // Grid Mode
+                                    appList.currentIndex = Math.min(appList.currentIndex + 1, root.currentModel.length - 1)
+                                    event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_Left) {
                                 if (root.wallpaperMode) {
@@ -450,6 +508,9 @@ PanelWindow {
                                     event.accepted = true
                                 } else if (root.viewMode === 6) {
                                     if (currencyPopup) currencyPopup.doSwap()
+                                    event.accepted = true
+                                } else if (root.viewMode === 1) { // Grid Mode
+                                    appList.currentIndex = Math.max(appList.currentIndex - 1, 0)
                                     event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_Tab && !(event.modifiers & Qt.ShiftModifier)) {
@@ -515,9 +576,6 @@ PanelWindow {
                                     event.accepted = true
                                 } else if (root.autoCompleteApp()) {
                                     event.accepted = true
-                                } else {
-                                    searchInput.forceActiveFocus()
-                                    event.accepted = true
                                 }
                             } else if (event.key === Qt.Key_A) {
                                 if (event.modifiers & Qt.ShiftModifier) {
@@ -549,6 +607,22 @@ PanelWindow {
                             } else if (event.key === Qt.Key_M && !event.modifiers) {
                                 if (root.viewMode === 5) {
                                     colorService.toggleMode()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_P && (event.modifiers & Qt.AltModifier)) {
+                                if (root.viewMode === 8) {
+                                    if (clipboardPopup) clipboardPopup.togglePinCurrent()
+                                    event.accepted = true
+                                }
+                            } else if (event.key === Qt.Key_Delete) {
+                                if (root.viewMode === 8) {
+                                    if (clipboardPopup) {
+                                        if (event.modifiers & Qt.AltModifier) {
+                                            if (root.clipboardService) root.clipboardService.clearHistory()
+                                        } else {
+                                            clipboardPopup.deleteCurrent()
+                                        }
+                                    }
                                     event.accepted = true
                                 }
                             }
@@ -798,7 +872,7 @@ PanelWindow {
             StackLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                currentIndex: root.wallpaperMode ? 2 : (root.viewMode === 7 ? 7 : root.viewMode)
+                currentIndex: root.wallpaperMode ? 2 : root.viewMode
 
                 Rectangle {
                     color: "transparent"
@@ -1127,6 +1201,7 @@ PanelWindow {
 
                 WallpaperSwitcher {
                     id: wallpaperSwitcher
+                    wallpaper: root.wallpaper
                 }
 
                 PowerPopup {
@@ -1409,85 +1484,105 @@ PanelWindow {
                         }
                     }
                 }
-            }
 
-            RowLayout {
-                id: footerHint
-                Layout.fillWidth: true
-                spacing: Theme.dp(6)
-                Layout.topMargin: Theme.dp(2)
-                Layout.bottomMargin: Theme.dp(2)
-                visible: !root.showCommands && !root.wallpaperMode && root.viewMode !== 5 && root.viewMode !== 6 && root.viewMode !== 7
-
-                Text {
-                    text: "↑↓ Navigate"
-                    color: Theme.accent
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(8 * s)
-                }
-
-                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
-
-                Text {
-                    text: root.viewMode === 4 ? "Enter Copy" : "Enter Launch"
-                    color: Theme.accent
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(8 * s)
-                }
-
-                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
-
-                Text {
-                    text: "Tab Focus"
-                    color: Theme.accent
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(8 * s)
-                }
-
-                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
-
-                Text {
-                    text: root.viewMode === 0 ? "Ctrl/Right-click Action" : "Shift+A Back"
-                    color: Theme.accent
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(8 * s)
-                }
-
-                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
-
-                Text {
-                    text: "Esc Back/Close"
-                    color: Theme.accent
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(8 * s)
+                ClipboardPopup {
+                    id: clipboardPopup
+                    service: root.clipboardService
+                    onCloseRequested: {
+                        root.viewMode = 0
+                        searchInput.text = ""
+                        launcher.searchText = ""
+                        closeLauncher()
+                    }
                 }
             }
 
-            RowLayout {
-                id: footerHintActions
+            // --- Footer Navigation Section ---
+            Rectangle {
                 Layout.fillWidth: true
-                spacing: Theme.dp(6)
-                Layout.topMargin: Theme.dp(2)
-                Layout.bottomMargin: Theme.dp(2)
+                Layout.preferredHeight: Theme.dp(28)
+                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+                radius: 0
+                visible: !root.showCommands && !root.wallpaperMode && root.viewMode !== 5 && root.viewMode !== 6 && root.viewMode !== 7 && root.viewMode !== 8
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: Theme.dp(12)
+                    anchors.rightMargin: Theme.dp(12)
+                    spacing: Theme.dp(10)
+
+                    FooterHint { label: "Navigate"; keys: "↑/↓" }
+                    FooterSeparator {}
+                    FooterHint { label: root.viewMode === 4 ? "Copy" : "Launch"; keys: "Enter" }
+                    FooterSeparator {}
+                    FooterHint { label: "Focus"; keys: "Tab" }
+                    FooterSeparator {}
+                    FooterHint { label: root.viewMode === 0 ? "Action" : "Back"; keys: root.viewMode === 0 ? "Ctrl" : "Shift+A" }
+                    FooterSeparator {}
+                    FooterHint { label: "Close"; keys: "Esc" }
+                    
+                    Item { Layout.fillWidth: true }
+                    
+                    Text {
+                        text: "Stellix Launcher"
+                        color: Theme.accent
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round(8 * s)
+                        font.weight: Font.Bold
+                        opacity: 0.6
+                    }
+                }
+            }
+
+            // --- Footer Navigation Section (Context Menu) ---
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Theme.dp(28)
+                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+                radius: 0
                 visible: root.viewMode === 7
 
-                Text {
-                    text: "Enter Launch"
-                    color: Theme.accent
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(8 * s)
-                }
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: Theme.dp(12)
+                    anchors.rightMargin: Theme.dp(12)
+                    spacing: Theme.dp(10)
 
-                Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
-
-                Text {
-                    text: "Esc/Right-click Cancel"
-                    color: Theme.accent
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(8 * s)
+                    FooterHint { label: "Launch"; keys: "Enter" }
+                    FooterSeparator {}
+                    FooterHint { label: "Cancel"; keys: "Esc" }
+                    
+                    Item { Layout.fillWidth: true }
                 }
             }
         }
+    }
+
+    component FooterHint: RowLayout {
+        property string label: ""
+        property string keys: ""
+        spacing: Theme.dp(4)
+        
+        Text {
+            text: keys
+            color: Theme.accent
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+            font.weight: Font.Bold
+        }
+        Text {
+            text: label
+            color: Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+        }
+    }
+
+    component FooterSeparator: Rectangle {
+        Layout.preferredWidth: 1
+        Layout.preferredHeight: Theme.dp(12)
+        color: Theme.border
+        opacity: 0.5
     }
 
     Rectangle {
@@ -1684,10 +1779,11 @@ PanelWindow {
                         cursorShape: Qt.PointingHandCursor
                         hoverEnabled: true
                         onClicked: deleteConfirmDialog.doDelete()
+                        }
                     }
                 }
+
             }
-        }
     }
 
     Item {
@@ -1695,6 +1791,12 @@ PanelWindow {
         focus: true
         Keys.enabled: true
         Keys.onPressed: function(event) {
+            // Only handle keys if we are in main views (0, 1) or context menu (7)
+            if (root.viewMode >= 3 && root.viewMode !== 7) {
+                event.accepted = false;
+                return;
+            }
+
             if (event.key === Qt.Key_Escape) {
                 if (root.viewMode === 7) {
                     root.viewMode = 0

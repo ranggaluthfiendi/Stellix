@@ -67,7 +67,7 @@ Item {
         width: Theme.dp(120); height: Theme.dp(32)
         color: bttMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.bgPrimary.r, Theme.bgPrimary.g, Theme.bgPrimary.b, 0.95)
         border.width: 1; border.color: Theme.accent; radius: 0
-        visible: flickable.contentY > Theme.dp(400)
+        visible: flickable.contentY > Theme.dp(200)
         opacity: visible ? 1 : 0
         z: 100
 

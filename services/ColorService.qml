@@ -223,13 +223,26 @@ Item {
 
     function toggleMode() {
         Theme.toggleMode()
-        // Matugen will be triggered via Theme.isDark change if needed
+        applyGtkMode()
     }
 
     function setMode(mode) {
         if (mode === "dark" || mode === "light") {
             Theme.setLightMode(mode === "light")
+            applyGtkMode()
         }
+    }
+
+    function applyGtkMode() {
+        var isDark = Theme.isDark
+        var gtkCmd = isDark ? "true" : "false"
+        var schemeCmd = isDark ? "prefer-dark" : "prefer-light"
+        Quickshell.execDetached({
+            command: ["sh", "-c",
+                "gsettings set org.gnome.desktop.interface gtk-application-prefer-dark-theme " + gtkCmd + "; " +
+                "gsettings set org.gnome.desktop.interface color-scheme " + schemeCmd + " 2>/dev/null || true"
+            ]
+        })
     }
 
     function cycleType() {

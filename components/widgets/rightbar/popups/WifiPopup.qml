@@ -10,6 +10,7 @@ import Quickshell.Wayland
 
 PopupWindow {
     id: root
+    color: "transparent"
 
     property var popupPanel: null
     property var closeCallback: null

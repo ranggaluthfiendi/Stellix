@@ -66,7 +66,7 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Theme.dp(12)
-        spacing: Theme.dp(10)
+        spacing: Theme.dp(12)
 
         // Header
         RowLayout {
@@ -76,9 +76,9 @@ Rectangle {
 
             Text {
                 text: "Color Style"
-                color: Theme.textPrimary
+                color: Theme.accent
                 font.family: Typography.fontFamily
-                font.pixelSize: Math.round(13 * s)
+                font.pixelSize: Math.round(14 * s)
                 font.weight: Font.Bold
             }
 
@@ -90,12 +90,13 @@ Rectangle {
                 font.family: Typography.fontFamily
                 font.pixelSize: Math.round(9 * s)
                 font.weight: Font.Medium
+                opacity: 0.8
             }
 
             Rectangle {
-                Layout.preferredWidth: applyText.width + Theme.dp(14)
-                Layout.preferredHeight: Theme.dp(24)
-                color: applyMouse.containsMouse ? Theme.accentHover : "transparent"
+                Layout.preferredWidth: applyText.implicitWidth + Theme.dp(16)
+                Layout.preferredHeight: Theme.dp(26)
+                color: applyMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1) : "transparent"
                 border.width: 1
                 border.color: Theme.accent
                 radius: 0
@@ -103,7 +104,7 @@ Rectangle {
                 Text {
                     id: applyText
                     anchors.centerIn: parent
-                    text: "Enter Apply"
+                    text: "Apply"
                     color: Theme.accent
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round(9 * s)
@@ -133,17 +134,18 @@ Rectangle {
                 anchors.fill: parent
                 model: root.schemeTypes
                 currentIndex: 0
+                spacing: Theme.dp(4)
 
                 delegate: Rectangle {
                     width: schemeList.width
                     height: Theme.dp(48)
                     color: schemeList.currentIndex === index
-                        ? Theme.accentHover
+                        ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
                         : schemeMouse.containsMouse
-                            ? Theme.accentHover
-                            : (colorService.currentType === modelData.value ? Theme.accentHover : "transparent")
-                    border.width: 1
-                    border.color: schemeList.currentIndex === index ? Theme.accent : (colorService.currentType === modelData.value ? Theme.accent : "transparent")
+                            ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.06)
+                            : (colorService.currentType === modelData.value ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05) : "transparent")
+                    border.width: schemeList.currentIndex === index ? 1 : 0
+                    border.color: Theme.accent
                     radius: 0
 
                     Behavior on color {
@@ -154,8 +156,6 @@ Rectangle {
                         anchors.fill: parent
                         anchors.leftMargin: Theme.dp(12)
                         anchors.rightMargin: Theme.dp(12)
-                        anchors.topMargin: Theme.dp(6)
-                        anchors.bottomMargin: Theme.dp(6)
                         spacing: Theme.dp(10)
 
                         ColumnLayout {
@@ -168,8 +168,8 @@ Rectangle {
                                 text: modelData.name
                                 color: Theme.textPrimary
                                 font.family: Typography.fontFamily
-                                font.pixelSize: Math.round(10 * s)
-                                font.weight: Font.Medium
+                                font.pixelSize: Math.round(11 * s)
+                                font.weight: schemeList.currentIndex === index ? Font.Bold : Font.Medium
                                 horizontalAlignment: Text.AlignLeft
                             }
 
@@ -178,8 +178,9 @@ Rectangle {
                                 text: modelData.desc
                                 color: Theme.textMuted
                                 font.family: Typography.fontFamily
-                                font.pixelSize: Math.round(7 * s)
+                                font.pixelSize: Math.round(8 * s)
                                 horizontalAlignment: Text.AlignLeft
+                                opacity: 0.7
                             }
                         }
 
@@ -213,42 +214,75 @@ Rectangle {
                 }
 
                 ScrollBar.vertical: ScrollBar {
+                    id: vbar
                     policy: ScrollBar.AsNeeded
-                    width: Theme.dp(6)
+                    width: Theme.dp(4)
+                    contentItem: Rectangle {
+                        implicitWidth: Theme.dp(4)
+                        radius: 0
+                        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                    }
                 }
             }
         }
 
-        // Footer hints
-        RowLayout {
+        // --- Footer Navigation Section ---
+        Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: Theme.dp(24)
-            spacing: Theme.dp(6)
+            Layout.preferredHeight: Theme.dp(28)
+            color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+            radius: 0
 
-            Text {
-                text: "↑↓ Select"
-                color: Theme.accent
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(8 * s)
-            }
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.dp(12)
+                anchors.rightMargin: Theme.dp(12)
+                spacing: Theme.dp(10)
 
-            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
-
-            Text {
-                text: "Enter Apply"
-                color: Theme.accent
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(8 * s)
-            }
-
-            Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: Theme.dp(14); color: Theme.border }
-
-            Text {
-                text: "Esc Close"
-                color: Theme.accent
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(8 * s)
+                FooterHint { label: "Select"; keys: "↑/↓" }
+                FooterSeparator {}
+                FooterHint { label: "Apply"; keys: "Enter" }
+                FooterSeparator {}
+                FooterHint { label: "Close"; keys: "Esc" }
+                
+                Item { Layout.fillWidth: true }
+                
+                Text {
+                    text: "Color Engine"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                    font.weight: Font.Bold
+                    opacity: 0.6
+                }
             }
         }
+    }
+
+    component FooterHint: RowLayout {
+        property string label: ""
+        property string keys: ""
+        spacing: Theme.dp(4)
+        
+        Text {
+            text: keys
+            color: Theme.accent
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+            font.weight: Font.Bold
+        }
+        Text {
+            text: label
+            color: Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+        }
+    }
+
+    component FooterSeparator: Rectangle {
+        Layout.preferredWidth: 1
+        Layout.preferredHeight: Theme.dp(12)
+        color: Theme.border
+        opacity: 0.5
     }
 }

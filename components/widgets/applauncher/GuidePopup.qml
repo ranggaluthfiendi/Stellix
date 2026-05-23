@@ -48,8 +48,8 @@ PanelWindow {
     Rectangle {
         id: mainContainer
         anchors.centerIn: parent
-        width: Theme.dp(700)
-        height: contentCol.implicitHeight + Theme.dp(32)
+        width: Theme.dp(800)
+        height: Math.min(parent.height - Theme.dp(64), contentCol.implicitHeight + Theme.dp(32))
         color: Theme.bgSecondary
         border.width: 1
         border.color: Theme.border
@@ -66,163 +66,246 @@ PanelWindow {
             NumberAnimation { duration: 150; easing.type: Easing.OutCubic }
         }
 
-        Column {
-            id: contentCol
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
+        ColumnLayout {
+            anchors.fill: parent
             anchors.margins: Theme.dp(16)
             spacing: Theme.dp(12)
 
             RowLayout {
-                width: parent.width
+                Layout.fillWidth: true
                 spacing: Theme.dp(8)
 
                 Text {
-                    text: "Quick Guide"
+                    text: "Stellix Shortcut Guide"
                     color: Theme.accent
                     font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(14 * s)
+                    font.pixelSize: Math.round(16 * s)
                     font.weight: Font.Bold
                 }
 
                 Item { Layout.fillWidth: true }
 
                 Text {
-                    text: "ESC to close"
+                    text: "ESC or / to close | Scroll for more"
                     color: Theme.textMuted
                     font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(10 * s)
+                }
+
+                Rectangle {
+                    width: 1
+                    height: Theme.dp(12)
+                    color: Theme.border
+                    visible: guideScroll.contentHeight > guideScroll.height && guideScroll.contentY < (guideScroll.contentHeight - guideScroll.height - 20)
+                }
+
+                Text {
+                    text: "Scroll for more ↓"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
                     font.pixelSize: Math.round(9 * s)
+                    visible: guideScroll.contentHeight > guideScroll.height && guideScroll.contentY < (guideScroll.contentHeight - guideScroll.height - 20)
+                    
+                    SequentialAnimation on opacity {
+                        loops: Animation.Infinite
+                        NumberAnimation { from: 0.4; to: 1.0; duration: 1000; easing.type: Easing.InOutQuad }
+                        NumberAnimation { from: 1.0; to: 0.4; duration: 1000; easing.type: Easing.InOutQuad }
+                    }
                 }
             }
 
             Rectangle {
-                width: parent.width
-                height: 1
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
                 color: Theme.border
             }
 
-            GridLayout {
-                width: parent.width
-                columns: 2
-                rowSpacing: Theme.dp(4)
-                columnSpacing: Theme.dp(16)
+            ScrollView {
+                id: guideScroll
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                clip: true
+                contentWidth: availableWidth
 
-                GuideItem { label: "App Launcher"; keys: "Super + R"; keys2: "Alt + Space" }
-                GuideItem { label: "Next Workspace"; keys: "Alt + Tab" }
-                GuideItem { label: "Workspace Switcher"; keys: "Super + Tab" }
-                GuideItem { label: "Prev Workspace"; keys: "Alt + Shift + Tab" }
-                GuideItem { label: "Quick Settings"; keys: "Super + Alt" }
-                GuideItem { label: "Terminal"; keys: "Super + Enter" }
-                GuideItem { label: "Shortcut Guide"; keys: "Super + /" }
-                GuideItem { label: "File Manager"; keys: "Super + E" }
-                GuideItem { label: "Kill Window"; keys: "Super + Q" }
-                GuideItem { label: "Browser"; keys: "Super + W" }
-                GuideItem { label: "Fullscreen"; keys: "Super + F" }
-                GuideItem { label: "Toggle Floating"; keys: "Super + Shift + F" }
-            }
+                ScrollBar.vertical: ScrollBar {
+                    id: vBar
+                    policy: ScrollBar.AsNeeded
+                    width: Theme.dp(4)
+                    active: true
+                    
+                    contentItem: Rectangle {
+                        implicitWidth: Theme.dp(4)
+                        radius: Theme.dp(2)
+                        color: vBar.pressed ? Theme.accent : (vBar.hovered ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.5) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2))
+                        
+                        Behavior on color { ColorAnimation { duration: 150 } }
+                    }
+                }
 
-            Text {
-                width: parent.width
-                text: "Volume"
-                color: Theme.accent
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(11 * s)
-                font.weight: Font.Bold
-            }
+                ColumnLayout {
+                    id: contentCol
+                    width: parent.width
+                    spacing: Theme.dp(20)
 
-            GridLayout {
-                width: parent.width
-                columns: 2
-                rowSpacing: Theme.dp(4)
-                columnSpacing: Theme.dp(16)
+                    // --- System ---
+                    CategorySection {
+                        title: "System & Quickshell"
+                        GridLayout {
+                            columns: 2
+                            rowSpacing: Theme.dp(6)
+                            columnSpacing: Theme.dp(24)
+                            Layout.fillWidth: true
 
-                GuideItem { label: "Mute"; keys: "Super + ;" }
-                GuideItem { label: "Up"; keys: "Super + ." }
-                GuideItem { label: "Down"; keys: "Super + ," }
-            }
+                            GuideItem { label: "App Launcher"; keys: "Super + R"; keys2: "Alt + Space" }
+                            GuideItem { label: "Clipboard History"; keys: "Super + V" }
+                            GuideItem { label: "System Settings"; keys: "Super + I" }
+                            GuideItem { label: "Shortcut Guide"; keys: "Super + /" }
+                            GuideItem { label: "Quick Settings"; keys: "Win + Alt (L/R)" }
+                            GuideItem { label: "Workspace Switcher"; keys: "Super + Tab" }
+                        }
+                    }
 
-            Text {
-                width: parent.width
-                text: "Brightness"
-                color: Theme.accent
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(11 * s)
-                font.weight: Font.Bold
-            }
+                    // --- Windows ---
+                    CategorySection {
+                        title: "Window Management"
+                        GridLayout {
+                            columns: 2
+                            rowSpacing: Theme.dp(6)
+                            columnSpacing: Theme.dp(24)
+                            Layout.fillWidth: true
 
-            GridLayout {
-                width: parent.width
-                columns: 2
-                rowSpacing: Theme.dp(4)
-                columnSpacing: Theme.dp(16)
+                            GuideItem { label: "Kill Active Window"; keys: "Super + Q" }
+                            GuideItem { label: "Fullscreen"; keys: "Super + F" }
+                            GuideItem { label: "Toggle Floating"; keys: "Super + Shift + F" }
+                            GuideItem { label: "Exit Hyprland"; keys: "Super + M" }
+                            
+                            GuideItem { label: "Move Focus"; keys: "Super + Arrows" }
+                            GuideItem { label: "Swap Window"; keys: "Super + Shift + Arrows" }
+                            GuideItem { label: "Resize Window"; keys: "Super + Mouse Right" }
+                            GuideItem { label: "Drag Window"; keys: "Super + Mouse Left" }
+                        }
+                    }
 
-                GuideItem { label: "Up"; keys: "Super + ]" }
-                GuideItem { label: "Down"; keys: "Super + [" }
+                    // --- Apps ---
+                    CategorySection {
+                        title: "Applications"
+                        GridLayout {
+                            columns: 2
+                            rowSpacing: Theme.dp(6)
+                            columnSpacing: Theme.dp(24)
+                            Layout.fillWidth: true
+
+                            GuideItem { label: "Terminal (Kitty)"; keys: "Super + Enter"; keys2: "Super + T" }
+                            GuideItem { label: "File Manager (Nautilus)"; keys: "Super + E" }
+                            GuideItem { label: "Browser (Brave)"; keys: "Super + W" }
+                            GuideItem { label: "VS Code"; keys: "Super + C" }
+                            GuideItem { label: "Discord"; keys: "Super + D" }
+                            GuideItem { label: "Steam"; keys: "Super + G" }
+                            GuideItem { label: "OBS Studio"; keys: "Super + O" }
+                        }
+                    }
+
+                    // --- Multimedia ---
+                    CategorySection {
+                        title: "Multimedia & Hardware"
+                        GridLayout {
+                            columns: 2
+                            rowSpacing: Theme.dp(6)
+                            columnSpacing: Theme.dp(24)
+                            Layout.fillWidth: true
+
+                            GuideItem { label: "Volume Up/Down"; keys: "Super + . / ," }
+                            GuideItem { label: "Mute Toggle"; keys: "Super + ;" }
+                            GuideItem { label: "Brightness Up/Down"; keys: "Super + ] / [" }
+                            GuideItem { label: "Screenshot (Region)"; keys: "Super + Shift + S" }
+                            GuideItem { label: "Screenshot (Window)"; keys: "Super + S" }
+                            GuideItem { label: "Media Play/Pause"; keys: "Media Keys" }
+                        }
+                    }
+
+                    // --- Workspaces ---
+                    CategorySection {
+                        title: "Workspaces"
+                        GridLayout {
+                            columns: 2
+                            rowSpacing: Theme.dp(6)
+                            columnSpacing: Theme.dp(24)
+                            Layout.fillWidth: true
+
+                            GuideItem { label: "Switch Workspace"; keys: "Super + 1-0" }
+                            GuideItem { label: "Move to Workspace"; keys: "Super + Shift + 1-0" }
+                            GuideItem { label: "Next/Prev Workspace"; keys: "Alt + (Shift) + Tab" }
+                        }
+                    }
+
+                    // --- App Launcher Features ---
+                    CategorySection {
+                        title: "Launcher Features"
+                        GridLayout {
+                            columns: 2
+                            rowSpacing: Theme.dp(6)
+                            columnSpacing: Theme.dp(24)
+                            Layout.fillWidth: true
+
+                            GuideItem { label: "Command Mode"; keys: "/"; isSub: true }
+                            GuideItem { label: "Action Trigger"; keys: ">"; isSub: true }
+                            GuideItem { label: "Search Mode"; keys: "?"; isSub: true }
+                            GuideItem { label: "Context Menu"; keys: "Ctrl / Right-Click"; isSub: true }
+                            GuideItem { label: "Go Back"; keys: "Shift + A"; isSub: true }
+                        }
+                    }
+                }
             }
 
             Rectangle {
-                width: parent.width
-                height: 1
-                color: Theme.border
-            }
-
-            Text {
-                width: parent.width
-                text: "Inside App Launcher"
-                color: Theme.accent
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(11 * s)
-                font.weight: Font.Bold
-            }
-
-            GridLayout {
-                width: parent.width
-                columns: 2
-                rowSpacing: Theme.dp(4)
-                columnSpacing: Theme.dp(16)
-
-                GuideItem { label: "Commands"; keys: "/"; isSub: true }
-                GuideItem { label: "Context Menu"; keys: "Ctrl / Right-Click"; isSub: true }
-                GuideItem { label: "Action Trigger"; keys: ">"; isSub: true }
-                GuideItem { label: "Go Back"; keys: "Shift + A"; isSub: true }
-                GuideItem { label: "Help Menu"; keys: "?"; isSub: true }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: 1
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
                 color: Theme.border
             }
 
             RowLayout {
-                width: parent.width
+                Layout.fillWidth: true
                 spacing: Theme.dp(12)
 
                 Text {
-                    text: "ESC"
+                    text: "StellixOS"
                     color: Theme.accent
                     font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(9 * s)
-                    font.weight: Font.Medium
-                }
-
-                Text {
-                    text: "Close this guide"
-                    color: Theme.textMuted
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Math.round(9 * s)
+                    font.pixelSize: Math.round(10 * s)
+                    font.weight: Font.Bold
                 }
 
                 Item { Layout.fillWidth: true }
 
                 Text {
-                    text: "Click anywhere outside"
+                    text: "Powered by Quickshell & Hyprland"
                     color: Theme.textMuted
                     font.family: Typography.fontFamily
                     font.pixelSize: Math.round(9 * s)
                 }
             }
+        }
+    }
+
+    component CategorySection: ColumnLayout {
+        property string title: ""
+        default property alias content: innerContent.data
+        Layout.fillWidth: true
+        spacing: Theme.dp(8)
+
+        Text {
+            text: title
+            color: Theme.accent
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(12 * s)
+            font.weight: Font.Bold
+            opacity: 0.8
+        }
+
+        ColumnLayout {
+            id: innerContent
+            Layout.fillWidth: true
+            spacing: 0
         }
     }
 
@@ -276,6 +359,7 @@ PanelWindow {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
             onEntered: parent.hovered = true
             onExited: { parent.hovered = false; parent.pressed = false }
             onPressed: parent.pressed = true

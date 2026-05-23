@@ -16,6 +16,9 @@ Scope {
     property bool pinned: true
     property bool autoHideEnabled: true
 
+    readonly property bool isBottom: BarLayoutState.barPosition === "bottom"
+    readonly property int barH: BarLayoutState.barHeight * s
+
     BarState {
         id: state
     }
@@ -46,16 +49,33 @@ Scope {
     property bool _triggerHovering: false
     property bool _barHovering: false
 
-    readonly property bool expanded: pinned || (autoHideEnabled && (_triggerHovering || _barHovering))
+    property bool pinIndicatorVisible: false
+    property bool _pinIndicatorAnimating: false
 
-    // ── Hover trigger zone (only visible when bar is hidden) ──
+    Timer {
+        id: pinIndicatorTimer
+        interval: 1500
+        repeat: false
+        onTriggered: root.pinIndicatorVisible = false
+    }
+
+    function showPinIndicator() {
+        root.pinIndicatorVisible = true
+        root._pinIndicatorAnimating = true
+        pinIndicatorTimer.restart()
+    }
+
+    readonly property bool expanded: pinned || (_triggerHovering || _barHovering)
+
+    // ── Hover trigger zone (always visible when unpinned, bar covers it when expanded) ──
     PanelWindow {
         id: trigger
-        visible: !root.expanded
+        visible: !root.pinned
         color: "transparent"
 
         anchors {
-            top: true
+            top: !root.isBottom
+            bottom: root.isBottom
             left: true
             right: true
         }
@@ -81,18 +101,27 @@ Scope {
     // ── Main bar ──
     PanelWindow {
         id: bar
-        implicitHeight: Dimens.barHeight * s
-        color: Theme.bgPrimary
+        implicitHeight: root.barH
+        color: "transparent"
 
         anchors {
-            top: true
+            top: !root.isBottom
+            bottom: root.isBottom
             left: true
             right: true
         }
 
-        margins.top: root.expanded ? 0 : -(Dimens.barHeight * s)
+        margins.top: (!root.isBottom) ? (root.expanded ? 0 : -(root.barH)) : 0
+        margins.bottom: root.isBottom ? (root.expanded ? 0 : -(root.barH)) : 0
 
         Behavior on margins.top {
+            NumberAnimation {
+                duration: 220
+                easing.type: Easing.OutCubic
+            }
+        }
+
+        Behavior on margins.bottom {
             NumberAnimation {
                 duration: 220
                 easing.type: Easing.OutCubic
@@ -106,6 +135,21 @@ Scope {
             }
         }
 
+        Rectangle {
+            id: barBg
+            anchors.fill: parent
+            color: Qt.rgba(Theme.bgPrimary.r, Theme.bgPrimary.g, Theme.bgPrimary.b, BarLayoutState.barOpacity)
+
+            Rectangle {
+                visible: BarLayoutState.barBorder
+                anchors.bottom: !root.isBottom ? parent.bottom : undefined
+                anchors.top: root.isBottom ? parent.top : undefined
+                width: parent.width
+                height: 1
+                color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, BarLayoutState.barOpacity)
+            }
+        }
+
         MouseArea {
             id: barMouseArea
             anchors.fill: parent
@@ -113,13 +157,11 @@ Scope {
             acceptedButtons: Qt.RightButton
 
             onEntered: root._barHovering = true
-            onExited: {
-                if (!root.pinned && root.autoHideEnabled)
-                    root._barHovering = false
-            }
+            onExited: root._barHovering = false
 
             onPressed: function(mouse) {
                 root.pinned = !root.pinned
+                root.showPinIndicator()
             }
         }
 
@@ -128,6 +170,7 @@ Scope {
 
             BarLeft {
                 anchors.left: parent.left
+                anchors.leftMargin: Theme.dp(14)
                 anchors.verticalCenter: parent.verticalCenter
             }
 
@@ -157,7 +200,7 @@ Scope {
         }
     }
 
-    // ── Calendar/VB Indicator outside overlay ──
+    // ── Overlay to close calendar/VB indicator ──
     PanelWindow {
         id: calendarOutsideOverlay
         visible: RightBarState.calendarOpen || RightBarState.indicatorVisible
@@ -188,6 +231,51 @@ Scope {
         }
     }
 
+    readonly property var clockItem: BarLayoutState.getItem("clock")
+
+    PanelWindow {
+        id: clockAnchorWin
+        visible: true
+        color: "transparent"
+
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.exclusiveZone: -1
+
+        anchors {
+            top: !root.isBottom
+            bottom: root.isBottom
+            left: true
+        }
+
+        implicitWidth: Theme.dp(1)
+        implicitHeight: Theme.dp(1)
+
+        margins.top: root.isBottom ? 0 : BarLayoutState.barHeight * s
+        margins.bottom: root.isBottom ? BarLayoutState.barHeight * s : 0
+        margins.left: 0
+    }
+
+    function computeClockX() {
+        if (!root.clockItem) return Math.round((bar.width - vbIndicator.implicitWidth) / 2)
+        try {
+            var pos = root.clockItem.mapToGlobal(0, 0)
+            return Math.round(pos.x + root.clockItem.width / 2 - vbIndicator.implicitWidth / 2)
+        } catch(e) {
+            return Math.round((bar.width - vbIndicator.implicitWidth) / 2)
+        }
+    }
+
+    function computeCalendarX() {
+        if (!root.clockItem) return Math.round((bar.width - Theme.dp(244)) / 2)
+        try {
+            var pos = root.clockItem.mapToGlobal(0, 0)
+            return Math.round(pos.x + root.clockItem.width / 2 - Theme.dp(244) / 2)
+        } catch(e) {
+            return Math.round((bar.width - Theme.dp(244)) / 2)
+        }
+    }
+
     // ── Volume/Brightness Indicator ──
     PopupWindow {
         id: vbIndicatorPopup
@@ -195,9 +283,11 @@ Scope {
         color: "transparent"
         grabFocus: false
 
-        anchor.window: bar
-        anchor.rect.x: Math.round((bar.width - vbIndicator.implicitWidth) / 2)
-        anchor.rect.y: bar.height + Theme.dp(4)
+        anchor.window: clockAnchorWin
+        anchor.rect.x: root.computeClockX()
+        anchor.rect.y: root.isBottom
+            ? -(vbIndicator.implicitHeight + Theme.dp(4))
+            : (root.clockItem ? root.clockItem.height : bar.height) + Theme.dp(4)
 
         implicitWidth: vbIndicator.implicitWidth
         implicitHeight: vbIndicator.implicitHeight
@@ -212,6 +302,29 @@ Scope {
         }
     }
 
+    // ── Pin Indicator ──
+    PopupWindow {
+        id: pinIndicatorPopup
+        visible: root.pinIndicatorVisible
+        color: "transparent"
+        grabFocus: false
+
+        anchor.window: clockAnchorWin
+        anchor.rect.x: root.computeClockX()
+        anchor.rect.y: root.isBottom
+            ? -(Theme.dp(40) + Theme.dp(4))
+            : (root.clockItem ? root.clockItem.height : bar.height) + Theme.dp(4)
+
+        implicitWidth: Theme.dp(180)
+        implicitHeight: Theme.dp(40)
+
+        PinIndicator {
+            anchors.fill: parent
+            isPinned: root.pinned
+            animating: root._pinIndicatorAnimating
+        }
+    }
+
     // ── Calendar popup ──
     PopupWindow {
         id: calendarPopup
@@ -219,9 +332,11 @@ Scope {
         color: "transparent"
         grabFocus: false
 
-        anchor.window: bar
-        anchor.rect.x: Math.round((bar.width - implicitWidth) / 2)
-        anchor.rect.y: bar.height + Theme.dp(4)
+        anchor.window: clockAnchorWin
+        anchor.rect.x: root.computeCalendarX()
+        anchor.rect.y: root.isBottom
+            ? -(implicitHeight + Theme.dp(4))
+            : (root.clockItem ? root.clockItem.height : bar.height) + Theme.dp(4)
 
         implicitWidth: Theme.dp(244)
         implicitHeight: calendarCard.implicitHeight
@@ -229,31 +344,32 @@ Scope {
         Rectangle {
             id: calendarBg
             anchors.fill: parent
-            color: Theme.bgSecondary
+            color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.calendarOpacity)
             border.width: 1
-            border.color: Theme.border
+            border.color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, BarLayoutState.calendarOpacity)
             radius: 0
 
-            opacity: 0
-            y: -Theme.dp(8)
+            property real animOpacity: 0
+            opacity: animOpacity
+            y: root.isBottom ? Theme.dp(8) : -Theme.dp(8)
 
             states: State {
                 name: "visible"
                 when: calendarPopup.visible
-                PropertyChanges { target: calendarBg; opacity: 1; y: 0 }
+                PropertyChanges { target: calendarBg; animOpacity: 1; y: 0 }
             }
 
             transitions: [
                 Transition {
                     from: ""
                     to: "visible"
-                    NumberAnimation { target: calendarBg; property: "opacity"; duration: 180; easing.type: Easing.OutCubic }
+                    NumberAnimation { target: calendarBg; property: "animOpacity"; duration: 180; easing.type: Easing.OutCubic }
                     NumberAnimation { target: calendarBg; property: "y"; duration: 200; easing.type: Easing.OutCubic }
                 },
                 Transition {
                     from: "visible"
                     to: ""
-                    NumberAnimation { target: calendarBg; property: "opacity"; duration: 140; easing.type: Easing.InCubic }
+                    NumberAnimation { target: calendarBg; property: "animOpacity"; duration: 140; easing.type: Easing.InCubic }
                     NumberAnimation { target: calendarBg; property: "y"; duration: 140; easing.type: Easing.InCubic }
                 }
             ]

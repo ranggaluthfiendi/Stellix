@@ -21,6 +21,8 @@ Item {
     // Updated by BatteryRightBar's NotificationServer
     property int notifCount: 0
 
+    signal launcherToggleRequested()
+
     // Volume/Brightness indicator
     property bool indicatorVisible: false
     property string indicatorType: "volume"

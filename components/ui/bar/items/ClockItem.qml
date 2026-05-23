@@ -9,30 +9,34 @@ Item {
 
     property real s: Scales.uiScale
 
-    implicitHeight: Dimens.barHeight * s
-    implicitWidth: timeText.implicitWidth + tzText.implicitWidth + Theme.dp(4)
+    readonly property string formattedTime: {
+        var fmt = BarLayoutState.clock24Hour ? "HH" : "hh"
+        fmt += BarLayoutState.clockShowSeconds ? ":mm:ss" : ":mm"
+        if (!BarLayoutState.clock24Hour) fmt += " AP"
+        return Qt.formatDateTime(Time.currentDate, fmt)
+    }
+
+    readonly property string displayText: {
+        var fmt = BarLayoutState.clockFormat
+        if (fmt === "time") return formattedTime
+        if (fmt === "date") return Time.date
+        if (fmt === "time-date") return formattedTime + "  •  " + Time.date
+        if (fmt === "date-time") return Time.date + "  •  " + formattedTime
+        if (fmt === "time-tz") return formattedTime + " " + Time.timezone
+        return formattedTime
+    }
+
+    implicitHeight: BarLayoutState.barHeight * s
+    implicitWidth: clockText.implicitWidth + Theme.dp(8)
 
     Text {
-        id: timeText
+        id: clockText
         anchors.centerIn: parent
-        anchors.horizontalCenterOffset: -tzText.implicitWidth / 2 - Theme.dp(1)
-        text: Time.time
+        text: root.displayText
         color: Theme.textPrimary
         font.family: Typography.fontFamily
         font.pixelSize: Math.round((Typography.sizeMD || 12) * s)
         font.weight: Typography.weightMedium || Font.Normal
-        verticalAlignment: Text.AlignVCenter
-    }
-
-    Text {
-        id: tzText
-        anchors.centerIn: parent
-        anchors.horizontalCenterOffset: timeText.implicitWidth / 2 + Theme.dp(1)
-        text: Time.timezone
-        color: Theme.textMuted
-        font.family: Typography.fontFamily
-        font.pixelSize: Math.round((Typography.sizeXS || 9) * s)
-        font.weight: Typography.weightRegular || Font.Normal
         verticalAlignment: Text.AlignVCenter
     }
 

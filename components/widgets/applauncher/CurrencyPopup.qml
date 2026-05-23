@@ -20,7 +20,7 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Theme.dp(12)
-        spacing: Theme.dp(10)
+        spacing: Theme.dp(12)
 
         RowLayout {
             Layout.fillWidth: true
@@ -29,9 +29,9 @@ Rectangle {
 
             Text {
                 text: "Currency Converter"
-                color: Theme.textPrimary
+                color: Theme.accent
                 font.family: Typography.fontFamily
-                font.pixelSize: Math.round(13 * s)
+                font.pixelSize: Math.round(14 * s)
                 font.weight: Font.Bold
             }
 
@@ -88,6 +88,7 @@ Rectangle {
                     }
                     background: Rectangle {
                         color: fromCombo.highlightedIndex === index ? Theme.accent : "transparent"
+                        radius: 0
                     }
                 }
                 popup: Popup {
@@ -105,7 +106,12 @@ Rectangle {
                         clip: true
                         implicitHeight: contentHeight > Theme.dp(200) ? Theme.dp(200) : contentHeight
                         ScrollBar.vertical: ScrollBar {
-                            width: Theme.dp(6)
+                            width: Theme.dp(4)
+                            contentItem: Rectangle {
+                                implicitWidth: Theme.dp(4)
+                                radius: 0
+                                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                            }
                         }
                     }
                 }
@@ -181,6 +187,7 @@ Rectangle {
                     }
                     background: Rectangle {
                         color: toCombo.highlightedIndex === index ? Theme.accent : "transparent"
+                        radius: 0
                     }
                 }
                 popup: Popup {
@@ -198,7 +205,12 @@ Rectangle {
                         clip: true
                         implicitHeight: contentHeight > Theme.dp(200) ? Theme.dp(200) : contentHeight
                         ScrollBar.vertical: ScrollBar {
-                            width: Theme.dp(6)
+                            width: Theme.dp(4)
+                            contentItem: Rectangle {
+                                implicitWidth: Theme.dp(4)
+                                radius: 0
+                                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                            }
                         }
                     }
                 }
@@ -279,38 +291,64 @@ Rectangle {
 
         Item { Layout.fillHeight: true }
 
-        ColumnLayout {
+        // --- Footer Navigation Section ---
+        Rectangle {
             Layout.fillWidth: true
-            spacing: Theme.dp(2)
+            Layout.preferredHeight: Theme.dp(28)
+            color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+            radius: 0
 
-            Text {
-                text: "Convert between 20 currencies with live rates from open.er-api.com"
-                color: Theme.textMuted
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(8 * s)
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
-            }
+            RowLayout {
+                anchors.fill: parent
+                anchors.leftMargin: Theme.dp(12)
+                anchors.rightMargin: Theme.dp(12)
+                spacing: Theme.dp(10)
 
-            Text {
-                text: "S Swap   |   ← → Toggle Swap   |   Enter to copy result"
-                color: Theme.textMuted
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(8 * s)
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
-            }
-
-            Text {
-                text: "Examples:  1000 USD to IDR   |   50 EUR to JPY   |   1 SGD to MYR"
-                color: Theme.accent
-                font.family: Typography.fontFamily
-                font.pixelSize: Math.round(8 * s)
-                font.weight: Font.Medium
-                horizontalAlignment: Text.AlignHCenter
-                Layout.fillWidth: true
+                FooterHint { label: "Swap"; keys: "S / ←→" }
+                FooterSeparator {}
+                FooterHint { label: "Copy Result"; keys: "Enter" }
+                FooterSeparator {}
+                FooterHint { label: "Close"; keys: "Esc" }
+                
+                Item { Layout.fillWidth: true }
+                
+                Text {
+                    text: "Currency Converter"
+                    color: Theme.accent
+                    font.family: Typography.fontFamily
+                    font.pixelSize: Math.round(8 * s)
+                    font.weight: Font.Bold
+                    opacity: 0.6
+                }
             }
         }
+    }
+
+    component FooterHint: RowLayout {
+        property string label: ""
+        property string keys: ""
+        spacing: Theme.dp(4)
+        
+        Text {
+            text: keys
+            color: Theme.accent
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+            font.weight: Font.Bold
+        }
+        Text {
+            text: label
+            color: Theme.textMuted
+            font.family: Typography.fontFamily
+            font.pixelSize: Math.round(8 * s)
+        }
+    }
+
+    component FooterSeparator: Rectangle {
+        Layout.preferredWidth: 1
+        Layout.preferredHeight: Theme.dp(12)
+        color: Theme.border
+        opacity: 0.5
     }
 
     function findCurrencyIndex(code) {

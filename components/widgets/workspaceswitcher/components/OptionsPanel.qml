@@ -140,12 +140,11 @@ Item {
             Item {
                 width: parent.width
                 height: Theme.dp(36)
-                clip: true
 
                 Rectangle {
                     height: Theme.dp(28)
                     width: parent.width
-                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.centerIn: parent
                     color: swapBtnMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.08)
                     border.width: 1
                     border.color: swapBtnMouse.containsMouse ? Theme.accent : Theme.border

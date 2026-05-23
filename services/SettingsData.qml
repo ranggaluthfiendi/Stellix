@@ -99,6 +99,26 @@ Item {
         { cat: 4, title: "Screenshot", desc: "Shortcut for hyprshot", type: "keybind", key: "screenshot" },
         { cat: 4, title: "Workspace Tab", desc: "Shortcut for switcher", type: "keybind", key: "ws_tab" },
         
+        // Category 9: Bar Layout
+        { cat: 9, title: "Bar Position", desc: "Move bar to top or bottom of screen panel location", type: "toggle", key: "bar_position" },
+        { cat: 9, title: "Bar Items", desc: "Rearrange items between left center right bar sections layout order", type: "action", action: "bar_items" },
+        { cat: 9, title: "Hide Launcher", desc: "Show or hide app launcher button in bar", type: "toggle", key: "hide_launcher" },
+        { cat: 9, title: "Hide Workspace", desc: "Show or hide workspace indicator in bar", type: "toggle", key: "hide_workspace" },
+        { cat: 9, title: "Hide System Tray", desc: "Show or hide system tray icons in bar", type: "toggle", key: "hide_systray" },
+        { cat: 9, title: "Hide Clock", desc: "Show or hide clock display in bar", type: "toggle", key: "hide_clock" },
+        { cat: 9, title: "Clock Format", desc: "Choose time date display format", type: "select", key: "clock_format" },
+        { cat: 9, title: "24 Hour Format", desc: "Use 24-hour or 12-hour time display", type: "toggle", key: "clock_24h" },
+        { cat: 9, title: "Show Seconds", desc: "Display seconds in clock time", type: "toggle", key: "clock_seconds" },
+        { cat: 9, title: "Battery Style", desc: "Choose battery icon percentage display style", type: "select", key: "battery_style" },
+        { cat: 9, title: "Charging Indicator", desc: "Show lightning bolt when battery charging", type: "toggle", key: "battery_charging" },
+        { cat: 9, title: "Low Battery Threshold", desc: "Percentage warning level for low battery", type: "slider", key: "battery_threshold" },
+        { cat: 9, title: "Bar Height", desc: "Adjust bar panel height pixels size", type: "slider", key: "bar_height" },
+        { cat: 9, title: "Bar Opacity", desc: "Adjust bar background transparency opacity", type: "slider", key: "bar_opacity" },
+        { cat: 9, title: "Bar Border", desc: "Show border line on bar edge top bottom", type: "toggle", key: "bar_border" },
+        { cat: 9, title: "Item Separators", desc: "Show dividers between bar items", type: "toggle", key: "bar_separators" },
+        { cat: 9, title: "Workspace Count", desc: "Number of workspace dots to display", type: "slider", key: "workspace_count" },
+        { cat: 9, title: "Reset All", desc: "Restore all bar settings to defaults", type: "action", action: "reset_all" },
+
         // Category 5: System
         { cat: 5, title: "Shell Restart", desc: "Hot-reload Quickshell process", type: "action", action: "restart_shell" },
         { cat: 5, title: "Hyprland Reload", desc: "Force reload compositor config", type: "action", action: "hypr_reload" },
