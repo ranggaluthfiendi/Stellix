@@ -36,7 +36,12 @@ Scope {
             NowPlayingWidget {}
             ClockWidget{}
 
-            BatteryRightBar {}
+            BatteryRightBar {
+                brightnessService: BarLayoutState.getItem("brightnessService")
+                mprisService: BarLayoutState.getItem("mprisService")
+                pipewireService: BarLayoutState.getItem("pwService")
+                notificationService: BarLayoutState.getItem("notifService")
+            }
 
             Item {
                 anchors.fill: parent

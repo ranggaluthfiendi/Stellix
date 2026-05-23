@@ -21,10 +21,16 @@ Scope {
 
     readonly property var battery: UPower.displayDevice
 
-    BrightnessService { id: brightnessSvc }
-    MprisService { id: mprisSvc }
-    PipewireService { id: pwSvc }
-    NotificationService { id: notifSvc }
+    property var brightnessService: null
+    property var mprisService: null
+    property var pipewireService: null
+    property var notificationService: null
+
+    // For internal alias compatibility
+    readonly property alias brightnessSvc: root.brightnessService
+    readonly property alias mprisSvc: root.mprisService
+    readonly property alias pwSvc: root.pipewireService
+    readonly property alias notifSvc: root.notificationService
 
     property bool wifiPopupOpen: false
     property bool btPopupOpen: false

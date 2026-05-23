@@ -232,6 +232,8 @@ Scope {
 
     readonly property var clockItem: BarLayoutState.getItem("clock")
 
+    // Indicators are now automated via shell.qml hub
+
     PanelWindow {
         id: clockAnchorWin
         visible: true
@@ -272,14 +274,14 @@ Scope {
         color: "transparent"
         grabFocus: false
 
-        anchor.window: clockAnchorWin
-        anchor.rect.x: root.computeClockX()
+        anchor.window: bar
+        anchor.rect.x: Math.round((bar.width - Theme.dp(220)) / 2)
         anchor.rect.y: root.isBottom
-            ? -(vbIndicator.implicitHeight + Theme.dp(4))
-            : (root.clockItem ? root.clockItem.height : bar.height) + Theme.dp(4)
+            ? -(Theme.dp(40) + Theme.dp(4))
+            : bar.height + Theme.dp(4)
 
-        implicitWidth: vbIndicator.implicitWidth
-        implicitHeight: vbIndicator.implicitHeight
+        implicitWidth: Theme.dp(220)
+        implicitHeight: Theme.dp(40)
 
         VolumeBrightnessIndicator {
             id: vbIndicator
@@ -298,11 +300,11 @@ Scope {
         color: "transparent"
         grabFocus: false
 
-        anchor.window: clockAnchorWin
-        anchor.rect.x: root.computeClockX()
+        anchor.window: bar
+        anchor.rect.x: Math.round((bar.width - Theme.dp(180)) / 2)
         anchor.rect.y: root.isBottom
             ? -(Theme.dp(40) + Theme.dp(4))
-            : (root.clockItem ? root.clockItem.height : bar.height) + Theme.dp(4)
+            : bar.height + Theme.dp(4)
 
         implicitWidth: Theme.dp(180)
         implicitHeight: Theme.dp(40)

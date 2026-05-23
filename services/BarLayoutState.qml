@@ -13,25 +13,41 @@ Item {
         "/quickshell/savedata/bar-layout.json"
 
     property string barPosition: "top"
+    onBarPositionChanged: save()
     readonly property bool isBottom: barPosition === "bottom"
 
     property bool showBatteryPercentage: true
+    onShowBatteryPercentageChanged: save()
     property string clockFormat: "time"
+    onClockFormatChanged: save()
     property bool clock24Hour: true
+    onClock24HourChanged: save()
     property bool clockShowSeconds: false
+    onClockShowSecondsChanged: save()
 
     property int batteryLowThreshold: 20
+    onBatteryLowThresholdChanged: save()
     property string batteryStyle: "both"
+    onBatteryStyleChanged: save()
     property bool batteryShowCharging: true
+    onBatteryShowChargingChanged: save()
 
     property int barHeight: 32
+    onBarHeightChanged: save()
     property real barOpacity: 1.0
+    onBarOpacityChanged: save()
     property real calendarOpacity: 1.0
+    onCalendarOpacityChanged: save()
     property real notifOpacity: 1.0
+    onNotifOpacityChanged: save()
     property real systrayOpacity: 1.0
+    onSystrayOpacityChanged: save()
     property bool barBorder: true
+    onBarBorderChanged: save()
     property bool showSeparators: false
+    onShowSeparatorsChanged: save()
     property int workspaceCount: 5
+    onWorkspaceCountChanged: save()
 
     property var leftItems: ["launcher", "workspace", "systray"]
     property var centerItems: ["clock"]
@@ -217,13 +233,11 @@ Item {
         if (section === "left") leftItems = items
         else if (section === "center") centerItems = items
         else if (section === "right") rightItems = items
-        save()
         layoutChanged()
     }
 
     function setBarPosition(pos) {
         barPosition = pos
-        save()
         layoutChanged()
     }
 

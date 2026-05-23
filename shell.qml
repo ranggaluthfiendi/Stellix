@@ -49,11 +49,54 @@ ShellRoot {
 
     SystemInfoService {
         id: systemInfo
+        Component.onCompleted: BarLayoutState.registerItem("systemInfo", systemInfo)
     }
 
     PipewireService {
         id: pwService
+        Component.onCompleted: BarLayoutState.registerItem("pwService", pwService)
     }
+
+    MprisService {
+        id: mprisService
+        Component.onCompleted: BarLayoutState.registerItem("mprisService", mprisService)
+    }
+
+    BrightnessService {
+        id: brightnessService
+        Component.onCompleted: {
+            BarLayoutState.registerItem("brightnessService", brightnessService)
+            brightnessService.init()
+        }
+    }
+
+    NotificationService {
+        id: notifService
+        Component.onCompleted: BarLayoutState.registerItem("notifService", notifService)
+    }
+
+    Connections {
+        target: brightnessService
+        function onCurrentValueChanged() {
+            if (!RightBarState.indicatorVisible || RightBarState.indicatorType !== "brightness")
+                RightBarState.showIndicator("brightness", brightnessService.percentage / 100, false)
+        }
+    }
+
+    Connections {
+        target: (pwService.sink && pwService.sink.audio) ? pwService.sink.audio : null
+        ignoreUnknownSignals: true
+        function onVolumeChanged() {
+            if (!RightBarState.indicatorVisible || RightBarState.indicatorType !== "volume")
+                RightBarState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+        }
+        function onMutedChanged() {
+            RightBarState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+        }
+    }
+
+    // Since I don't have a direct reference to brightnessSvc here (it's in BatteryRightBar),
+    // I will rely on the IPC or move brightnessSvc to shell.qml level.
 
     SettingsData {
         id: settingsData

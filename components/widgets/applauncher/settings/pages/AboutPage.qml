@@ -22,13 +22,14 @@ VabContentPage {
 
     ColumnLayout {
         Layout.fillWidth: true
+        Layout.alignment: Qt.AlignHCenter
         spacing: Theme.dp(30)
         
         // --- Stellix Shell Section ---
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: Theme.dp(12)
             Layout.alignment: Qt.AlignHCenter
+            spacing: Theme.dp(12)
             
             Item {
                 Layout.preferredWidth: Theme.dp(100)

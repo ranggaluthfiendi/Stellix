@@ -323,10 +323,21 @@ Item {
                     SearchResultsPage { 
                         searchQuery: root.searchQuery; settingsData: root.settingsData; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; 
                         onGoToCategory: function(cat, title){ 
+                            var prevCat = root.currentCategory;
                             root.highlightTitle = title;
                             root.searchQuery = ""; 
                             root.currentCategory = cat; 
-                            root.focusedNavItem = cat 
+                            root.focusedNavItem = cat;
+                            root.focusInContent = true;
+
+                            if (prevCat === cat) {
+                                // Manual trigger if page didn't change
+                                var page = stack.children[cat];
+                                if (page && typeof page.triggerHighlight === "function") {
+                                    page.triggerHighlight(title);
+                                    root.highlightTitle = "";
+                                }
+                            }
                         } 
                     }
                     BluetoothPage { systemInfo: root.systemInfo; currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }

@@ -36,17 +36,11 @@ VabContentPage {
     active: page.focusInContent && page.currentCategory === 4
     focusIndex: page.contentFocusIndex
 
-    ScrollView {
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-        clip: true
-        contentWidth: availableWidth
+    ColumnLayout {
+        width: parent.width
+        spacing: Theme.dp(10)
 
-        ColumnLayout {
-            width: parent.width
-            spacing: Theme.dp(10)
-
-            Rectangle {
+        Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.dp(34)
                 color: page.uiMessage !== "" ? Qt.rgba(page.uiMessageColor.r, page.uiMessageColor.g, page.uiMessageColor.b, 0.15) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.08)
@@ -147,5 +141,4 @@ VabContentPage {
 
             Item { Layout.preferredHeight: Theme.dp(20) }
         }
-    }
 }

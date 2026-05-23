@@ -11,8 +11,116 @@ Item {
     
     signal highlightItem(string title)
     
+    // Internal state for search highlighting
+    property string _pendingHighlight: ""
+    property int _retryCount: 0
+
+    Timer {
+        id: scrollTimer
+        interval: 150 // Initial check delay
+        repeat: false
+        onTriggered: {
+            if (root._pendingHighlight !== "") {
+                var target = findTargetByTitle(mainLayout, root._pendingHighlight);
+                
+                // CRITICAL: Check if layout has actually populated and the item has a position
+                // If implicitHeight is very low, the page probably isn't ready.
+                if (target && mainLayout.implicitHeight > 100) {
+                    scrollToItem(target, true);
+                    root._pendingHighlight = "";
+                    root._retryCount = 0;
+                } else if (root._retryCount < 8) { // Up to ~2 seconds of total waiting
+                    root._retryCount++;
+                    scrollTimer.interval = 200;
+                    scrollTimer.restart();
+                } else {
+                    root._pendingHighlight = "";
+                    root._retryCount = 0;
+                }
+            }
+        }
+    }
+
+    NumberAnimation {
+        id: scrollAnim
+        target: flickable
+        property: "contentY"
+        duration: 600
+        easing.type: Easing.OutCubic
+    }
+
     function triggerHighlight(title) {
+        if (!title) return;
         root.highlightItem(title)
+        root._pendingHighlight = title
+        root._retryCount = 0
+        scrollTimer.interval = 100
+        scrollTimer.restart()
+    }
+
+    function scrollToItem(targetChild, force = false) {
+        if (!targetChild) return;
+        
+        // Ensure animation is fresh
+        scrollAnim.stop();
+
+        // Map position to the scrollable content area
+        var pos = targetChild.mapToItem(flickable.contentItem, 0, 0);
+        var absY = pos.y;
+        
+        var viewHeight = flickable.height;
+        var currentScrollY = flickable.contentY;
+        var margin = Theme.dp(100); 
+        
+        // Calculate target scroll position
+        var targetScrollY = Math.max(0, absY - margin);
+        
+        // Use the latest possible contentHeight
+        var realContentHeight = Math.max(flickable.height, mainLayout.implicitHeight + root.topPad + root.botPad);
+        var maxScroll = Math.max(0, realContentHeight - viewHeight);
+        targetScrollY = Math.min(targetScrollY, maxScroll);
+
+        if (force) {
+            scrollAnim.to = targetScrollY;
+            scrollAnim.start();
+        } else {
+            // Standard keyboard navigation
+            if (absY < currentScrollY + margin) {
+                flickable.contentY = Math.max(0, absY - margin);
+            } else if (absY + targetChild.height > currentScrollY + viewHeight - margin) {
+                flickable.contentY = Math.min(maxScroll, absY + targetChild.height - viewHeight + margin);
+            }
+        }
+    }
+
+    // Comprehensive recursive search for items with title or label
+    function findTargetByTitle(container, searchTitle) {
+        if (!container || !searchTitle) return null;
+        var lowerSearch = searchTitle.toLowerCase().trim();
+        
+        function checkItem(item) {
+            if (!item) return null;
+            
+            var itemText = "";
+            try {
+                if (typeof item.title === "string") itemText = item.title;
+                else if (typeof item.label === "string") itemText = item.label;
+            } catch(e) {}
+            
+            if (itemText && itemText.toLowerCase().trim() === lowerSearch) {
+                return item;
+            }
+            
+            if (item.children) {
+                for (var i = 0; i < item.children.length; i++) {
+                    var found = checkItem(item.children[i]);
+                    if (found) return found;
+                }
+            }
+            return null;
+        }
+        
+        return checkItem(container);
     }
 
     Layout.fillWidth: true
@@ -29,7 +137,7 @@ Item {
         id: flickable
         anchors.fill: parent
         contentWidth: width
-        contentHeight: mainLayout.implicitHeight + root.topPad + root.botPad
+        contentHeight: Math.max(height, mainLayout.implicitHeight + root.topPad + root.botPad)
         clip: true
         interactive: true
         flickableDirection: Flickable.VerticalFlick
@@ -89,34 +197,21 @@ Item {
     // Auto-scroll logic for keyboard navigation
     onFocusIndexChanged: {
         if (!active) return;
-        
-        function findTarget(container) {
-            for (var i = 0; i < container.children.length; i++) {
-                var child = container.children[i];
-                if (child && child.hasOwnProperty("itemIndex") && child.itemIndex === root.focusIndex) {
-                    return child;
-                }
-                if (child && child.children && child.children.length > 0) {
-                    var sub = findTarget(child);
-                    if (sub) return sub;
-                }
-            }
-            return null;
-        }
-        
-        var targetChild = findTarget(mainLayout);
-        
-        if (targetChild) {
-            var relY = targetChild.mapToItem(mainLayout, 0, 0).y + root.topPad;
-            var viewHeight = flickable.height;
-            var currentScrollY = flickable.contentY;
-            var margin = Theme.dp(40);
-            
-            if (relY < currentScrollY + margin) {
-                flickable.contentY = Math.max(0, relY - margin);
-            } else if (relY + targetChild.height > currentScrollY + viewHeight - margin) {
-                flickable.contentY = Math.min(flickable.contentHeight - viewHeight, relY + targetChild.height - viewHeight + margin);
+        var targetChild = findTargetByIndex(mainLayout, root.focusIndex);
+        scrollToItem(targetChild);
+    }
+
+    function findTargetByIndex(container, index) {
+        if (!container) return null;
+        var stack = [container];
+        while (stack.length > 0) {
+            var item = stack.pop();
+            if (!item) continue;
+            if (item.hasOwnProperty("itemIndex") && item.itemIndex === index) return item;
+            if (item.children) {
+                for (var i = 0; i < item.children.length; i++) stack.push(item.children[i]);
             }
         }
+        return null;
     }
 }

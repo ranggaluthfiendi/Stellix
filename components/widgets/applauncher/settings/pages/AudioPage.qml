@@ -188,45 +188,115 @@ VabContentPage {
 
         VabSectionHeader { title: "Application Mixer"; Layout.topMargin: Theme.dp(12) }
 
-        Repeater {
-            model: page.pwService ? page.pwService.sinkApps() : []
-            delegate: VabSettingsCard {
-                itemIndex: 2 + index
-                isFocused: page.focusInContent && page.contentFocusIndex === (2 + index)
-                title: page.pwService ? page.pwService.nodeName(modelData) : ""; desc: "Playback stream"
-                
-                headerActions: RowLayout {
-                    spacing: Theme.dp(12)
-                    VabSlider { 
-                        value: modelData.audio.volume; 
-                        muted: modelData.audio.muted
-                        onMoved: modelData.audio.volume = value 
-                        
-                        MouseArea {
-                            anchors.fill: parent
-                            acceptedButtons: Qt.NoButton
-                            onWheel: function(wheel) {
-                                var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
-                                modelData.audio.volume = Math.max(0, Math.min(1, modelData.audio.volume + delta))
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: Theme.dp(8)
+            visible: page.pwService && page.pwService.sinkApps().length > 0
+
+            Repeater {
+                model: page.pwService ? page.pwService.sinkApps() : []
+                delegate: Rectangle {
+                    id: appCard
+                    required property var modelData
+                    required property int index
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(54)
+                    color: Qt.darker(Theme.bgSecondary, 1.1)
+                    border.width: 1
+                    border.color: Theme.border
+                    radius: 0
+
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: Theme.dp(10)
+                        spacing: Theme.dp(14)
+
+                        // App Icon
+                        Rectangle {
+                            Layout.preferredWidth: Theme.dp(34)
+                            Layout.preferredHeight: Theme.dp(34)
+                            color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
+                            radius: 0
+                            
+                            Image {
+                                anchors.centerIn: parent
+                                width: Theme.dp(22)
+                                height: Theme.dp(22)
+                                source: page.pwService ? page.pwService.nodeIconPath(appCard.modelData) : ""
+                                fillMode: Image.PreserveAspectFit
+                                visible: source != ""
+                            }
+                            
+                            IconVolume {
+                                anchors.centerIn: parent
+                                iconSize: Theme.dp(16)
+                                iconColor: Theme.accent
+                                visible: !page.pwService || page.pwService.nodeIconPath(appCard.modelData) == ""
                             }
                         }
-                    }
-                    Text {
-                        text: Math.round(modelData.audio.volume * 100) + "%"
-                        color: modelData.audio.muted ? Theme.danger : Theme.accent
-                        font.pixelSize: Theme.dp(10); font.weight: Font.Bold; Layout.preferredWidth: Theme.dp(36); horizontalAlignment: Text.AlignRight
-                    }
-                    Rectangle {
-                        Layout.preferredWidth: Theme.dp(28); Layout.preferredHeight: Theme.dp(28)
-                        color: appMuteM.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1) : "transparent"
-                        border.width: 1; border.color: modelData.audio.muted ? Theme.danger : Theme.accent; radius: 0
-                        IconVolume { 
-                            anchors.centerIn: parent; iconSize: Theme.dp(14)
-                            iconColor: modelData.audio.muted ? Theme.danger : Theme.accent 
+
+                        // App Name
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+                            Text {
+                                text: page.pwService ? page.pwService.nodeName(appCard.modelData) : "Unknown App"
+                                color: Theme.textPrimary
+                                font.pixelSize: Theme.dp(11)
+                                font.weight: Font.Bold
+                                elide: Text.ElideRight
+                                Layout.fillWidth: true
+                            }
+                            Text {
+                                text: "Active Playback Stream"
+                                color: Theme.textMuted
+                                font.pixelSize: Theme.dp(8)
+                            }
                         }
-                        MouseArea {
-                            id: appMuteM; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                            onClicked: modelData.audio.muted = !modelData.audio.muted
+
+                        // Volume Control
+                        RowLayout {
+                            spacing: Theme.dp(12)
+                            
+                            VabSlider { 
+                                Layout.preferredWidth: Theme.dp(160)
+                                value: appCard.modelData.audio.volume; 
+                                muted: appCard.modelData.audio.muted
+                                onMoved: appCard.modelData.audio.volume = value 
+                                
+                                MouseArea {
+                                    anchors.fill: parent
+                                    acceptedButtons: Qt.NoButton
+                                    onWheel: function(wheel) {
+                                        var delta = wheel.angleDelta.y > 0 ? 0.05 : -0.05
+                                        appCard.modelData.audio.volume = Math.max(0, Math.min(1, appCard.modelData.audio.volume + delta))
+                                    }
+                                }
+                            }
+
+                            Text {
+                                text: Math.round(appCard.modelData.audio.volume * 100) + "%"
+                                color: appCard.modelData.audio.muted ? Theme.danger : Theme.accent
+                                font.pixelSize: Theme.dp(10)
+                                font.weight: Font.Bold
+                                Layout.preferredWidth: Theme.dp(36)
+                                horizontalAlignment: Text.AlignRight
+                            }
+
+                            Rectangle {
+                                Layout.preferredWidth: Theme.dp(28); Layout.preferredHeight: Theme.dp(28)
+                                color: am.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1) : "transparent"
+                                border.width: 1; border.color: appCard.modelData.audio.muted ? Theme.danger : Theme.accent; radius: 0
+                                IconVolume { 
+                                    anchors.centerIn: parent; iconSize: Theme.dp(14)
+                                    iconColor: appCard.modelData.audio.muted ? Theme.danger : Theme.accent 
+                                }
+                                MouseArea {
+                                    id: am; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                                    onClicked: appCard.modelData.audio.muted = !appCard.modelData.audio.muted
+                                }
+                            }
                         }
                     }
                 }
@@ -234,14 +304,21 @@ VabContentPage {
         }
 
         // Empty state for mixer
-        Item {
+        Rectangle {
             visible: page.pwService ? page.pwService.sinkApps().length === 0 : true
-            Layout.fillWidth: true; Layout.preferredHeight: Theme.dp(60)
+            Layout.fillWidth: true
+            Layout.preferredHeight: Theme.dp(80)
+            color: Qt.rgba(Theme.textMuted.r, Theme.textMuted.g, Theme.textMuted.b, 0.05)
+            border.width: 1
+            border.color: Theme.border
+            radius: 0
+            
             Text {
                 anchors.centerIn: parent
                 text: "No applications currently playing audio"
                 color: Theme.textMuted
                 font.pixelSize: Theme.dp(10)
+                font.italic: true
             }
         }
     }
