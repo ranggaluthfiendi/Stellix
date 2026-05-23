@@ -359,7 +359,7 @@ PanelWindow {
                                         }
                                         event.accepted = true; return
                                     }
-                                    if (event.key === Qt.Key_P && (event.modifiers & Qt.AltModifier)) {
+                                    if (event.key === Qt.Key_F && !event.modifiers) {
                                         if (clipboardPopup) clipboardPopup.togglePinCurrent()
                                         event.accepted = true; return
                                     }

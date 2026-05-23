@@ -85,7 +85,7 @@ Rectangle {
         } else if (event.key === Qt.Key_Up) {
             clipList.currentIndex = Math.max(clipList.currentIndex - 1, 0)
             event.accepted = true
-        } else if (event.key === Qt.Key_P && (event.modifiers & Qt.AltModifier)) {
+        } else if (event.key === Qt.Key_F && !event.modifiers) {
             root.togglePinCurrent()
             event.accepted = true
         } else if (event.key === Qt.Key_Delete) {
@@ -435,6 +435,7 @@ Rectangle {
                             onReleased: {
                                 if (Math.abs(swipeRect.x) > Theme.dp(80)) {
                                     if (root.service) root.service.deleteFromHistory(modelData.id)
+                                    swipeRect.x = 0 // Reset position
                                 } else {
                                     swipeRect.x = 0
                                 }
@@ -496,7 +497,7 @@ Rectangle {
                 FooterSeparator {}
                 FooterHint { label: "Copy"; keys: "Enter" }
                 FooterSeparator {}
-                FooterHint { label: "Pin"; keys: "Alt+P" }
+                FooterHint { label: "Pin"; keys: "F" }
                 FooterSeparator {}
                 FooterHint { label: "Del"; keys: "Del" }
                 FooterSeparator {}

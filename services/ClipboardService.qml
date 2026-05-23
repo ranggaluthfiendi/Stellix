@@ -162,7 +162,7 @@ Item {
     }
 
     function deleteFromHistory(id) {
-        deleteProcess.exec(["sh", "-c", "cliphist delete '" + id + "'"])
+        deleteProcess.exec(["sh", "-c", "cliphist list | grep -w \"^" + id + "\" | cliphist delete"])
     }
 
     Process {
