@@ -121,7 +121,7 @@ VabContentPage {
             property bool expanded: false
             itemIndex: 2
             isFocused: page.focusInContent && page.contentFocusIndex === 2
-            title: "Wallpaper Directory"; desc: page.wallpaper ? page.wallpaper.wallpaperDir : "~/Pictures/Wallpapers"
+            title: "Wallpaper Directory"; desc: page.wallpaper ? page.wallpaper.wallpaperDir.replace(Quickshell.env("HOME"), "~") : "~/Pictures/Wallpapers"
 
             headerActions: RowLayout {
                 spacing: Theme.dp(8)
@@ -149,7 +149,7 @@ VabContentPage {
                         id: dirInput
                         Layout.fillWidth: true
                         text: page.wallpaper ? page.wallpaper.wallpaperDir : ""
-                        placeholderText: "~/Pictures/Wallpapers"
+                        placeholderText: Quickshell.env("HOME") + "/Pictures/Wallpapers"
                         color: Theme.textPrimary
                         font.pixelSize: Theme.dp(10)
                         background: Rectangle {

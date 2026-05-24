@@ -31,6 +31,7 @@ PanelWindow {
 
         onPressed: {
             RightBarState.calendarOpen = false
+            RightBarState.weatherDetailOpen = false
         }
     }
 }

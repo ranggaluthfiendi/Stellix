@@ -1,4 +1,6 @@
 import QtQuick
+import Quickshell
+import qs.services
 
 Item {
     id: timeFloating
@@ -6,18 +8,46 @@ Item {
     property string time: "00:00"
     property string date: ""
 
-    function updateTime() {
-        const now = new Date()
-        time = Qt.formatTime(now, "hh:mm")
-        date = Qt.formatDate(now, "ddd dd • MMMM • yyyy").toUpperCase()
+    SystemClock {
+        id: clock
+        precision: BarLayoutState.desktopClockShowSeconds ? SystemClock.Seconds : SystemClock.Minutes
+        
+        onDateChanged: {
+            var timeFmt = BarLayoutState.desktopClock24Hour ? "HH:mm" : "hh:mm"
+            if (BarLayoutState.desktopClockShowSeconds) timeFmt += ":ss"
+            if (!BarLayoutState.desktopClock24Hour) timeFmt += " AP"
+            
+            timeFloating.time = Qt.formatDateTime(clock.date, timeFmt)
+            
+            var dateParts = []
+            if (BarLayoutState.desktopClockShowWeekday) dateParts.push("ddd")
+            if (BarLayoutState.desktopClockShowDate) dateParts.push("dd MMMM")
+            if (BarLayoutState.desktopClockShowYear) dateParts.push("yyyy")
+            
+            var dateFmt = dateParts.join(" ' • ' ")
+            if (dateFmt === "") dateFmt = " " // Non-empty to trigger binding
+            
+            timeFloating.date = Qt.formatDateTime(clock.date, dateFmt).toUpperCase()
+        }
     }
 
-    Component.onCompleted: updateTime()
-
-    Timer {
-        interval: 1000
-        running: true
-        repeat: true
-        onTriggered: updateTime()
+    Component.onCompleted: {
+        var timeFmt = BarLayoutState.desktopClock24Hour ? "HH:mm" : "hh:mm"
+        if (BarLayoutState.desktopClockShowSeconds) timeFmt += ":ss"
+        if (!BarLayoutState.desktopClock24Hour) timeFmt += " AP"
+        
+        time = Qt.formatDateTime(clock.date, timeFmt)
+        
+        var dateParts = []
+        if (BarLayoutState.desktopClockShowWeekday) dateParts.push("ddd")
+        if (BarLayoutState.desktopClockShowDate) dateParts.push("dd MMMM")
+        if (BarLayoutState.desktopClockShowYear) dateParts.push("yyyy")
+        
+        var dateFmt = dateParts.join(" ' • ' ")
+        if (dateFmt === "") dateFmt = " "
+        
+        date = Qt.formatDateTime(clock.date, dateFmt).toUpperCase()
     }
 }
+
+

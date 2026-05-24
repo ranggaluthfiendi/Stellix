@@ -183,7 +183,7 @@ Item {
         id: titleMarquee
         x: 245 * s
         y: 24 * s
-        width: 400 * s
+        width: 300 * s
         height: 28 * s
         text: root.trackTitle
         textColor: root.primary
@@ -198,7 +198,7 @@ Item {
         id: artistMarquee
         x: 245 * s
         y: 52 * s
-        width: 400 * s
+        width: 300 * s
         height: 24 * s
         text: root.artist
         textColor: root.primary

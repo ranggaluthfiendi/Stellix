@@ -29,12 +29,11 @@ Item {
         return names[now.getMonth()]
     }
 
-    readonly property real headerH: Theme.dp(56)
-    readonly property real weekdayH: Theme.dp(18)
-    readonly property real gridH: Theme.dp(168)
-    readonly property real footerH: Theme.dp(28)
-    readonly property real navH: Theme.dp(32)
-    readonly property real totalH: headerH + weekdayH + gridH + footerH + navH
+    readonly property real headerH: Theme.dp(64)
+    readonly property real weekdayH: Theme.dp(24)
+    readonly property real gridH: Theme.dp(210)
+    readonly property real footerH: Theme.dp(36)
+    readonly property real totalH: headerH + weekdayH + gridH + footerH
 
     implicitHeight: totalH
 
@@ -90,59 +89,73 @@ Item {
             anchors.fill: parent
             spacing: 0
 
-            // ── Header: Day number + time ──
+            // ── Header: Month/Year + Nav ──
             Item {
                 width: parent.width
                 height: root.headerH
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.margins: Theme.dp(10)
-                    spacing: Theme.dp(10)
+                    anchors.margins: Theme.dp(12)
+                    spacing: Theme.dp(8)
 
-                    Rectangle {
-                        Layout.preferredWidth: Theme.dp(42)
-                        Layout.preferredHeight: Theme.dp(42)
-                        color: Theme.accent
-                        radius: 0
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: root.now.getDate()
-                            color: Theme.bgPrimary
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round(18 * s)
-                            font.weight: Font.Bold
-                        }
-                    }
-
+                    // Month/Year
                     ColumnLayout {
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
                         spacing: Theme.dp(2)
 
-                        Item { Layout.fillHeight: true }
-
                         Text {
-                            text: {
-                                var h = root.now.getHours()
-                                var m = root.now.getMinutes()
-                                return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m
-                            }
+                            text: root.monthNameFull + " " + root.now.getFullYear()
                             color: Theme.textPrimary
                             font.family: Typography.fontFamily
-                            font.pixelSize: Math.round(14 * s)
+                            font.pixelSize: Math.round(16 * s)
                             font.weight: Font.Bold
                         }
 
                         Text {
-                            text: root.dayName + ", " + root.now.getDate() + " " + root.monthNameFull + " " + root.now.getFullYear()
+                            text: root.dayName + ", " + root.now.getDate() + " " + root.monthNameFull
                             color: Theme.textMuted
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round(9 * s)
                         }
+                    }
 
-                        Item { Layout.fillHeight: true }
+                    // Time
+                    Text {
+                        text: {
+                            var h = root.now.getHours()
+                            var m = root.now.getMinutes()
+                            return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m
+                        }
+                        color: Theme.accent
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Math.round(22 * s)
+                        font.weight: Font.Bold
+                    }
+
+                    // Nav buttons
+                    RowLayout {
+                        spacing: Theme.dp(4)
+
+                        NavButton {
+                            iconSource: chevronsLeftComp
+                            onClicked: RightBarState.calendarMonthOffset -= 12
+                        }
+
+                        NavButton {
+                            iconSource: chevronLeftComp
+                            onClicked: RightBarState.prevMonth()
+                        }
+
+                        NavButton {
+                            iconSource: chevronRightComp
+                            onClicked: RightBarState.nextMonth()
+                        }
+
+                        NavButton {
+                            iconSource: chevronsRightComp
+                            onClicked: RightBarState.calendarMonthOffset += 12
+                        }
                     }
                 }
             }
@@ -169,9 +182,9 @@ Item {
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                         text: modelData
-                        color: Theme.textMuted
+                        color: index >= 5 ? Theme.danger : Theme.textMuted
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round(8 * s)
+                        font.pixelSize: Math.round(9 * s)
                         font.weight: Font.Medium
                     }
                 }
@@ -226,14 +239,26 @@ Item {
                             anchors.centerIn: parent
                             text: info.d
                             color: {
-                                if (!inMonth) return Theme.textMuted
+                                if (!inMonth) return Qt.rgba(Theme.textMuted.r, Theme.textMuted.g, Theme.textMuted.b, 0.4)
                                 if (isToday) return Theme.bgPrimary
                                 if (pinned) return Theme.accent
                                 return Theme.textPrimary
                             }
                             font.family: Typography.fontFamily
-                            font.pixelSize: Math.round(10 * s)
+                            font.pixelSize: Math.round(11 * s)
                             font.weight: isToday ? Font.Bold : Font.Normal
+                        }
+
+                        // Pin indicator
+                        Rectangle {
+                            anchors.top: parent.top
+                            anchors.right: parent.right
+                            anchors.margins: Theme.dp(2)
+                            width: Theme.dp(4)
+                            height: Theme.dp(4)
+                            radius: width / 2
+                            color: Theme.warning
+                            visible: pinned && !isToday
                         }
 
                         MouseArea {
@@ -253,7 +278,7 @@ Item {
                 color: Theme.border
             }
 
-            // ── Footer: pinned count + clear ──
+            // ── Footer ──
             Item {
                 width: parent.width
                 height: root.footerH
@@ -262,14 +287,14 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: Theme.dp(4)
-                    spacing: Theme.dp(4)
+                    anchors.margins: Theme.dp(10)
+                    spacing: Theme.dp(8)
 
                     Text {
-                        text: root.pinnedCountInShownMonth() > 0 ? (root.pinnedCountInShownMonth() + " pinned") : "Click a date to pin"
+                        text: root.pinnedCountInShownMonth() > 0 ? (root.pinnedCountInShownMonth() + " pinned this month") : "Click a date to pin/unpin"
                         color: Theme.textMuted
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round(8 * s)
+                        font.pixelSize: Math.round(9 * s)
                         elide: Text.ElideRight
                         Layout.fillWidth: true
                     }
@@ -277,7 +302,7 @@ Item {
                     HoldButton {
                         visible: root.pinnedCountInShownMonth() > 0
                         s: root.s
-                        buttonLabel: "Clear"
+                        buttonLabel: "Clear Month"
                         requireHold: false
                         onExecute: RightBarState.clearPinnedDatesInMonth(root.shownYear, root.shownMonth)
                     }
@@ -285,99 +310,10 @@ Item {
                     HoldButton {
                         visible: RightBarState.pinnedDates.length > root.pinnedCountInShownMonth()
                         s: root.s
-                        buttonLabel: "All"
+                        buttonLabel: "Clear All"
                         danger: true
                         requireHold: false
                         onExecute: RightBarState.clearAllPinnedDates()
-                    }
-                }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: Theme.dp(1)
-                color: Theme.border
-            }
-
-            // ── Bottom nav: year/month controls ──
-            Item {
-                width: parent.width
-                height: root.navH
-
-                RowLayout {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: Theme.dp(4)
-                    spacing: 0
-
-                    // Left side: prev controls
-                    RowLayout {
-                        spacing: Theme.dp(2)
-                        Layout.alignment: Qt.AlignLeft
-
-                        NavButton {
-                            iconSource: chevronsLeftComp
-                            onClicked: RightBarState.calendarMonthOffset -= 12
-                        }
-
-                        NavButton {
-                            iconSource: chevronLeftComp
-                            onClicked: RightBarState.prevMonth()
-                        }
-                    }
-
-                    // Center: month label
-                    Item { Layout.fillWidth: true }
-
-                    Rectangle {
-                        Layout.preferredWidth: Theme.dp(78)
-                        Layout.preferredHeight: Theme.dp(20)
-                        color: monthMouse.containsMouse
-                            ? (root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
-                            : (root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.bgSecondary : Theme.bgPrimary)
-                        border.width: 1
-                        border.color: root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.accent : Theme.border
-                        radius: 0
-
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: root.monthNameShort(root.shownMonth) + " " + root.shownYear
-                            color: root.shownMonth === (root.now.getMonth() + 1) && root.shownYear === root.now.getFullYear() ? Theme.accent : Theme.textPrimary
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round(8 * s)
-                            font.weight: Font.Bold
-                        }
-
-                        MouseArea {
-                            id: monthMouse
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            hoverEnabled: true
-                            onClicked: RightBarState.calendarMonthOffset = 0
-                        }
-                    }
-
-                    // Right side: next controls
-                    Item { Layout.fillWidth: true }
-
-                    RowLayout {
-                        spacing: Theme.dp(2)
-                        Layout.alignment: Qt.AlignRight
-
-                        NavButton {
-                            iconSource: chevronRightComp
-                            onClicked: RightBarState.nextMonth()
-                        }
-
-                        NavButton {
-                            iconSource: chevronsRightComp
-                            onClicked: RightBarState.calendarMonthOffset += 12
-                        }
                     }
                 }
             }
@@ -387,12 +323,12 @@ Item {
     component NavButton: Rectangle {
         property var iconSource
         signal clicked
-        Layout.preferredWidth: Theme.dp(22)
-        Layout.preferredHeight: Theme.dp(22)
-        color: navMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12) : Theme.bgSecondary
+        Layout.preferredWidth: Theme.dp(26)
+        Layout.preferredHeight: Theme.dp(26)
+        color: navMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
         border.width: 1
-        border.color: navMouse.containsMouse ? Theme.textPrimary : Theme.border
-        radius: 0
+        border.color: navMouse.containsMouse ? Theme.accent : Theme.border
+        radius: Theme.dp(4)
 
         Behavior on color {
             ColorAnimation { duration: 120 }
@@ -412,8 +348,8 @@ Item {
         }
     }
 
-    Component { id: chevronsLeftComp; IconChevronsLeft { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
-    Component { id: chevronLeftComp; IconChevronLeft { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
-    Component { id: chevronRightComp; IconChevronRight { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
-    Component { id: chevronsRightComp; IconChevronsRight { iconSize: Theme.dp(12); iconColor: Theme.textPrimary } }
+    Component { id: chevronsLeftComp; IconChevronsLeft { iconSize: Theme.dp(14); iconColor: Theme.textPrimary } }
+    Component { id: chevronLeftComp; IconChevronLeft { iconSize: Theme.dp(14); iconColor: Theme.textPrimary } }
+    Component { id: chevronRightComp; IconChevronRight { iconSize: Theme.dp(14); iconColor: Theme.textPrimary } }
+    Component { id: chevronsRightComp; IconChevronsRight { iconSize: Theme.dp(14); iconColor: Theme.textPrimary } }
 }

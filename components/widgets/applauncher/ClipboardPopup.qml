@@ -207,7 +207,12 @@ Rectangle {
 
                     Keys.onPressed: function(event) {
                         if (event.key === Qt.Key_Down || event.key === Qt.Key_Up || event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            event.accepted = false // Let it bubble to root Keys.onPressed
+                            event.accepted = false
+                        } else if (event.key === Qt.Key_Delete) {
+                            if (text.length === 0) {
+                                root.deleteCurrent()
+                                event.accepted = true
+                            }
                         }
                     }
                 }

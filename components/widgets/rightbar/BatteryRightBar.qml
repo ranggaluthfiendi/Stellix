@@ -133,6 +133,11 @@ Scope {
                 root.closeNotifPopup()
             }
         }
+        function onWeatherDetailOpenChanged() {
+            if (RightBarState.weatherDetailOpen) {
+                root.closeNotifPopup()
+            }
+        }
     }
 
     property int _notifReqVersion: 0
@@ -207,7 +212,7 @@ Scope {
 
     PanelWindow {
         id: outsideOverlay
-        visible: RightBarState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen
+        visible: RightBarState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen || RightBarState.calendarOpen || RightBarState.weatherDetailOpen || RightBarState.workspaceSwitcherOpen
         color: "transparent"
 
         WlrLayershell.layer: WlrLayer.Top
@@ -234,9 +239,12 @@ Scope {
                 root.closeSidePopups()
                 root.closeNotifPopup()
                 RightBarState.calendarOpen = false
+                RightBarState.weatherDetailOpen = false
             }
         }
     }
+
+    readonly property real popupRadius: BarLayoutState.rightbarPopupRounded ? Theme.radiusMedium : 0
 
     PanelWindow {
         id: panel
@@ -265,7 +273,7 @@ Scope {
         margins.right: root.batteryIsRight ? Theme.dp(5) : (root.batteryIsCenter ? root.centerMargin : root.screenW - root.panelW - Theme.dp(5))
 
         Component.onCompleted: {
-            brightnessSvc.init()
+            if (root.brightnessSvc) root.brightnessSvc.init()
         }
 
         MouseArea {
@@ -278,7 +286,7 @@ Scope {
             color: Theme.bgSecondary
             border.width: 1
             border.color: Theme.border
-            radius: 0
+            radius: root.popupRadius
 
             ColumnLayout {
                 id: content
@@ -408,6 +416,9 @@ Scope {
     }
 
     function computeNotifX() {
+        if (root.notifIsCenter) return root.centerMargin
+        if (root.notifIsLeft) return Theme.dp(5)
+        if (root.notifIsRight) return root.screenW - notifPopup.implicitWidth - Theme.dp(5)
         if (!root.notifItemRef) return root.screenW / 2 - notifPopup.implicitWidth / 2
         try {
             var pos = root.notifItemRef.mapToGlobal(0, 0)

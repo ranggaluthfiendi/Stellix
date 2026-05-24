@@ -225,6 +225,9 @@ Item {
                             VabSidebarHeader { title: "Appearance"; expanded: settingsData.appearanceExp; onToggled: settingsData.appearanceExp = !settingsData.appearanceExp }
                             VabNavItem { label: "Personalization"; index: 0; active: !root.isSearching && root.currentCategory === 0; visible: settingsData.appearanceExp }
                             VabNavItem { label: "Bar Layout"; index: 9; active: !root.isSearching && root.currentCategory === 9; visible: settingsData.appearanceExp }
+                            VabNavItem { label: "Screen Widgets"; index: 10; active: !root.isSearching && root.currentCategory === 10; visible: settingsData.appearanceExp }
+                            VabNavItem { label: "Weather"; index: 11; active: !root.isSearching && root.currentCategory === 11; visible: settingsData.appearanceExp }
+                            VabNavItem { label: "Clock"; index: 12; active: !root.isSearching && root.currentCategory === 12; visible: settingsData.appearanceExp }
                             
                             // --- Connectivity ---
                             VabSidebarHeader { title: "Connectivity"; expanded: settingsData.connectivityExp; onToggled: settingsData.connectivityExp = !settingsData.connectivityExp; Layout.topMargin: Theme.dp(8) }
@@ -266,7 +269,7 @@ Item {
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: Theme.dp(20); anchors.rightMargin: Theme.dp(20); spacing: Theme.dp(16)
                         Text {
-                            text: root.isSearching ? "Search Results" : ["Appearance", "Workspaces", "Audio", "Wi-Fi", "Keybindings", "System", "About", "Search", "Bluetooth", "Bar Layout"][root.currentCategory]
+                            text: root.isSearching ? "Search Results" : ["Personalization", "Workspaces", "Audio", "Wi-Fi", "Keybindings", "System", "About", "Search", "Bluetooth", "Bar Layout", "Screen Widgets", "Weather", "Clock"][root.currentCategory]
                             color: Theme.textPrimary; font.pixelSize: Theme.dp(16); font.weight: Font.Bold; Layout.preferredWidth: Theme.dp(140)
                         }
                         Rectangle {
@@ -284,6 +287,9 @@ Item {
                                     font.family: Typography.fontFamily
                                     text: root.searchQuery
                                     onTextChanged: if (text !== root.searchQuery) root.searchQuery = text
+                                    onAccepted: {
+                                        if (text !== "" && root.settingsData) root.settingsData.addRecentSearch(text)
+                                    }
                                     Keys.onPressed: function(event) {
                                         if (event.key === Qt.Key_Escape) { 
                                             if (text !== "") { text = ""; root.searchQuery = "" } 
@@ -342,6 +348,9 @@ Item {
                     }
                     BluetoothPage { systemInfo: root.systemInfo; currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     BarLayoutPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; subFocusActive: root.subFocusActive; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    ScreenPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    WeatherPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    ClockPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                 }
 
                 Rectangle { // Hint bar
@@ -352,8 +361,6 @@ Item {
                         FooterHint { label: "Navigate"; keys: "↑/↓" }
                         FooterSeparator {}
                         FooterHint { label: "Switch Area"; keys: "←/→" }
-                        FooterSeparator {}
-                        FooterHint { label: "Deep Focus"; keys: "Enter" }
                         FooterSeparator {}
                         FooterHint { label: "Back/Close"; keys: "Esc" }
                         
@@ -387,7 +394,7 @@ Item {
                 if (root.subFocusActive) root.subFocusActive = false; else if (root.focusInContent) root.focusInContent = false; else RightBarState.settingsOpen = false
                 event.accepted = true; return
             }
-            var navOrder = [0, 9, 3, 8, 2, 4, 5, 6]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
+            var navOrder = [0, 9, 10, 11, 12, 3, 8, 2, 4, 5, 6]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
             if (event.key === Qt.Key_Right && !root.focusInContent) { root.focusInContent = true; root.contentFocusIndex = 0; event.accepted = true; return }
             if (event.key === Qt.Key_Left && root.focusInContent && !root.subFocusActive) { root.focusInContent = false; event.accepted = true; return }
             if (event.key === Qt.Key_Up) {

@@ -4,6 +4,7 @@ import Quickshell
 import Quickshell.Services.UPower
 import qs.config
 import qs.components.elements
+import qs.components.widgets.rightbar
 
 Rectangle {
     id: root
@@ -63,6 +64,69 @@ Rectangle {
             font.weight: Typography.weightMedium || Font.Normal
         }
 
+        // Weather shortcut button
+        Rectangle {
+            Layout.preferredWidth: Theme.dp(24)
+            Layout.preferredHeight: Theme.dp(24)
+            color: weatherMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Theme.bgSecondary
+            border.width: 1
+            border.color: weatherMouse.containsMouse ? Theme.accent : Theme.border
+            radius: 0
+
+            Behavior on color {
+                ColorAnimation { duration: 120 }
+            }
+
+            IconCloud {
+                anchors.centerIn: parent
+                iconColor: weatherMouse.containsMouse ? Theme.accent : Theme.textPrimary
+                iconSize: Theme.dp(12)
+            }
+
+            MouseArea {
+                id: weatherMouse
+                cursorShape: Qt.PointingHandCursor
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    RightBarState.closeAll()
+                    RightBarState.weatherDetailOpen = true
+                }
+            }
+        }
+
+        // Notification shortcut button
+        Rectangle {
+            Layout.preferredWidth: Theme.dp(24)
+            Layout.preferredHeight: Theme.dp(24)
+            color: notifMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : Theme.bgSecondary
+            border.width: 1
+            border.color: notifMouse.containsMouse ? Theme.accent : Theme.border
+            radius: 0
+
+            Behavior on color {
+                ColorAnimation { duration: 120 }
+            }
+
+            IconBell {
+                anchors.centerIn: parent
+                iconColor: notifMouse.containsMouse ? Theme.accent : Theme.textPrimary
+                iconSize: Theme.dp(12)
+            }
+
+            MouseArea {
+                id: notifMouse
+                cursorShape: Qt.PointingHandCursor
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    RightBarState.closeAll()
+                    RightBarState.notifPanelRequested = true
+                }
+            }
+        }
+
+        // Power button
         Rectangle {
             Layout.preferredWidth: Theme.dp(24)
             Layout.preferredHeight: Theme.dp(24)

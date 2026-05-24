@@ -8,7 +8,8 @@ import qs.services
 Item {
     id: root
 
-    property real s: Scales.uiScale * 0.6
+    property real baseS: 0.6
+    property real s: Scales.uiScale * baseS * BarLayoutState.desktopNowPlayingScale
 
     property real contentOffsetX: 20 * s
     property real rightOffset: 120 * s
@@ -22,6 +23,10 @@ Item {
     readonly property real screenW: Screen.width
     readonly property real screenH: Screen.height
 
+    readonly property var pwService: BarLayoutState.getItem("pwService")
+    readonly property real audioPeak: (media.player && media.player.isPlaying) ? (pwService ? pwService.audioPeak : 0) : 0
+    readonly property var cavaBars: media.hasMedia ? CavaService.bars : []
+
     NowPlayingService {
         id: media
     }
@@ -29,7 +34,7 @@ Item {
     Item {
         id: container
 
-        width: 700 * s
+        width: trackInfo.x + trackInfo.contentWidth + 20 * s
         height: 97 * s
 
         property real defaultX: 30 * s
@@ -37,11 +42,11 @@ Item {
 
         property real mediaOffset: media.hasMedia ? 0 : -(140 * s)
 
-        x: NowPlayingState.posX !== -1 ? NowPlayingState.posX : defaultX
-        y: NowPlayingState.posY !== -1 ? NowPlayingState.posY : defaultY
+        x: BarLayoutState.desktopNowPlayingX
+        y: BarLayoutState.desktopNowPlayingY
+        rotation: BarLayoutState.desktopNowPlayingRotation
 
-        onXChanged: if (x !== -1 && draggable.moved) NowPlayingState.save(x, y)
-        onYChanged: if (y !== -1 && draggable.moved) NowPlayingState.save(x, y)
+        opacity: BarLayoutState.desktopWidgetsOpacity * BarLayoutState.desktopNowPlayingOpacity
 
         layer.enabled: true
         layer.smooth: true
@@ -81,13 +86,10 @@ Item {
             primary: Theme.accent
             background: Theme.surface
 
-            opacity: media.hasMedia ? 1 : 0.4
+            opacity: media.hasMedia ? (0.4 + root.audioPeak * 0.6) : 0.4
 
-            SequentialAnimation on opacity {
-                running: media.hasMedia
-                loops: Animation.Infinite
-                NumberAnimation { from: 1; to: 0.4; duration: 900 }
-                NumberAnimation { from: 0.4; to: 1; duration: 900 }
+            Behavior on opacity {
+                NumberAnimation { duration: 150 }
             }
         }
 
@@ -151,11 +153,23 @@ Item {
                 fillMode: Image.PreserveAspectCrop
                 visible: coverArt.visible
                 opacity: 0.4
-                
-                // Using a layer effect for blurring if available, 
-                // but since we don't know the exact Qt version/modules, 
-                // we'll stick to a simple opacity-based overlay for now.
-                // In Clairova-Shell, this often uses FastBlur.
+            }
+
+            // --- Smooth Wave Visualizer Overlay ---
+            // Only visible if there is NO cover art
+            WaveVisualizer {
+                id: smoothWave
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 8 * s
+                anchors.leftMargin: 10 * s
+                anchors.rightMargin: 10 * s
+                height: 40 * s
+                z: 6
+                active: media.hasMedia && media.player && media.player.isPlaying && !parent.artHovered && !media.hasArt
+                waveColor: Theme.accent
+                opacity: 0.8
             }
 
             Item {
@@ -163,49 +177,7 @@ Item {
                 width: 40 * s
                 height: 40 * s
                 visible: media.hasMedia && media.localArtPath === "" && media.artUrl === "" && !parent.artHovered
-
-                Row {
-                    anchors.centerIn: parent
-                    spacing: 4 * s
-
-                    Repeater {
-                        model: 12
-                        Rectangle {
-                            width: 8 * s
-                            height: 70 * s
-                            color: Theme.accent
-                            opacity: 0.6
-
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            transform: Scale {
-                                id: scaleTransform
-                                origin.y: height / 2
-                            }
-
-                            SequentialAnimation {
-                                running: media.hasMedia && media.localArtPath === "" && media.artUrl === ""
-                                loops: Animation.Infinite
-
-                                NumberAnimation {
-                                    target: scaleTransform
-                                    property: "yScale"
-                                    from: 0.4
-                                    to: 1.4
-                                    duration: 300 + index * 120
-                                }
-
-                                NumberAnimation {
-                                    target: scaleTransform
-                                    property: "yScale"
-                                    from: 1.4
-                                    to: 0.4
-                                    duration: 300 + index * 120
-                                }
-                            }
-                        }
-                    }
-                }
+                // Wave already shown above
             }
 
             Rectangle {
@@ -333,6 +305,16 @@ Item {
 
             defaultX: container.defaultX
             defaultY: container.defaultY
+
+            currentX: BarLayoutState.desktopNowPlayingX
+            currentY: BarLayoutState.desktopNowPlayingY
+            onDragPositionChanged: (x, y) => {
+                BarLayoutState.desktopNowPlayingX = x
+                BarLayoutState.desktopNowPlayingY = y
+            }
+            onRotateAction: (r) => {
+                BarLayoutState.desktopNowPlayingRotation = r
+            }
         }
     }
 }

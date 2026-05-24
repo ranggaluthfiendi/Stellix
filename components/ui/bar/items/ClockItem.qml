@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import qs.services
 import qs.config
 import qs.components.widgets.rightbar
@@ -8,6 +9,16 @@ Item {
     id: root
 
     property real s: Scales.uiScale
+
+    readonly property string clockSection: BarLayoutState.findItemSection("clock")
+    readonly property bool isCenterClock: clockSection === "center"
+    readonly property bool isLeftClock: clockSection === "left"
+    readonly property bool isRightClock: clockSection === "right"
+    readonly property real popupW: Theme.dp(372)
+    readonly property real screenW: BarLayoutState.barScreenWidth > 0 ? BarLayoutState.barScreenWidth : Screen.width
+    readonly property real centerMargin: Math.max(0, (screenW - popupW) / 2)
+
+    readonly property real popupRadius: BarLayoutState.calendarPopupRounded ? Theme.radiusMedium : 0
 
     readonly property string formattedTime: {
         var fmt = BarLayoutState.clock24Hour ? "HH" : "hh"
@@ -42,7 +53,6 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton
 
@@ -52,36 +62,45 @@ Item {
         }
     }
 
-    PopupWindow {
-        id: calendarPopup
+    PanelWindow {
+        id: calendarPanel
         visible: RightBarState.calendarOpen
         color: "transparent"
-        grabFocus: false
 
-        anchor.item: root
-        anchor.rect: BarLayoutState.isBottom
-            ? Qt.rect(0, -(implicitHeight + Theme.dp(4)), 0, 0)
-            : Qt.rect(0, root.height + Theme.dp(4), 0, 0)
+        WlrLayershell.layer: WlrLayer.Overlay
+        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.exclusiveZone: -1
 
-        implicitWidth: Theme.dp(244)
+        anchors {
+            top: !BarLayoutState.isBottom
+            bottom: BarLayoutState.isBottom
+            left: true
+            right: true
+        }
+
+        implicitWidth: root.popupW
         implicitHeight: calendarCard.implicitHeight
+
+        margins.left: root.isCenterClock ? root.centerMargin : (root.isLeftClock ? Theme.dp(5) : root.screenW - root.popupW - Theme.dp(5))
+        margins.right: root.isCenterClock ? root.centerMargin : (root.isRightClock ? Theme.dp(5) : root.screenW - root.popupW - Theme.dp(5))
+        margins.top: !BarLayoutState.isBottom ? (BarLayoutState.barHeight * s + Theme.dp(4)) : 0
+        margins.bottom: BarLayoutState.isBottom ? (BarLayoutState.barHeight * s + Theme.dp(4)) : 0
 
         Rectangle {
             id: calendarBg
             anchors.fill: parent
-            color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.calendarOpacity)
+            color: Theme.bgSecondary
             border.width: 1
-            border.color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, BarLayoutState.calendarOpacity)
-            radius: 0
+            border.color: Theme.border
+            radius: root.popupRadius
 
             property real animOpacity: 0
             opacity: animOpacity
-            y: BarLayoutState.isBottom ? Theme.dp(8) : -Theme.dp(8)
 
             states: State {
                 name: "visible"
-                when: calendarPopup.visible
-                PropertyChanges { target: calendarBg; animOpacity: 1; y: 0 }
+                when: calendarPanel.visible
+                PropertyChanges { target: calendarBg; animOpacity: 1 }
             }
 
             transitions: [
@@ -89,13 +108,11 @@ Item {
                     from: ""
                     to: "visible"
                     NumberAnimation { target: calendarBg; property: "animOpacity"; duration: 180; easing.type: Easing.OutCubic }
-                    NumberAnimation { target: calendarBg; property: "y"; duration: 200; easing.type: Easing.OutCubic }
                 },
                 Transition {
                     from: "visible"
                     to: ""
                     NumberAnimation { target: calendarBg; property: "animOpacity"; duration: 140; easing.type: Easing.InCubic }
-                    NumberAnimation { target: calendarBg; property: "y"; duration: 140; easing.type: Easing.InCubic }
                 }
             ]
 

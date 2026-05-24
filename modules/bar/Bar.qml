@@ -133,6 +133,7 @@ Scope {
                 bar.WlrLayershell.layer = WlrLayer.Overlay
                 bar.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
             }
+            BarLayoutState.barScreenWidth = bar.screen ? bar.screen.width : Screen.width
         }
 
         Rectangle {

@@ -17,10 +17,12 @@ ShellRoot {
     SysTrayFocusHandler {}
     SysTrayGlobalOverlay {}
     CalendarGlobalOverlay {}
+    WeatherGlobalOverlay {}
     WelcomeScreen { settingsData: settingsData }
 
     AppLauncherService {
         id: launcher
+        Component.onCompleted: BarLayoutState.registerItem("launcherSvc", launcher)
     }
 
     WallpaperService {
@@ -78,8 +80,7 @@ ShellRoot {
     Connections {
         target: brightnessService
         function onCurrentValueChanged() {
-            if (!RightBarState.indicatorVisible || RightBarState.indicatorType !== "brightness")
-                RightBarState.showIndicator("brightness", brightnessService.percentage / 100, false)
+            RightBarState.showIndicator("brightness", brightnessService.percentage / 100, false)
         }
     }
 
@@ -87,8 +88,7 @@ ShellRoot {
         target: (pwService.sink && pwService.sink.audio) ? pwService.sink.audio : null
         ignoreUnknownSignals: true
         function onVolumeChanged() {
-            if (!RightBarState.indicatorVisible || RightBarState.indicatorType !== "volume")
-                RightBarState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+            RightBarState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
         }
         function onMutedChanged() {
             RightBarState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
@@ -304,6 +304,23 @@ ShellRoot {
         }
     }
 
+    GlobalShortcut {
+        id: openWeatherShortcut
+        name: "weather-popup"
+        description: "Open weather detail popup"
+
+        onPressedChanged: {
+            if (pressed) {
+                if (RightBarState.weatherDetailOpen) {
+                    RightBarState.weatherDetailOpen = false
+                } else {
+                    RightBarState.closeAll()
+                    RightBarState.weatherDetailOpen = true
+                }
+            }
+        }
+    }
+
     Timer {
         id: wsFlashTimer
         interval: 600
@@ -319,6 +336,7 @@ ShellRoot {
         
         onCloseRequested: {
             RightBarState.workspaceSwitcherOpen = false
+            RightBarState.weatherDetailOpen = false
         }
     }
 

@@ -40,7 +40,7 @@ PanelWindow {
         opacity: 0
 
         property int currentIndex: 0
-        readonly property int totalPages: 3
+        readonly property int totalPages: 4
         property bool localShowOnStartup: root.settingsData ? root.settingsData.showWelcomeScreen : true
 
         Component.onCompleted: {
@@ -60,6 +60,7 @@ PanelWindow {
             onFinished: {
                 if (root.settingsData) root.settingsData.showWelcomeScreen = mainContent.localShowOnStartup
                 root.active = false
+                RightBarState.weatherDetailOpen = false
             }
         }
 
@@ -75,7 +76,7 @@ PanelWindow {
             id: card
             anchors.centerIn: parent
             width: Theme.dp(540)
-            height: Theme.dp(520)
+            height: mainContent.currentIndex === 3 ? Theme.dp(560) : Theme.dp(520)
             color: Theme.bgPrimary
             border.width: 1
             border.color: Theme.border
@@ -115,7 +116,7 @@ PanelWindow {
                         Layout.alignment: Qt.AlignHCenter
                         Text {
                             Layout.alignment: Qt.AlignHCenter
-                            text: mainContent.currentIndex === 0 ? "Welcome to Stellix" : (mainContent.currentIndex === 1 ? "Quick Controls" : "Aesthetic Engine")
+                            text: mainContent.currentIndex === 0 ? "Welcome to Stellix" : (mainContent.currentIndex === 1 ? "Quick Controls" : (mainContent.currentIndex === 2 ? "Aesthetic Engine" : "Desktop Widgets"))
                             color: Theme.textPrimary; font.pixelSize: Theme.dp(24); font.weight: Font.Bold
                         }
                         Text {
@@ -173,6 +174,31 @@ PanelWindow {
                             Layout.fillWidth: true
                             text: "Your system, your colors. Stellix uses Matugen to generate dynamic themes from your wallpaper.\n\nChange your wallpaper from the launcher and watch the entire shell transform instantly."
                             color: Theme.textSecondary; font.pixelSize: Theme.dp(12); horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap; lineHeight: 1.5
+                        }
+                    }
+
+                    // Page 3: Desktop Widgets
+                    ColumnLayout {
+                        spacing: Theme.dp(12)
+                        Text {
+                            Layout.fillWidth: true
+                            text: "Customize your desktop with draggable widgets. Clock, system stats, weather, music player, and audio visualizer — all configurable from Settings."
+                            color: Theme.textSecondary; font.pixelSize: Theme.dp(11); horizontalAlignment: Text.AlignHCenter; wrapMode: Text.WordWrap
+                        }
+                        GridLayout {
+                            columns: 2; Layout.alignment: Qt.AlignHCenter; columnSpacing: Theme.dp(20); rowSpacing: Theme.dp(8)
+                            Text { text: "CLOCK"; color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                            Text { text: "Time & Date"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
+                            Text { text: "STATS"; color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                            Text { text: "CPU, RAM, GPU, Net"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
+                            Text { text: "WEATHER"; color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                            Text { text: "Live Forecast"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
+                            Text { text: "NOW PLAYING"; color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                            Text { text: "Media Controls"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
+                            Text { text: "EQUALIZER"; color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                            Text { text: "Audio Visualizer"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
+                            Text { text: "QUICK ACTIONS"; color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                            Text { text: "Power Buttons"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
                         }
                     }
                 }

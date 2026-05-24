@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import qs.config
 import qs.components.elements
 import qs.components.widgets.media.nowplaying
 import qs.components.widgets.system
@@ -25,16 +26,47 @@ Scope {
                 right: true
             }
 
-            Component.onCompleted: {
-                if (overlay.WlrLayershell != null) {
-                    overlay.WlrLayershell.exclusiveZone = -1
-                    overlay.WlrLayershell.layer = WlrLayer.Background
-                    overlay.WlrLayershell.keyboardFocus = WlrKeyboardFocus.None
-                }
+            WlrLayershell.layer: WlrLayer.Bottom
+            WlrLayershell.exclusiveZone: -1
+            WlrLayershell.keyboardFocus: BarLayoutState.desktopSearchFocus ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+            NowPlayingWidget {
+                visible: BarLayoutState.showScreenNowPlaying
+            }
+            EqualizerWidget {
+                visible: BarLayoutState.showScreenEqualizer
+            }
+            ClockWidget {
+                visible: BarLayoutState.showScreenClock
+            }
+            SystemStatsWidget {
+                visible: BarLayoutState.showScreenSystemStats
+            }
+            WeatherWidget {
+                visible: BarLayoutState.showScreenWeather
+            }
+            QuickActionsWidget {
+                visible: BarLayoutState.showScreenQuickActions
             }
 
-            NowPlayingWidget {}
-            ClockWidget{}
+            // --- Snap Guides ---
+            Rectangle {
+                id: vSnapLine
+                width: 1; height: parent.height
+                x: BarLayoutState.snapLineXPos
+                color: Theme.accent
+                visible: BarLayoutState.snapLineXVisible
+                z: 999
+            }
+
+            Rectangle {
+                id: hSnapLine
+                width: parent.width; height: 1
+                y: BarLayoutState.snapLineYPos
+                color: Theme.accent
+                visible: BarLayoutState.snapLineYVisible
+                z: 999
+            }
 
             BatteryRightBar {
                 brightnessService: BarLayoutState.getItem("brightnessService")

@@ -53,7 +53,7 @@ Item {
 
     Timer {
         id: refreshTimer
-        interval: 1500
+        interval: 1000
         running: true
         repeat: true
         onTriggered: getProcess.exec(["brightnessctl", "get"])

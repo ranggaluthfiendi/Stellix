@@ -405,13 +405,70 @@ VabContentPage {
         }
 
         VabSettingsCard {
+            id: systrayCard
+            property bool expanded: false
             itemIndex: 8
             isFocused: page.focusInContent && page.contentFocusIndex === 8
             title: "System Tray"; desc: "Show or hide the system tray icons"
 
-            headerActions: VabSwitch {
-                checked: !BarLayoutState.isHidden("systray")
-                onToggled: BarLayoutState.toggleHide("systray")
+            headerActions: RowLayout {
+                spacing: Theme.dp(8)
+                VabButton {
+                    text: systrayCard.expanded ? "Close" : "Options"
+                    onClicked: systrayCard.expanded = !systrayCard.expanded
+                }
+                VabSwitch {
+                    checked: !BarLayoutState.isHidden("systray")
+                    onToggled: BarLayoutState.toggleHide("systray")
+                }
+            }
+
+            ColumnLayout {
+                visible: systrayCard.expanded
+                Layout.fillWidth: true
+                spacing: Theme.dp(12)
+                Layout.topMargin: Theme.dp(4)
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(12)
+                    Text { text: "Show All Icons on Bar"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
+                    VabSwitch {
+                        checked: BarLayoutState.systrayShowAll
+                        onToggled: BarLayoutState.systrayShowAll = !BarLayoutState.systrayShowAll
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(12)
+                    Text {
+                        text: "Collapse Limit"
+                        color: Theme.textPrimary
+                        font.pixelSize: Theme.dp(10)
+                        Layout.preferredWidth: Theme.dp(100)
+                    }
+                    VabSlider {
+                        Layout.fillWidth: true
+                        from: 1; to: 20; value: BarLayoutState.systrayCollapseLimit
+                        onValueChanged: BarLayoutState.systrayCollapseLimit = Math.round(value)
+                    }
+                    Text {
+                        text: BarLayoutState.systrayCollapseLimit
+                        color: Theme.accent
+                        font.pixelSize: Theme.dp(10)
+                        font.weight: Font.Bold
+                        Layout.preferredWidth: Theme.dp(24)
+                        horizontalAlignment: Text.AlignRight
+                    }
+                }
+                
+                Text {
+                    text: "When icons exceed this limit, they will be hidden behind an arrow."
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.dp(8)
+                    font.italic: true
+                }
             }
         }
 
@@ -426,183 +483,199 @@ VabContentPage {
             }
         }
 
-        VabSectionHeader { title: "Clock Options"; Layout.topMargin: Theme.dp(10) }
-
         VabSettingsCard {
             itemIndex: 10
             isFocused: page.focusInContent && page.contentFocusIndex === 10
-            title: "Clock Format"; desc: "Choose how the clock is displayed"
+            title: "Notifications"; desc: "Show or hide notification widget"
 
-            ColumnLayout {
-                Layout.fillWidth: true
-                spacing: Theme.dp(6)
-
-                Repeater {
-                    model: BarLayoutState.clockFormats
-                    delegate: Rectangle {
-                        id: formatRow
-                        required property int index
-                        required property var modelData
-
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Theme.dp(36)
-                        color: BarLayoutState.clockFormat === formatRow.modelData.value
-                            ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
-                            : (formatMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.05) : "transparent")
-                        border.width: 1
-                        border.color: BarLayoutState.clockFormat === formatRow.modelData.value ? Theme.accent : Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.5)
-                        radius: 0
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: Theme.dp(12)
-                            anchors.rightMargin: Theme.dp(12)
-
-                            Text {
-                                text: formatRow.modelData.label
-                                color: BarLayoutState.clockFormat === formatRow.modelData.value ? Theme.accent : Theme.textPrimary
-                                font.pixelSize: Theme.dp(10)
-                                font.weight: BarLayoutState.clockFormat === formatRow.modelData.value ? Font.Bold : Font.Normal
-                                Layout.fillWidth: true
-                            }
-
-                            Text {
-                                visible: BarLayoutState.clockFormat === formatRow.modelData.value
-                                text: "✓"
-                                color: Theme.accent
-                                font.pixelSize: Theme.dp(12)
-                                font.weight: Font.Bold
-                            }
-                        }
-
-                        MouseArea {
-                            id: formatMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: BarLayoutState.clockFormat = formatRow.modelData.value
-                        }
-                    }
-                }
+            headerActions: VabSwitch {
+                checked: !BarLayoutState.isHidden("notif")
+                onToggled: BarLayoutState.toggleHide("notif")
             }
         }
 
         VabSettingsCard {
             itemIndex: 11
             isFocused: page.focusInContent && page.contentFocusIndex === 11
-            title: "24 Hour Format"; desc: "Use 24-hour time display"
+            title: "Weather"; desc: "Show or hide weather widget"
 
             headerActions: VabSwitch {
-                checked: BarLayoutState.clock24Hour
-                onToggled: BarLayoutState.clock24Hour = !BarLayoutState.clock24Hour
-            }
-        }
-
-        VabSettingsCard {
-            itemIndex: 12
-            isFocused: page.focusInContent && page.contentFocusIndex === 12
-            title: "Show Seconds"; desc: "Display seconds in clock"
-
-            headerActions: VabSwitch {
-                checked: BarLayoutState.clockShowSeconds
-                onToggled: BarLayoutState.clockShowSeconds = !BarLayoutState.clockShowSeconds
+                checked: !BarLayoutState.isHidden("weather")
+                onToggled: BarLayoutState.toggleHide("weather")
             }
         }
 
         VabSectionHeader { title: "Battery Options"; Layout.topMargin: Theme.dp(10) }
 
         VabSettingsCard {
-            itemIndex: 13
-            isFocused: page.focusInContent && page.contentFocusIndex === 13
-            title: "Battery Style"; desc: "Choose battery display style"
+            id: batteryOptionsCard
+            property bool expanded: false
+            itemIndex: 12
+            isFocused: page.focusInContent && page.contentFocusIndex === 12
+            title: "Battery Customization"; desc: "Configure style, charging icon, and threshold"
+
+            headerActions: VabButton {
+                text: batteryOptionsCard.expanded ? "Close" : "Expand"
+                onClicked: batteryOptionsCard.expanded = !batteryOptionsCard.expanded
+            }
 
             ColumnLayout {
+                visible: batteryOptionsCard.expanded
                 Layout.fillWidth: true
-                spacing: Theme.dp(6)
+                spacing: Theme.dp(12)
+                Layout.topMargin: Theme.dp(4)
 
-                Repeater {
-                    model: BarLayoutState.batteryStyles
-                    delegate: Rectangle {
-                        id: styleRow
-                        required property int index
-                        required property var modelData
-
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Theme.dp(36)
-                        color: BarLayoutState.batteryStyle === styleRow.modelData.value
-                            ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
-                            : (styleMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.05) : "transparent")
-                        border.width: 1
-                        border.color: BarLayoutState.batteryStyle === styleRow.modelData.value ? Theme.accent : Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.5)
-                        radius: 0
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: Theme.dp(12)
-                            anchors.rightMargin: Theme.dp(12)
-
-                            Text {
-                                text: styleRow.modelData.label
-                                color: BarLayoutState.batteryStyle === styleRow.modelData.value ? Theme.accent : Theme.textPrimary
-                                font.pixelSize: Theme.dp(10)
-                                font.weight: BarLayoutState.batteryStyle === styleRow.modelData.value ? Font.Bold : Font.Normal
-                                Layout.fillWidth: true
-                            }
-
-                            Text {
-                                visible: BarLayoutState.batteryStyle === styleRow.modelData.value
-                                text: "✓"
-                                color: Theme.accent
-                                font.pixelSize: Theme.dp(12)
-                                font.weight: Font.Bold
-                            }
-                        }
-
-                        MouseArea {
-                            id: styleMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: BarLayoutState.batteryStyle = styleRow.modelData.value
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(6)
+                    Text { text: "Style"; color: Theme.textMuted; font.pixelSize: Theme.dp(9); font.weight: Font.Bold }
+                    Repeater {
+                        model: BarLayoutState.batteryStyles
+                        delegate: Rectangle {
+                            id: styleRow
+                            required property int index
+                            required property var modelData
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Theme.dp(32)
+                            color: BarLayoutState.batteryStyle === styleRow.modelData.value ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1) : "transparent"
+                            border.width: 1
+                            border.color: BarLayoutState.batteryStyle === styleRow.modelData.value ? Theme.accent : Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.3)
+                            Text { anchors.centerIn: parent; text: styleRow.modelData.label; color: BarLayoutState.batteryStyle === styleRow.modelData.value ? Theme.accent : Theme.textPrimary; font.pixelSize: Theme.dp(9) }
+                            MouseArea { anchors.fill: parent; onClicked: BarLayoutState.batteryStyle = styleRow.modelData.value }
                         }
                     }
                 }
-            }
-        }
 
-        VabSettingsCard {
-            itemIndex: 14
-            isFocused: page.focusInContent && page.contentFocusIndex === 14
-            title: "Show Charging Indicator"; desc: "Display lightning bolt when charging"
-
-            headerActions: VabSwitch {
-                checked: BarLayoutState.batteryShowCharging
-                onToggled: BarLayoutState.batteryShowCharging = !BarLayoutState.batteryShowCharging
-            }
-        }
-
-        VabSettingsCard {
-            itemIndex: 15
-            isFocused: page.focusInContent && page.contentFocusIndex === 15
-            title: "Low Battery Threshold"; desc: "Percentage to show low battery warning"
-
-            headerActions: RowLayout {
-                spacing: Theme.dp(8)
-                VabSlider {
-                    from: 5; to: 50; value: BarLayoutState.batteryLowThreshold
-                    onValueChanged: BarLayoutState.batteryLowThreshold = Math.round(value)
+                VabSectionHeader {
+                    title: "Element Order"
                 }
-                Text {
-                    text: BarLayoutState.batteryLowThreshold + "%"
-                    color: Theme.accent
-                    font.pixelSize: Theme.dp(10)
-                    font.weight: Font.Bold
-                    Layout.preferredWidth: Theme.dp(36)
-                    horizontalAlignment: Text.AlignRight
+
+                Rectangle {
+                    id: batteryElementsContainer
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: batteryElementsColumn.implicitHeight
+                    color: "transparent"
+
+                    property int _batteryElementsKey: 0
+
+                    Connections {
+                        target: BarLayoutState
+                        function onBatteryElementsChanged() { batteryElementsContainer._batteryElementsKey++ }
+                    }
+
+                    ColumnLayout {
+                        id: batteryElementsColumn
+                        anchors.fill: parent
+                        spacing: Theme.dp(8)
+
+                        Repeater {
+                            model: batteryElementsContainer._batteryElementsKey > 0 ? BarLayoutState.batteryElements.length : 0
+                            delegate: Rectangle {
+                                id: batteryElementCard
+                                required property int index
+
+                                readonly property string elementType: index < BarLayoutState.batteryElements.length ? BarLayoutState.batteryElements[index] : ""
+                                readonly property string elementLabel: elementType==="charging"?"Charging Indicator":(elementType==="percentage"?"Percentage":"Battery Icon")
+                                readonly property string elementSymbol: elementType==="charging"?"⚡":(elementType==="percentage"?"%":"🔋")
+
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: Theme.dp(32)
+                                color: beCardMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.08) : "transparent"
+                                border.width: 1
+                                border.color: beCardMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.5)
+                                radius: 0
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: Theme.dp(6)
+                                    anchors.rightMargin: Theme.dp(4)
+                                    spacing: Theme.dp(4)
+
+                                    Text {
+                                        text: batteryElementCard.elementSymbol
+                                        font.pixelSize: Theme.dp(12)
+                                        Layout.preferredWidth: Theme.dp(20)
+                                        horizontalAlignment: Text.AlignHCenter
+                                    }
+
+                                    Text { text: batteryElementCard.elementLabel; color: Theme.textPrimary; font.pixelSize: Theme.dp(9); font.weight: Font.Medium; Layout.fillWidth: true }
+
+                                    Rectangle {
+                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
+                                        visible: batteryElementCard.index > 0
+                                        Text { anchors.centerIn: parent; text: "▲"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                var a=BarLayoutState.batteryElements.slice(); var p=batteryElementCard.index; if(p>0){var t=a[p];a[p]=a[p-1];a[p-1]=t;BarLayoutState.batteryElements=a}
+                                            }
+                                        }
+                                    }
+                                    Rectangle {
+                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
+                                        visible: batteryElementCard.index < BarLayoutState.batteryElements.length-1
+                                        Text { anchors.centerIn: parent; text: "▼"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                var a=BarLayoutState.batteryElements.slice(); var p=batteryElementCard.index; if(p>=0&&p<a.length-1){var t=a[p];a[p]=a[p+1];a[p+1]=t;BarLayoutState.batteryElements=a}
+                                            }
+                                        }
+                                    }
+                                }
+                                MouseArea { id: beCardMouse; anchors.fill: parent; hoverEnabled: true; acceptedButtons: Qt.NoButton }
+                            }
+                        }
+                    }
                 }
-                VabButton {
-                    text: "Reset"
-                    onClicked: BarLayoutState.batteryLowThreshold = 20
+
+                Rectangle {
+                    id: batteryPreviewBox
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(28)
+                    color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+                    border.width: 1
+                    border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2)
+                    radius: 0
+
+                    property int _batteryPreviewKey: 0
+
+                    Connections {
+                        target: BarLayoutState
+                        function onBatteryElementsChanged() { batteryPreviewBox._batteryPreviewKey++ }
+                    }
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: Theme.dp(4)
+                        leftPadding: Theme.dp(8)
+                        rightPadding: Theme.dp(8)
+
+                        Repeater {
+                            model: batteryPreviewBox._batteryPreviewKey > 0 ? BarLayoutState.batteryElements : []
+                            delegate: Text {
+                                required property string modelData
+                                text: modelData==="charging"?"⚡":(modelData==="percentage"?"85%":"🔋")
+                                color: Theme.accent
+                                font.pixelSize: Theme.dp(10)
+                            }
+                        }
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text { text: "Charging Indicator"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
+                    VabSwitch { checked: BarLayoutState.batteryShowCharging; onToggled: BarLayoutState.batteryShowCharging = !BarLayoutState.batteryShowCharging }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(4)
+                    Text { text: "Low Battery Threshold (" + BarLayoutState.batteryLowThreshold + "%)"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
+                    VabSlider { Layout.fillWidth: true; from: 5; to: 50; value: BarLayoutState.batteryLowThreshold; onValueChanged: BarLayoutState.batteryLowThreshold = Math.round(value) }
                 }
             }
         }
@@ -610,41 +683,36 @@ VabContentPage {
         VabSectionHeader { title: "Workspace Options"; Layout.topMargin: Theme.dp(10) }
 
         VabSettingsCard {
-            itemIndex: 16
-            isFocused: page.focusInContent && page.contentFocusIndex === 16
-            title: "Workspace Count"; desc: "Number of workspace dots to display"
+            itemIndex: 13
+            isFocused: page.focusInContent && page.contentFocusIndex === 13
+            title: "Workspace Count"; desc: "Number of dots: " + BarLayoutState.workspaceCount
 
-            headerActions: RowLayout {
-                spacing: Theme.dp(8)
-                VabSlider {
-                    from: 3; to: 10; value: BarLayoutState.workspaceCount
-                    onValueChanged: BarLayoutState.workspaceCount = Math.round(value)
-                }
-                Text {
-                    text: BarLayoutState.workspaceCount
-                    color: Theme.accent
-                    font.pixelSize: Theme.dp(10)
-                    font.weight: Font.Bold
-                    Layout.preferredWidth: Theme.dp(24)
-                    horizontalAlignment: Text.AlignRight
-                }
-                VabButton {
-                    text: "Reset"
-                    onClicked: BarLayoutState.workspaceCount = 5
-                }
+            headerActions: VabSlider {
+                Layout.preferredWidth: Theme.dp(120)
+                from: 3; to: 10; value: BarLayoutState.workspaceCount
+                onValueChanged: BarLayoutState.workspaceCount = Math.round(value)
             }
         }
 
         VabSectionHeader { title: "Presets"; Layout.topMargin: Theme.dp(10) }
 
         VabSettingsCard {
-            itemIndex: 17
-            isFocused: page.focusInContent && page.contentFocusIndex === 17
+            id: presetsCard
+            property bool expanded: false
+            itemIndex: 14
+            isFocused: page.focusInContent && page.contentFocusIndex === 14
             title: "Layout Presets"; desc: "Quick apply predefined bar layouts"
 
+            headerActions: VabButton {
+                text: presetsCard.expanded ? "Close" : "Expand"
+                onClicked: presetsCard.expanded = !presetsCard.expanded
+            }
+
             ColumnLayout {
+                visible: presetsCard.expanded
                 Layout.fillWidth: true
                 spacing: Theme.dp(6)
+                Layout.topMargin: Theme.dp(4)
 
                 Repeater {
                     model: BarLayoutState.presets
@@ -652,51 +720,21 @@ VabContentPage {
                         id: presetRow
                         required property int index
                         required property var modelData
-
                         Layout.fillWidth: true
                         Layout.preferredHeight: Theme.dp(40)
                         color: presetMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.08) : "transparent"
                         border.width: 1
                         border.color: presetMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.5)
-                        radius: 0
-
                         RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: Theme.dp(12)
-                            anchors.rightMargin: Theme.dp(12)
-                            spacing: Theme.dp(12)
-
-                            ColumnLayout {
+                            anchors.fill: parent; anchors.margins: Theme.dp(8)
+                            Column {
                                 Layout.fillWidth: true
-                                spacing: Theme.dp(2)
-                                Text {
-                                    text: presetRow.modelData.name
-                                    color: Theme.textPrimary
-                                    font.pixelSize: Theme.dp(10)
-                                    font.weight: Font.Bold
-                                }
-                                Text {
-                                    text: presetRow.modelData.desc
-                                    color: Theme.textMuted
-                                    font.pixelSize: Theme.dp(8)
-                                }
+                                Text { text: modelData.name; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                                Text { text: modelData.desc; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
                             }
-
-                            Item { Layout.fillWidth: true }
-
-                            VabButton {
-                                text: "Apply"
-                                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                                onClicked: BarLayoutState.applyPreset(presetRow.index)
-                            }
+                            VabButton { text: "Apply"; onClicked: BarLayoutState.applyPreset(presetRow.index) }
                         }
-
-                        MouseArea {
-                            id: presetMouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            acceptedButtons: Qt.NoButton
-                        }
+                        MouseArea { id: presetMouse; anchors.fill: parent; hoverEnabled: true; acceptedButtons: Qt.NoButton }
                     }
                 }
             }
@@ -705,8 +743,8 @@ VabContentPage {
         VabSectionHeader { title: "Reset"; Layout.topMargin: Theme.dp(10) }
 
         VabSettingsCard {
-            itemIndex: 18
-            isFocused: page.focusInContent && page.contentFocusIndex === 18
+            itemIndex: 15
+            isFocused: page.focusInContent && page.contentFocusIndex === 15
             title: "Reset All Settings"; desc: "Restore all bar settings to defaults"
 
             headerActions: VabButton {

@@ -24,31 +24,63 @@ Item {
     readonly property bool showIcon: BarLayoutState.batteryStyle !== "percentage"
     readonly property bool showPercentage: BarLayoutState.batteryStyle !== "icon"
 
+    readonly property var activeElements: {
+        var result = []
+        for (var i = 0; i < BarLayoutState.batteryElements.length; i++) {
+            var el = BarLayoutState.batteryElements[i]
+            if (el === "charging" && !BarLayoutState.batteryShowCharging) continue
+            if (el === "icon" && !showIcon) continue
+            if (el === "percentage" && !showPercentage) continue
+            result.push(el)
+        }
+        return result
+    }
+
     Row {
         id: batteryRow
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.dp(4)
+        leftPadding: Theme.dp(4)
+        rightPadding: Theme.dp(4)
 
+        Repeater {
+            model: root.activeElements
+            delegate: Loader {
+                required property string modelData
+                anchors.verticalCenter: parent.verticalCenter
+                sourceComponent: {
+                    if (modelData === "charging") return chargingComp
+                    if (modelData === "percentage") return percentageComp
+                    if (modelData === "icon") return iconComp
+                    return null
+                }
+            }
+        }
+    }
+
+    Component {
+        id: chargingComp
         LightningShape {
-            visible: root.isCharging && BarLayoutState.batteryShowCharging
-            anchors.verticalCenter: parent.verticalCenter
+            visible: root.isCharging
             s: root.s * 0.7
             color: root.batteryColor
         }
+    }
 
+    Component {
+        id: percentageComp
         Text {
-            visible: root.showPercentage
             text: root.ready ? (root.percentageInt + "%") : "--"
             color: root.batteryColor
             font.family: Typography.fontFamily
             font.pixelSize: Math.round((Typography.sizeSM || 12) * root.s)
             font.weight: Typography.weightMedium || Font.Normal
-            anchors.verticalCenter: parent.verticalCenter
         }
+    }
 
+    Component {
+        id: iconComp
         BatteryShape {
-            visible: root.showIcon
-            anchors.verticalCenter: parent.verticalCenter
             s: root.s
             level: root.percentage
             fillColor: root.batteryColor

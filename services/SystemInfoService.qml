@@ -14,6 +14,8 @@ Item {
     property var gpus: []
     property int updatesCount: 0
     property string storageInfo: "Unknown"
+    property string diskUsage: "0%"
+    property string temperature: "0°C"
     property string ssid: "Disconnected"
     property string wifiPass: "N/A"
     property string netUp: "0 KB/s"
@@ -42,7 +44,7 @@ Item {
                 if (rawText === "") return;
                 
                 var sections = rawText.split('---SECTION---');
-                if (sections.length < 13) return;
+                if (sections.length < 15) return;
 
                 // 0: Uptime
                 var upSeconds = parseFloat(sections[0].trim().split(/\s+/)[0]);
@@ -83,22 +85,28 @@ Item {
                 // 7: Storage
                 root.storageInfo = sections[7].trim() || "Unknown";
 
-                // 8: SSID
-                root.ssid = sections[8].trim() || "Disconnected";
+                // 8: Disk Usage
+                root.diskUsage = sections[8].trim() || "0%";
 
-                // 9: WiFi Pass
-                root.wifiPass = sections[9].trim() || "N/A";
+                // 9: Temperature
+                root.temperature = sections[9].trim() || "0°C";
 
-                // 10: OS Info
-                var osParts = sections[10].trim().split(';');
+                // 10: SSID
+                root.ssid = sections[10].trim() || "Disconnected";
+
+                // 11: WiFi Pass
+                root.wifiPass = sections[11].trim() || "N/A";
+
+                // 12: OS Info
+                var osParts = sections[12].trim().split(';');
                 if (osParts.length >= 3) {
                     root.distroName = osParts[0];
                     root.distroId = osParts[1];
                     root.distroLogo = osParts[2];
                 }
 
-                // 11: Network Speeds
-                var netData = sections[11].trim().split(/\s+/);
+                // 13: Network Speeds
+                var netData = sections[13].trim().split(/\s+/);
                 if (netData.length >= 2) {
                     var rx = parseInt(netData[0]);
                     var tx = parseInt(netData[1]);
@@ -116,12 +124,12 @@ Item {
                     root._lastNetBytes = {rx: rx, tx: tx, time: now};
                 }
 
-                // 12: Saved Connections
-                var savedConnections = sections[12].trim().split('\n').map(function(s){ return s.trim() });
+                // 14: Saved Connections
+                var savedConnections = sections[14].trim().split('\n').map(function(s){ return s.trim() });
 
-                // 13: Available Networks
-                if (sections.length >= 14) {
-                    var wifiLines = sections[13].trim().split('\n');
+                // 15: Available Networks
+                if (sections.length >= 16) {
+                    var wifiLines = sections[15].trim().split('\n');
                     var networks = [];
                     for (var k = 0; k < wifiLines.length; k++) {
                         var line = wifiLines[k].trim();
@@ -164,9 +172,12 @@ Item {
                   "nproc; echo '---SECTION---'; " +
                   "uname -sr; echo '---SECTION---'; " +
                   "lscpu | grep 'Model name:' | cut -d: -f2 | xargs; echo '---SECTION---'; " +
-                  "lspci -k | grep -E 'VGA|3D' | cut -d: -f3 | cut -d'(' -f1 | xargs -I{} echo {}; echo '---SECTION---'; " +
+                  "lspci -k | grep -E 'VGA|3D' | cut -d: -f3 | cut -d'(' -f1 | xargs -I{} echo {}; " +
+                  "if command -v nvidia-smi >/dev/null; then nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits | xargs -I{} echo NVIDIA: {}%; fi; echo '---SECTION---'; " +
                   "(checkupdates 2>/dev/null | wc -l || echo 0); echo '---SECTION---'; " +
                   "df -h / | tail -1 | awk '{print $3 \" / \" $2 \" (used \" $5 \")\"}'; echo '---SECTION---'; " +
+                  "df / | tail -1 | awk '{print $5}'; echo '---SECTION---'; " +
+                  "sensors | grep -m1 -E 'Tctl|Tdie|Package id 0|Core 0|temp1' | awk -F'+' '{print $2}' | awk '{print $1}' || echo 'N/A'; echo '---SECTION---'; " +
                   "nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d: -f2 || echo 'Disconnected'; echo '---SECTION---'; " +
                   "SSID=$(nmcli -t -f active,ssid dev wifi | grep '^yes' | cut -d: -f2); [ -n \"$SSID\" ] && nmcli -s -g 802-11-wireless-security.psk connection show \"$SSID\" 2>/dev/null || echo 'N/A'; echo '---SECTION---'; " +
                   "source /etc/os-release && echo \"$PRETTY_NAME;$ID;$LOGO\"; echo '---SECTION---'; " +

@@ -49,8 +49,21 @@ Rectangle {
         spacing: Theme.dp(6)
 
         Text {
-            text: (root.indicatorType === "volume" ? "Volume" : "Brightness") + ": " + Math.round(root.indicatorValue * 100) + "%" + (root.indicatorMuted ? " | Muted" : "")
-            color: root.indicatorMuted ? Theme.danger : Theme.accent
+            text: {
+                if (root.indicatorType === "volume") {
+                    return "Volume: " + Math.round(root.indicatorValue * 100) + "%" + (root.indicatorMuted ? " | Muted" : "")
+                } else if (root.indicatorType === "brightness") {
+                    return "Brightness: " + Math.round(root.indicatorValue * 100) + "%"
+                } else if (root.indicatorType === "pinned") {
+                    return "Bar: " + (root.indicatorValue > 0.5 ? "Pinned" : "Unpinned")
+                }
+                return ""
+            }
+            color: {
+                if (root.indicatorMuted) return Theme.danger
+                if (root.indicatorType === "pinned" && root.indicatorValue < 0.5) return Theme.textSecondary
+                return Theme.accent
+            }
             font.family: Typography.fontFamily
             font.pixelSize: Math.round((Typography.sizeSM || 13) * Scales.uiScale)
             font.weight: Typography.weightBold || Font.Bold

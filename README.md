@@ -1,80 +1,52 @@
-# Stellix Shell
+# ✨ Stellix Shell
 
-A master-crafted, modern, and highly customizable shell environment for Linux, built with **Quickshell** and designed for **Hyprland**. Stellix Shell focuses on performance, deep system integration, and a refined "Glass & Dark" aesthetic.
+A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic theming, deep system integration, and a refined glass-dark aesthetic. 🌑
 
-## ✨ Features
+## 📸 Preview
 
-- **Dynamic Theming**: Powered by **Matugen**, the entire UI colors automatically sync with your wallpaper.
-- **Floating Dashboard**: A beautiful, unified control center for system settings, hardware metrics, and quick toggles.
-- **Adaptive Bar**: Supports top and bottom positions with dynamic layout adjustment.
-- **Deep Integration**: Native controls for Wi-Fi (nmcli), Bluetooth (bluetoothctl), Audio (Pipewire), and Media (MPRIS).
-- **Global Shortcuts**: Built-in management for Hyprland keybinds directly from the settings menu.
+> *Add your screenshots here*
 
-## 🛠️ System Requirements & Dependencies
+| Bar | Dashboard | Widgets |
+|:---:|:---------:|:-------:|
+| ![bar](./assets/bar.png) | ![dashboard](./assets/dashboard.png) | ![widgets](./assets/widgets.png) |
 
-To experience the full potential of Stellix Shell, ensure the following are installed on your system.
+## 🚀 Features
 
-### 1. Core Components
-Install the shell engine and the recommended window manager:
-```bash
-# Arch Linux
-sudo pacman -S quickshell hyprland qt6-base qt6-declarative
+- 🎨 **Dynamic Colors** -- Matugen extracts colors from your wallpaper, auto-syncs across the entire shell
+- 📊 **Adaptive Bar** -- Top/bottom position, rearrangeable items, custom opacity & blur
+- 🖥️ **Desktop Widgets** -- Draggable & rotatable clock, stats, weather, music player, equalizer
+- 🎛️ **Control Center** -- Wi-Fi, Bluetooth, Audio, Media, Brightness, Quick Toggles
+- 🔍 **App Launcher** -- Search apps, calculator, currency converter, clipboard, power menu
+- ⚙️ **Settings Panel** -- Full GUI settings with live keybind editor for Hyprland
+
+## 📦 Requirements
+
+```
+quickshell · hyprland · qt6-base · qt6-declarative
+networkmanager · bluez · pipewire · playerctl · matugen · awww
 ```
 
-### 2. Services & Logic
-Required for the shell's features to function (Networking, Audio, Colors):
+## 🛠️ Install
+
 ```bash
-# Core Services
-sudo pacman -S networkmanager bluez bluez-utils pipewire wireplumber upower playerctl curl
+git clone https://github.com/YourUsername/quickshell-stellix.git ~/.config/quickshell
+qs
 ```
 
-### 3. Theming & Wallpaper
-Stellix uses **Matugen** for colors and **Awww** for wallpaper transitions:
-```bash
-# Install Matugen (via AUR)
-yay -S matugen-bin
-
-# Install Awww (Wallpaper Daemon)
-# Visit: https://github.com/out-fox/awww
-yay -S awww-git
-```
-
-## 🚀 Installation
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/YourUsername/quickshell-stellix.git ~/.config/quickshell
-   ```
-
-2. **Setup Matugen**:
-   Ensure you have a valid `matugen.toml` in your config directory. Stellix expects `~/.config/matugen/matugen.toml` to exist for dynamic theming.
-
-3. **Launch the Shell**:
-   Simply run the `qs` command (or `quickshell` pointing to `shell.qml`):
-   ```bash
-   qs
-   ```
-
-## ⌨️ Default Keybinds
+## ⌨️ Keybinds
 
 | Shortcut | Action |
-| :--- | :--- |
-| `SUPER + /` | Open Shortcut Guide |
-| `SUPER + I` | Open System Settings |
-| `ALT + SPACE` | Open App Launcher |
-| `SUPER + V` | Open Clipboard History |
-| `SUPER + TAB` | Toggle Workspace Switcher |
-| `SUPER + RETURN` | Open Terminal |
-
-## ⚙️ Customization
-
-Most aspects of the shell can be configured through the **Stellix Control** (System Settings).
-- **Appearance**: Change wallpaper, toggle Dark Mode, adjust Blur and Transparency.
-- **Keybindings**: Change system shortcuts without editing config files manually.
+|:---|:---|
+| `Super + R` / `Alt + Space` | 🔍 App Launcher |
+| `Super + I` | ⚙️ Settings |
+| `Super + V` | 📋 Clipboard |
+| `Super + /` | 📖 Shortcut Guide |
+| `Super + Tab` | 🔄 Workspace Switcher |
+| `Super + Alt (L/R)` | 🎛️ Rightbar Panel |
 
 ## 🤝 Credits
-- Developed by **Rangga Luthfiendi**.
 
+Developed by **Rangga Luthfiendi** 💻
 
 ---
-*Stellix Shell ^_^*
+*Stellix Shell ^_^* 🐚

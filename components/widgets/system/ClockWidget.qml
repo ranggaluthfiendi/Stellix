@@ -5,7 +5,8 @@ import qs.services
 Item {
     id: root
 
-    property real s: Scales.uiScale * 0.6
+    property real baseS: 0.6
+    property real s: Scales.uiScale * baseS * BarLayoutState.desktopClockScale
 
     width: Screen.width
     height: Screen.height
@@ -13,124 +14,99 @@ Item {
     readonly property real screenW: Screen.width
     readonly property real screenH: Screen.height
 
-    TimeFloating {
-        id: timeService
+    readonly property string formattedTime: {
+        var fmt = BarLayoutState.desktopClock24Hour ? "HH" : "hh"
+        fmt += BarLayoutState.desktopClockShowSeconds ? ":mm:ss" : ":mm"
+        if (!BarLayoutState.desktopClock24Hour) fmt += " AP"
+        return Qt.formatDateTime(Time.currentDate, fmt)
     }
 
-    ClockPosition {
-        id: pos
-        defaultX: container.defaultX
-        defaultY: container.defaultY
+    readonly property string formattedDay: {
+        if (BarLayoutState.desktopClockShowWeekday) return Qt.formatDateTime(Time.currentDate, "dddd").toUpperCase()
+        return ""
     }
 
-    Component.onCompleted: {
-        pos.loadPosition()
-        container.safeTime = "00:00"
-        container.safeDate = ""
-    }
-
-    Connections {
-        target: pos
-
-        function onPositionLoaded(x, y) {
-            container.x = x
-            container.y = y
-        }
-
-        function onAlignLoaded(a) {
-            container.alignMode = a
-        }
-    }
-
-    Connections {
-        target: timeService
-
-        function onTimeChanged() {
-            container.safeTime = timeService.time ? timeService.time : "00:00"
-        }
-
-        function onDateChanged() {
-            container.safeDate = timeService.date ? timeService.date : ""
-        }
+    readonly property string formattedDate: {
+        var parts = []
+        if (BarLayoutState.desktopClockShowDate) parts.push(Qt.formatDateTime(Time.currentDate, "dd MMMM"))
+        if (BarLayoutState.desktopClockShowYear) parts.push(Qt.formatDateTime(Time.currentDate, "yyyy"))
+        return parts.join("  •  ").toUpperCase()
     }
 
     Item {
         id: container
 
-        width: 320 * s
-        height: 140 * s
+        width: 480 * s
+        height: 180 * s
 
-        property real defaultX: 40 * s
-        property real defaultY: 40 * s
+        property real defaultX: 40 * Scales.uiScale
+        property real defaultY: 40 * Scales.uiScale
 
-        x: defaultX
-        y: defaultY
+        x: BarLayoutState.desktopClockX
+        y: BarLayoutState.desktopClockY
+        rotation: BarLayoutState.desktopClockRotation
 
-        property int alignMode: 1
+        property int alignMode: BarLayoutState.desktopClockAlignment
 
-        property string safeTime: "00:00"
-        property string safeDate: ""
+        opacity: BarLayoutState.desktopWidgetsOpacity * BarLayoutState.desktopClockOpacity
 
-        property bool savePending: false
+        readonly property color clockColor: {
+            if (BarLayoutState.desktopClockColorMode === "white") return "#FFFFFF"
+            if (BarLayoutState.desktopClockColorMode === "black") return "#000000"
+            return Theme.accent
+        }
 
-        function nextAlign() {
-            alignMode = (alignMode + 1) % 3
-            pos.applyPosition(container.x, container.y, container, alignMode)
+        readonly property color dateColor: {
+            if (BarLayoutState.desktopClockColorMode === "white") return Qt.rgba(1, 1, 1, 0.7)
+            if (BarLayoutState.desktopClockColorMode === "black") return Qt.rgba(0, 0, 0, 0.7)
+            return Theme.textSecondary
         }
 
         function alignment() {
-            if (alignMode === 0) return Text.AlignLeft
-            if (alignMode === 1) return Text.AlignHCenter
+            if (BarLayoutState.desktopClockAlignment === 0) return Text.AlignLeft
+            if (BarLayoutState.desktopClockAlignment === 1) return Text.AlignHCenter
             return Text.AlignRight
         }
-
-        function scheduleSave() {
-            if (savePending) return
-            savePending = true
-
-            Qt.callLater(function() {
-                savePending = false
-                pos.applyPosition(container.x, container.y, container, alignMode)
-            })
-        }
-
-        onXChanged: scheduleSave()
-        onYChanged: scheduleSave()
 
         Column {
             anchors.fill: parent
             anchors.margins: 10 * s
-            spacing: 4 * s
+            spacing: 0
 
             Text {
-                text: container.safeTime
-                font.pixelSize: Typography.sp(86)
-                color: Theme.textPrimary
+                text: root.formattedTime
+                font.pixelSize: Typography.sp(86) * BarLayoutState.desktopClockScale
+                color: container.clockColor
                 horizontalAlignment: container.alignment()
                 width: parent.width
+                font.weight: Font.Bold
+                lineHeight: 0.8
             }
 
             Text {
-                text: container.safeDate
-                font.pixelSize: Typography.sp(22)
-                color: Theme.textSecondary
+                visible: text !== ""
+                text: root.formattedDay
+                font.pixelSize: Typography.sp(22) * BarLayoutState.desktopClockScale
+                color: container.clockColor
                 horizontalAlignment: container.alignment()
                 width: parent.width
+                font.weight: Font.Bold
+                opacity: 0.9
             }
-        }
 
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.RightButton
-
-            onClicked: function(mouse) {
-                if (mouse.button === Qt.RightButton) {
-                    container.nextAlign()
-                }
+            Text {
+                visible: text !== ""
+                text: root.formattedDate
+                font.pixelSize: Typography.sp(14) * BarLayoutState.desktopClockScale
+                color: container.dateColor
+                horizontalAlignment: container.alignment()
+                width: parent.width
+                font.weight: Font.Medium
             }
         }
 
         Draggable {
+            id: drag
             anchors.fill: parent
             target: container
 
@@ -139,6 +115,24 @@ Item {
 
             defaultX: container.defaultX
             defaultY: container.defaultY
+            
+            currentX: BarLayoutState.desktopClockX
+            currentY: BarLayoutState.desktopClockY
+            onDragPositionChanged: (x, y) => {
+                BarLayoutState.desktopClockX = x
+                BarLayoutState.desktopClockY = y
+            }
+            onRotateAction: (r) => {
+                BarLayoutState.desktopClockRotation = r
+            }
         }
+    }
+
+    Component.onCompleted: {
+        BarLayoutState.registerItem("desktopClockPos", drag)
+    }
+
+    Component.onDestruction: {
+        BarLayoutState.unregisterItem("desktopClockPos")
     }
 }

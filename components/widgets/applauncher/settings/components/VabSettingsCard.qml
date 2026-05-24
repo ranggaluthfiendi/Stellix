@@ -7,6 +7,7 @@ Rectangle {
     id: root
     property string title: ""
     property string desc: ""
+    property string sectionLabel: ""
     property int itemIndex: -1
     property bool isFocused: false
     
@@ -73,13 +74,35 @@ Rectangle {
                 Layout.alignment: Qt.AlignVCenter
                 spacing: Theme.dp(2)
 
-                Text {
-                    text: root.title
-                    color: Theme.textPrimary
-                    font.pixelSize: Theme.dp(12)
-                    font.weight: Font.Bold
+                RowLayout {
                     Layout.fillWidth: true
-                    elide: Text.ElideRight
+                    spacing: Theme.dp(6)
+
+                    Text {
+                        text: root.title
+                        color: Theme.textPrimary
+                        font.pixelSize: Theme.dp(12)
+                        font.weight: Font.Bold
+                        Layout.fillWidth: true
+                        elide: Text.ElideRight
+                    }
+
+                    Rectangle {
+                        visible: root.sectionLabel !== ""
+                        Layout.preferredWidth: sectionText.implicitWidth + Theme.dp(8)
+                        Layout.preferredHeight: Theme.dp(16)
+                        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
+                        radius: Theme.dp(3)
+
+                        Text {
+                            id: sectionText
+                            anchors.centerIn: parent
+                            text: root.sectionLabel
+                            color: Theme.accent
+                            font.pixelSize: Theme.dp(7)
+                            font.weight: Font.Bold
+                        }
+                    }
                 }
 
                 Text {

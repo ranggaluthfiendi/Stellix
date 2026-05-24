@@ -85,6 +85,20 @@ Rectangle {
         opacity: artBg.visible ? 0.6 : 1.0
     }
 
+    // --- Smooth Wave Visualizer (Layered behind UI) ---
+    WaveVisualizer {
+        id: wave
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Theme.dp(4)
+        height: Theme.dp(36)
+        active: root.hasMedia && root.activePlayer && root.activePlayer.isPlaying
+        waveColor: Theme.accent
+        opacity: 0.35
+        z: 0
+    }
+
     Rectangle {
         id: artBox
         x: root.pad

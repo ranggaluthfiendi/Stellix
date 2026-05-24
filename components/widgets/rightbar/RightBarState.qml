@@ -14,6 +14,8 @@ Item {
     onOpenChanged: {
         if (open) {
             calendarOpen = false
+            weatherDetailOpen = false
+            workspaceSwitcherOpen = false
             SysTrayState.forceCloseAll()
         }
     }
@@ -22,13 +24,32 @@ Item {
     onCalendarOpenChanged: {
         if (calendarOpen) {
             open = false
+            weatherDetailOpen = false
+            workspaceSwitcherOpen = false
             SysTrayState.forceCloseAll()
         }
     }
     property bool workspaceSwitcherOpen: false
+    onWorkspaceSwitcherOpenChanged: {
+        if (workspaceSwitcherOpen) {
+            open = false
+            calendarOpen = false
+            weatherDetailOpen = false
+            SysTrayState.forceCloseAll()
+        }
+    }
     property bool launcherOpen: false
     property bool settingsOpen: false
     property bool guideOpen: false
+    property bool weatherDetailOpen: false
+    onWeatherDetailOpenChanged: {
+        if (weatherDetailOpen) {
+            open = false
+            calendarOpen = false
+            workspaceSwitcherOpen = false
+            SysTrayState.forceCloseAll()
+        }
+    }
     property bool dndEnabled: false
     property int calendarMonthOffset: 0
     property bool notifPanelRequested: false
@@ -110,6 +131,12 @@ Item {
         launcherOpen = false
         settingsOpen = false
         guideOpen = false
+        weatherDetailOpen = false
+        SysTrayState.forceCloseAll()
+    }
+
+    function closeWeatherDetail() {
+        weatherDetailOpen = false
     }
 
     function prevMonth() {

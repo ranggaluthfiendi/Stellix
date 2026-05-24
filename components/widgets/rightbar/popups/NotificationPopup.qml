@@ -171,16 +171,18 @@ PopupWindow {
         return result
     }
 
+    readonly property real popupRadius: BarLayoutState.notifPopupRounded ? Theme.radiusMedium : 0
+
     anchor.window: popupPanel
     anchor.rect.x: Theme.dp(0)
 
     Rectangle {
         anchors.fill: parent
         y: root.slideY
-        color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.notifOpacity)
+        color: Theme.bgSecondary
         border.width: 1
-        border.color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, BarLayoutState.notifOpacity)
-        radius: 0
+        border.color: Theme.border
+        radius: root.popupRadius
 
         Behavior on y {
             NumberAnimation {
@@ -266,6 +268,62 @@ PopupWindow {
                     buttonLabel: "Clear"
                     requireHold: true
                     onExecute: root.dismissAll()
+                }
+
+                // Weather shortcut button
+                Rectangle {
+                    implicitWidth: Theme.dp(22)
+                    implicitHeight: Theme.dp(22)
+                    color: notifWeatherMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2) : "transparent"
+                    border.width: 1
+                    border.color: notifWeatherMouse.containsMouse ? Theme.accent : Theme.border
+                    radius: 0
+
+                    IconCloud {
+                        anchors.centerIn: parent
+                        iconColor: notifWeatherMouse.containsMouse ? Theme.accent : Theme.textMuted
+                        iconSize: Theme.dp(12)
+                    }
+
+                    MouseArea {
+                        id: notifWeatherMouse
+                        anchors.fill: parent
+                        cursorShape: Qt.PointingHandCursor
+                        hoverEnabled: true
+                        onClicked: {
+                            if (root.closeCallback) root.closeCallback()
+                            RightBarState.closeAll()
+                            RightBarState.weatherDetailOpen = true
+                        }
+                    }
+                }
+
+                // Grip icon (drag handle)
+                Rectangle {
+                    implicitWidth: Theme.dp(22)
+                    implicitHeight: Theme.dp(22)
+                    color: rightbarMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2) : "transparent"
+                    border.width: 1
+                    border.color: rightbarMouse.containsMouse ? Theme.accent : Theme.border
+                    radius: 0
+
+                    IconGrip {
+                        anchors.centerIn: parent
+                        width: Theme.dp(14)
+                        height: Theme.dp(14)
+                        color: rightbarMouse.containsMouse ? Theme.accent : Theme.textMuted
+                    }
+
+                    MouseArea {
+                        id: rightbarMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            RightBarState.closeAll()
+                            RightBarState.open = true
+                        }
+                    }
                 }
 
                 Text {

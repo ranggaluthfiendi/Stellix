@@ -6,6 +6,7 @@ import Quickshell.Hyprland
 import Quickshell.Wayland
 import Quickshell.Io
 import qs.config
+import qs.services
 import qs.components.elements
 import qs.components.widgets.workspaceswitcher.components
 
@@ -63,7 +64,14 @@ PanelWindow {
 
     // ── Background click to close ──
     MouseArea {
-        anchors.fill: parent
+        anchors {
+            top: parent.top
+            topMargin: BarLayoutState.isBottom ? 0 : BarLayoutState.barHeight * s
+            bottom: parent.bottom
+            bottomMargin: BarLayoutState.isBottom ? BarLayoutState.barHeight * s : 0
+            left: parent.left
+            right: parent.right
+        }
         enabled: root.visible
         acceptedButtons: Qt.AllButtons
         onPressed: { root.closeRequested() }

@@ -10,6 +10,15 @@ Item {
     readonly property var source: Pipewire.defaultAudioSource
     readonly property bool sourceReady: source && source.audio && source.ready
 
+    PwNodePeakMonitor {
+        id: peakMonitor
+        node: sink
+        enabled: sinkReady
+    }
+
+    readonly property real audioPeak: peakMonitor.peak
+    readonly property var audioPeaks: peakMonitor.peaks
+
     PwObjectTracker {
         id: pwTracker
         objects: Pipewire.nodes.values
