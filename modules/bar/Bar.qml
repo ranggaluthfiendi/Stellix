@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import qs.components.ui.bar.sections
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.config
 import qs.services
 
@@ -204,7 +204,7 @@ Scope {
     // ── Overlay to close VB indicator ──
     PanelWindow {
         id: indicatorOutsideOverlay
-        visible: RightBarState.indicatorVisible
+        visible: BarPopupState.indicatorVisible
         color: "transparent"
 
         anchors {
@@ -226,7 +226,7 @@ Scope {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
             onPressed: {
-                RightBarState.indicatorVisible = false
+                BarPopupState.indicatorVisible = false
             }
         }
     }
@@ -271,7 +271,7 @@ Scope {
     // ── Volume/Brightness Indicator ──
     PopupWindow {
         id: vbIndicatorPopup
-        visible: RightBarState.indicatorVisible
+        visible: BarPopupState.indicatorVisible
         color: "transparent"
         grabFocus: false
 
@@ -287,10 +287,10 @@ Scope {
         VolumeBrightnessIndicator {
             id: vbIndicator
             anchors.fill: parent
-            indicatorType: RightBarState.indicatorType
-            indicatorValue: RightBarState.indicatorValue
-            indicatorMuted: RightBarState.indicatorMuted
-            animating: RightBarState.indicatorVisible
+            indicatorType: BarPopupState.indicatorType
+            indicatorValue: BarPopupState.indicatorValue
+            indicatorMuted: BarPopupState.indicatorMuted
+            animating: BarPopupState.indicatorVisible
         }
     }
 

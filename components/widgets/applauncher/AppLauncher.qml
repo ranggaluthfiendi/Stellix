@@ -5,7 +5,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.widgets.applauncher
 import qs.components.elements
 
@@ -116,8 +116,8 @@ PanelWindow {
                 root.viewMode = 0
                 break
             case "settings":
-                RightBarState.closeAll()
-                RightBarState.settingsOpen = true
+                BarPopupState.closeAll()
+                BarPopupState.settingsOpen = true
                 closeLauncher()
                 break
             case "color":
@@ -173,7 +173,7 @@ PanelWindow {
         }
     }
 
-    visible: RightBarState.launcherOpen
+    visible: BarPopupState.launcherOpen
     color: "transparent"
 
     anchors {
@@ -184,7 +184,7 @@ PanelWindow {
     }
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: RightBarState.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: BarPopupState.launcherOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     WlrLayershell.exclusiveZone: -1
 
     MouseArea {
@@ -209,8 +209,8 @@ PanelWindow {
         radius: 0
         z: 1
 
-        opacity: RightBarState.launcherOpen ? 1 : 0
-        scale: RightBarState.launcherOpen ? 1 : 0.96
+        opacity: BarPopupState.launcherOpen ? 1 : 0
+        scale: BarPopupState.launcherOpen ? 1 : 0.96
 
         Behavior on opacity {
             NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
@@ -221,12 +221,12 @@ PanelWindow {
         }
 
         Behavior on x {
-            enabled: root.followCursor && RightBarState.launcherOpen
+            enabled: root.followCursor && BarPopupState.launcherOpen
             NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
         }
 
         Behavior on y {
-            enabled: root.followCursor && RightBarState.launcherOpen
+            enabled: root.followCursor && BarPopupState.launcherOpen
             NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
         }
 
@@ -278,7 +278,7 @@ PanelWindow {
                         selectedTextColor: Theme.textPrimary
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round(13 * s)
-                        focus: RightBarState.launcherOpen
+                        focus: BarPopupState.launcherOpen
                         background: Item {}
                         leftPadding: 0
                         topPadding: 0
@@ -322,8 +322,8 @@ PanelWindow {
                                     launcher.searchText = ""
                                 } else if (cmd === ">settings" || cmd === "/settings" || cmd === "?settings") {
                                     root.showCommands = false
-                                    RightBarState.closeAll()
-                                    RightBarState.settingsOpen = true
+                                    BarPopupState.closeAll()
+                                    BarPopupState.settingsOpen = true
                                     searchInput.text = ""
                                     launcher.searchText = ""
                                     closeLauncher()
@@ -1045,8 +1045,8 @@ PanelWindow {
                                         root.executeCommand(cmd)
                                         root.showCommands = false
                                     } else if (modelData.name === "Stellix Control") {
-                                        RightBarState.closeAll()
-                                        RightBarState.settingsOpen = true
+                                        BarPopupState.closeAll()
+                                        BarPopupState.settingsOpen = true
                                         closeLauncher()
                                     } else {
                                         launcher.launchApp(modelData)
@@ -1835,7 +1835,7 @@ PanelWindow {
     }
 
     function closeLauncher() {
-        RightBarState.launcherOpen = false
+        BarPopupState.launcherOpen = false
         launcher.close()
     }
 

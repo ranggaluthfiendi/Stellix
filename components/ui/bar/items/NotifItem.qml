@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.elements
 
 Rectangle {
@@ -15,7 +15,7 @@ Rectangle {
     border.color: "transparent"
     radius: 0
 
-    readonly property int count: RightBarState.notifCount
+    readonly property int count: BarPopupState.notifCount
     property bool hovered: false
 
     IconBell {
@@ -26,7 +26,7 @@ Rectangle {
 
     Rectangle {
         id: badge
-        visible: notifBox.count > 0 && !RightBarState.dndEnabled
+        visible: notifBox.count > 0 && !BarPopupState.dndEnabled
         anchors.top: parent.top
         anchors.right: parent.right
         anchors.topMargin: -Theme.dp(4)
@@ -63,8 +63,8 @@ Rectangle {
         onEntered: notifBox.hovered = true
         onExited: notifBox.hovered = false
         onClicked: {
-            RightBarState.closeAll()
-            RightBarState.notifPanelRequested = true
+            BarPopupState.closeAll()
+            BarPopupState.notifPanelRequested = true
         }
     }
 }

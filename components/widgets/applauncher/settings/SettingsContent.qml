@@ -8,8 +8,8 @@ import Quickshell.Networking
 import Quickshell.Bluetooth
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
-import qs.components.widgets.rightbar.services
+import qs.components.widgets.barpopup
+import qs.components.widgets.barpopup.services
 import qs.components.elements
 
 // Import modular pages and components
@@ -229,6 +229,17 @@ Item {
                             VabNavItem { label: "Weather"; index: 11; active: !root.isSearching && root.currentCategory === 11; visible: settingsData.appearanceExp }
                             VabNavItem { label: "Clock"; index: 12; active: !root.isSearching && root.currentCategory === 12; visible: settingsData.appearanceExp }
                             
+                            // --- Metrics ---
+                            VabSidebarHeader { title: "Metric Widgets"; expanded: settingsData.metricsExp; onToggled: settingsData.metricsExp = !settingsData.metricsExp; Layout.topMargin: Theme.dp(8) }
+                            VabNavItem { label: "CPU"; index: 13; active: !root.isSearching && root.currentCategory === 13; visible: settingsData.metricsExp }
+                            VabNavItem { label: "GPU"; index: 14; active: !root.isSearching && root.currentCategory === 14; visible: settingsData.metricsExp }
+                            VabNavItem { label: "RAM"; index: 15; active: !root.isSearching && root.currentCategory === 15; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Disk"; index: 16; active: !root.isSearching && root.currentCategory === 16; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Uptime"; index: 17; active: !root.isSearching && root.currentCategory === 17; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Temp"; index: 18; active: !root.isSearching && root.currentCategory === 18; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Net Down"; index: 19; active: !root.isSearching && root.currentCategory === 19; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Net Up"; index: 20; active: !root.isSearching && root.currentCategory === 20; visible: settingsData.metricsExp }
+
                             // --- Connectivity ---
                             VabSidebarHeader { title: "Connectivity"; expanded: settingsData.connectivityExp; onToggled: settingsData.connectivityExp = !settingsData.connectivityExp; Layout.topMargin: Theme.dp(8) }
                             VabNavItem { label: "Wi-Fi"; index: 3; active: !root.isSearching && root.currentCategory === 3; visible: settingsData.connectivityExp }
@@ -269,7 +280,7 @@ Item {
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: Theme.dp(20); anchors.rightMargin: Theme.dp(20); spacing: Theme.dp(16)
                         Text {
-                            text: root.isSearching ? "Search Results" : ["Personalization", "Workspaces", "Audio", "Wi-Fi", "Keybindings", "System", "About", "Search", "Bluetooth", "Bar Layout", "Screen Widgets", "Weather", "Clock"][root.currentCategory]
+                            text: root.isSearching ? "Search Results" : ["Personalization", "Workspaces", "Audio", "Wi-Fi", "Keybindings", "System", "About", "Search", "Bluetooth", "Bar Layout", "Screen Widgets", "Weather", "Clock", "CPU", "GPU", "RAM", "Disk", "Uptime", "Temp", "Net Down", "Net Up"][root.currentCategory]
                             color: Theme.textPrimary; font.pixelSize: Theme.dp(16); font.weight: Font.Bold; Layout.preferredWidth: Theme.dp(140)
                         }
                         Rectangle {
@@ -293,7 +304,7 @@ Item {
                                     Keys.onPressed: function(event) {
                                         if (event.key === Qt.Key_Escape) { 
                                             if (text !== "") { text = ""; root.searchQuery = "" } 
-                                            else { RightBarState.settingsOpen = false }
+                                            else { BarPopupState.settingsOpen = false }
                                             event.accepted = true 
                                         }
                                     }
@@ -304,7 +315,7 @@ Item {
                         Rectangle {
                             Layout.preferredWidth: Theme.dp(32); Layout.preferredHeight: Theme.dp(32); color: closeMouse.containsMouse ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.1) : "transparent"; radius: 0
                             Text { anchors.centerIn: parent; text: "✕"; color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted; font.pixelSize: Theme.dp(12) }
-                            MouseArea { id: closeMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: RightBarState.settingsOpen = false }
+                            MouseArea { id: closeMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: BarPopupState.settingsOpen = false }
                         }
                     }
                     Rectangle { anchors.bottom: parent.bottom; width: parent.width; height: 1; color: Theme.border; opacity: 0.5 }
@@ -351,6 +362,14 @@ Item {
                     ScreenPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     WeatherPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     ClockPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    CpuMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    GpuMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    MemMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    DiskMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    UptimeMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    TempMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    NetDownMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    NetUpMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                 }
 
                 Rectangle { // Hint bar
@@ -381,7 +400,7 @@ Item {
     }
 
     Item {
-        focus: RightBarState.settingsOpen
+        focus: BarPopupState.settingsOpen
         Keys.onPressed: function(event) {
             if (root.isRecording) {
                 if (event.key === Qt.Key_Escape) { root.isRecording = false; root.recordingTarget = ""; event.accepted = true; return }
@@ -391,10 +410,10 @@ Item {
                 root.updateKeybind(root.recordingTarget, mod, keyStr); root.isRecording = false; event.accepted = true; return
             }
             if (event.key === Qt.Key_Escape) {
-                if (root.subFocusActive) root.subFocusActive = false; else if (root.focusInContent) root.focusInContent = false; else RightBarState.settingsOpen = false
+                if (root.subFocusActive) root.subFocusActive = false; else if (root.focusInContent) root.focusInContent = false; else BarPopupState.settingsOpen = false
                 event.accepted = true; return
             }
-            var navOrder = [0, 9, 10, 11, 12, 3, 8, 2, 4, 5, 6]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
+            var navOrder = [0, 9, 10, 11, 12, 3, 8, 2, 4, 5, 6, 13, 14, 15, 16, 17, 18, 19, 20]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
             if (event.key === Qt.Key_Right && !root.focusInContent) { root.focusInContent = true; root.contentFocusIndex = 0; event.accepted = true; return }
             if (event.key === Qt.Key_Left && root.focusInContent && !root.subFocusActive) { root.focusInContent = false; event.accepted = true; return }
             if (event.key === Qt.Key_Up) {
@@ -418,7 +437,7 @@ Item {
             if ((event.key === Qt.Key_Enter || event.key === Qt.Key_Return) && root.focusInContent) { root.subFocusActive = !root.subFocusActive; event.accepted = true; return }
         }
     }
-    Connections { target: RightBarState; function onSettingsOpenChanged() { if (RightBarState.settingsOpen) loadCurrentKeybinds() } }
+    Connections { target: BarPopupState; function onSettingsOpenChanged() { if (BarPopupState.settingsOpen) loadCurrentKeybinds() } }
 
     component VabSidebarHeader: Rectangle {
         property string title: ""

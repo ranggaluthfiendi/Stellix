@@ -4,7 +4,7 @@ import QtQuick.Controls
 import Quickshell
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import "../components"
 
 VabContentPage {
@@ -48,8 +48,8 @@ VabContentPage {
                 VabButton {
                     text: "Show Now"
                     onClicked: {
-                        RightBarState.settingsOpen = false
-                        RightBarState.welcomeRequested()
+                        BarPopupState.settingsOpen = false
+                        BarPopupState.welcomeRequested()
                     }
                 }
                 VabSwitch {

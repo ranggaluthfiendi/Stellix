@@ -5,13 +5,13 @@ import Quickshell
 import Quickshell.Wayland
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import "./settings"
 
 PanelWindow {
     id: root
 
-    visible: RightBarState.settingsOpen && (settingsData ? !settingsData.settingsFloating : true)
+    visible: BarPopupState.settingsOpen && (settingsData ? !settingsData.settingsFloating : true)
     color: "transparent"
 
     anchors {
@@ -31,7 +31,7 @@ PanelWindow {
 
     MouseArea {
         anchors.fill: parent
-        onClicked: { RightBarState.settingsOpen = false }
+        onClicked: { BarPopupState.settingsOpen = false }
     }
 
     Rectangle {

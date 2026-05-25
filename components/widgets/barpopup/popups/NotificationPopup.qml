@@ -6,7 +6,7 @@ import Quickshell.Io
 import Quickshell.Services.Notifications
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.elements
 import Quickshell.Wayland
 
@@ -234,10 +234,10 @@ PopupWindow {
                     implicitWidth: dndLabel.implicitWidth + Theme.dp(12)
                     implicitHeight: Theme.dp(20)
                     color: dndMouse.containsMouse
-                        ? (RightBarState.dndEnabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
-                        : (RightBarState.dndEnabled ? Theme.accent : Theme.bgPrimary)
+                        ? (BarPopupState.dndEnabled ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85) : Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.12))
+                        : (BarPopupState.dndEnabled ? Theme.accent : Theme.bgPrimary)
                     border.width: 1
-                    border.color: RightBarState.dndEnabled ? Theme.accent : Theme.border
+                    border.color: BarPopupState.dndEnabled ? Theme.accent : Theme.border
                     radius: 0
 
                     Behavior on color {
@@ -247,8 +247,8 @@ PopupWindow {
                     Text {
                         id: dndLabel
                         anchors.centerIn: parent
-                        text: RightBarState.dndEnabled ? "DND" : "DND"
-                        color: RightBarState.dndEnabled ? Theme.bgPrimary : Theme.textMuted
+                        text: BarPopupState.dndEnabled ? "DND" : "DND"
+                        color: BarPopupState.dndEnabled ? Theme.bgPrimary : Theme.textMuted
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                     }
@@ -258,7 +258,7 @@ PopupWindow {
                         cursorShape: Qt.PointingHandCursor
                         anchors.fill: parent
                         hoverEnabled: true
-                        onClicked: RightBarState.toggleDnd()
+                        onClicked: BarPopupState.toggleDnd()
                     }
                 }
 
@@ -292,8 +292,8 @@ PopupWindow {
                         hoverEnabled: true
                         onClicked: {
                             if (root.closeCallback) root.closeCallback()
-                            RightBarState.closeAll()
-                            RightBarState.weatherDetailOpen = true
+                            BarPopupState.closeAll()
+                            BarPopupState.weatherDetailOpen = true
                         }
                     }
                 }
@@ -302,26 +302,26 @@ PopupWindow {
                 Rectangle {
                     implicitWidth: Theme.dp(22)
                     implicitHeight: Theme.dp(22)
-                    color: rightbarMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2) : "transparent"
+                    color: barpopupMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2) : "transparent"
                     border.width: 1
-                    border.color: rightbarMouse.containsMouse ? Theme.accent : Theme.border
+                    border.color: barpopupMouse.containsMouse ? Theme.accent : Theme.border
                     radius: 0
 
                     IconGrip {
                         anchors.centerIn: parent
                         width: Theme.dp(14)
                         height: Theme.dp(14)
-                        color: rightbarMouse.containsMouse ? Theme.accent : Theme.textMuted
+                        color: barpopupMouse.containsMouse ? Theme.accent : Theme.textMuted
                     }
 
                     MouseArea {
-                        id: rightbarMouse
+                        id: barpopupMouse
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
                         onClicked: {
-                            RightBarState.closeAll()
-                            RightBarState.open = true
+                            BarPopupState.closeAll()
+                            BarPopupState.open = true
                         }
                     }
                 }
@@ -446,7 +446,7 @@ PopupWindow {
 
                     IconBell {
                         Layout.alignment: Qt.AlignHCenter
-                        iconColor: RightBarState.dndEnabled ? Theme.textMuted : Theme.accent
+                        iconColor: BarPopupState.dndEnabled ? Theme.textMuted : Theme.accent
                         iconSize: Theme.dp(36)
                     }
 
@@ -456,7 +456,7 @@ PopupWindow {
 
                         Text {
                             Layout.alignment: Qt.AlignHCenter
-                            text: RightBarState.dndEnabled ? "Do Not Disturb" : "No Notifications"
+                            text: BarPopupState.dndEnabled ? "Do Not Disturb" : "No Notifications"
                             color: Theme.textPrimary
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round((Typography.sizeSM || 14) * s)
@@ -465,7 +465,7 @@ PopupWindow {
 
                         Text {
                             Layout.alignment: Qt.AlignHCenter
-                            text: RightBarState.dndEnabled ? "You won't see new alerts" : "Your tray is empty"
+                            text: BarPopupState.dndEnabled ? "You won't see new alerts" : "Your tray is empty"
                             color: Theme.textMuted
                             font.family: Typography.fontFamily
                             font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)

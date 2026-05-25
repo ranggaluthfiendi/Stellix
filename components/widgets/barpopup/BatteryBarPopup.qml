@@ -6,10 +6,10 @@ import Quickshell.Wayland
 import Quickshell.Services.UPower
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
-import qs.components.widgets.rightbar.popups
-import qs.components.widgets.rightbar.services
-import qs.components.widgets.rightbar.sections
+import qs.components.widgets.barpopup
+import qs.components.widgets.barpopup.popups
+import qs.components.widgets.barpopup.services
+import qs.components.widgets.barpopup.sections
 import qs.components.elements
 
 Scope {
@@ -67,7 +67,7 @@ Scope {
 
     readonly property real notifY: isBottom
         ? -(notifPopup.implicitHeight + Theme.dp(5))
-        : (RightBarState.open ? (panel.implicitHeight + Theme.dp(5)) : Theme.dp(5))
+        : (BarPopupState.open ? (panel.implicitHeight + Theme.dp(5)) : Theme.dp(5))
 
     readonly property real panelHeight: panel.implicitHeight
 
@@ -77,8 +77,8 @@ Scope {
 
     onNotifYChanged: scheduleNotifAnchorRefresh()
     onNotifPopupOpenChanged: {
-        if (notifPopupOpen && RightBarState.open) {
-            RightBarState.open = false
+        if (notifPopupOpen && BarPopupState.open) {
+            BarPopupState.open = false
         }
         scheduleNotifAnchorRefresh()
     }
@@ -110,9 +110,9 @@ Scope {
     }
 
     Connections {
-        target: RightBarState
+        target: BarPopupState
         function onOpenChanged() {
-            if (RightBarState.open) {
+            if (BarPopupState.open) {
                 root.closeNotifPopup()
                 root.scheduleNotifAnchorRefresh()
             } else {
@@ -120,21 +120,21 @@ Scope {
                 root.btPopupOpen = false
                 root.powerPopupOpen = false
                 root.notifPopupOpen = false
-                RightBarState.calendarOpen = false
+                BarPopupState.calendarOpen = false
             }
         }
         function onCalendarOpenChanged() {
-            if (RightBarState.calendarOpen) {
+            if (BarPopupState.calendarOpen) {
                 root.closeNotifPopup()
             }
         }
         function onWorkspaceSwitcherOpenChanged() {
-            if (RightBarState.workspaceSwitcherOpen) {
+            if (BarPopupState.workspaceSwitcherOpen) {
                 root.closeNotifPopup()
             }
         }
         function onWeatherDetailOpenChanged() {
-            if (RightBarState.weatherDetailOpen) {
+            if (BarPopupState.weatherDetailOpen) {
                 root.closeNotifPopup()
             }
         }
@@ -153,11 +153,11 @@ Scope {
     }
 
     Connections {
-        target: RightBarState
+        target: BarPopupState
         function onNotifPanelRequestedChanged() {
-            if (RightBarState.notifPanelRequested) {
+            if (BarPopupState.notifPanelRequested) {
                 root._notifReqVersion++
-                RightBarState.notifPanelRequested = false
+                BarPopupState.notifPanelRequested = false
                 notifToggleTimer.restart()
             }
         }
@@ -205,14 +205,14 @@ Scope {
         notifPopupUserOpened = false
     }
 
-    onNotifCountChanged: RightBarState.notifCount = notifCount
+    onNotifCountChanged: BarPopupState.notifCount = notifCount
 
     readonly property int notifCount: notifSvc.notifCount
     readonly property var trackedNotifs: notifSvc.trackedNotifs
 
     PanelWindow {
         id: outsideOverlay
-        visible: RightBarState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen || RightBarState.calendarOpen || RightBarState.weatherDetailOpen || RightBarState.workspaceSwitcherOpen
+        visible: BarPopupState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen || BarPopupState.calendarOpen || BarPopupState.weatherDetailOpen || BarPopupState.workspaceSwitcherOpen
         color: "transparent"
 
         WlrLayershell.layer: WlrLayer.Top
@@ -233,22 +233,22 @@ Scope {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
             onPressed: {
-                if (RightBarState.open) {
-                    RightBarState.closeAll()
+                if (BarPopupState.open) {
+                    BarPopupState.closeAll()
                 }
                 root.closeSidePopups()
                 root.closeNotifPopup()
-                RightBarState.calendarOpen = false
-                RightBarState.weatherDetailOpen = false
+                BarPopupState.calendarOpen = false
+                BarPopupState.weatherDetailOpen = false
             }
         }
     }
 
-    readonly property real popupRadius: BarLayoutState.rightbarPopupRounded ? Theme.radiusMedium : 0
+    readonly property real popupRadius: BarLayoutState.barPopupRounded ? Theme.radiusMedium : 0
 
     PanelWindow {
         id: panel
-        visible: RightBarState.open
+        visible: BarPopupState.open
         color: "transparent"
 
         WlrLayershell.layer: WlrLayer.Overlay

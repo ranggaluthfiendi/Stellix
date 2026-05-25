@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 
 PanelWindow {
     id: overlay
@@ -33,7 +33,7 @@ PanelWindow {
 
         onPressed: {
             SysTrayState.forceCloseAll()
-            RightBarState.weatherDetailOpen = false
+            BarPopupState.weatherDetailOpen = false
         }
     }
 }

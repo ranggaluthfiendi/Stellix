@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 
 PanelWindow {
     id: overlay
@@ -14,7 +14,7 @@ PanelWindow {
         right: true
     }
 
-    visible: RightBarState.weatherDetailOpen
+    visible: BarPopupState.calendarOpen
     color: "transparent"
 
     Component.onCompleted: {
@@ -30,7 +30,8 @@ PanelWindow {
         acceptedButtons: Qt.AllButtons
 
         onPressed: {
-            RightBarState.weatherDetailOpen = false
+            BarPopupState.calendarOpen = false
+            BarPopupState.weatherDetailOpen = false
         }
     }
 }

@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.elements
 
 Item {
@@ -10,7 +10,7 @@ Item {
     property real s: Scales.uiScale
 
     property date now: new Date()
-    readonly property date shownDate: new Date(now.getFullYear(), now.getMonth() + RightBarState.calendarMonthOffset, 1)
+    readonly property date shownDate: new Date(now.getFullYear(), now.getMonth() + BarPopupState.calendarMonthOffset, 1)
     readonly property int shownYear: shownDate.getFullYear()
     readonly property int shownMonth: shownDate.getMonth() + 1
     readonly property int daysInMonth: new Date(shownYear, shownMonth, 0).getDate()
@@ -74,8 +74,8 @@ Item {
 
     function pinnedCountInShownMonth() {
         var count = 0
-        for (var i = 0; i < RightBarState.pinnedDates.length; i++) {
-            var key = RightBarState.pinnedDates[i]
+        for (var i = 0; i < BarPopupState.pinnedDates.length; i++) {
+            var key = BarPopupState.pinnedDates[i]
             if (typeof key === "string" && key.indexOf(monthPrefix + "-") === 0) count++
         }
         return count
@@ -150,12 +150,12 @@ Item {
 
                     NavButton {
                         iconSource: chevronsLeftComp
-                        onClicked: RightBarState.calendarMonthOffset -= 12
+                        onClicked: BarPopupState.calendarMonthOffset -= 12
                     }
 
                     NavButton {
                         iconSource: chevronLeftComp
-                        onClicked: RightBarState.prevMonth()
+                        onClicked: BarPopupState.prevMonth()
                     }
 
                     Item { Layout.fillWidth: true }
@@ -165,7 +165,7 @@ Item {
                         Layout.preferredWidth: Theme.dp(64)
                         color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
                         radius: 0
-                        visible: RightBarState.calendarMonthOffset !== 0
+                        visible: BarPopupState.calendarMonthOffset !== 0
                         
                         Text {
                             anchors.centerIn: parent
@@ -178,7 +178,7 @@ Item {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: RightBarState.calendarMonthOffset = 0
+                            onClicked: BarPopupState.calendarMonthOffset = 0
                         }
                     }
 
@@ -186,12 +186,12 @@ Item {
 
                     NavButton {
                         iconSource: chevronRightComp
-                        onClicked: RightBarState.nextMonth()
+                        onClicked: BarPopupState.nextMonth()
                     }
 
                     NavButton {
                         iconSource: chevronsRightComp
-                        onClicked: RightBarState.calendarMonthOffset += 12
+                        onClicked: BarPopupState.calendarMonthOffset += 12
                     }
                 }
             }
@@ -247,8 +247,8 @@ Item {
                         readonly property int col: index % 7
                         readonly property var info: root.gridCellDate(row, col)
                         readonly property bool inMonth: info.inMonth
-                        readonly property string key: RightBarState.dateKey(info.y, info.m, info.d)
-                        readonly property bool pinned: RightBarState.isPinned(key)
+                        readonly property string key: BarPopupState.dateKey(info.y, info.m, info.d)
+                        readonly property bool pinned: BarPopupState.isPinned(key)
                         readonly property bool isToday:
                             info.y === root.now.getFullYear() &&
                             info.m === (root.now.getMonth() + 1) &&
@@ -307,7 +307,7 @@ Item {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             hoverEnabled: true
-                            onClicked: RightBarState.togglePinnedDate(key)
+                            onClicked: BarPopupState.togglePinnedDate(key)
                         }
                     }
                 }
@@ -346,16 +346,16 @@ Item {
                         s: root.s
                         buttonLabel: "Clear Month"
                         requireHold: false
-                        onExecute: RightBarState.clearPinnedDatesInMonth(root.shownYear, root.shownMonth)
+                        onExecute: BarPopupState.clearPinnedDatesInMonth(root.shownYear, root.shownMonth)
                     }
 
                     HoldButton {
-                        visible: RightBarState.pinnedDates.length > 0
+                        visible: BarPopupState.pinnedDates.length > 0
                         s: root.s
                         buttonLabel: "Clear All"
                         danger: true
                         requireHold: true
-                        onExecute: RightBarState.clearAllPinnedDates()
+                        onExecute: BarPopupState.clearAllPinnedDates()
                     }
                 }
             }

@@ -5,7 +5,7 @@ import qs.config
 import qs.components.elements
 import qs.components.widgets.media.nowplaying
 import qs.components.widgets.system
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.services
 
 Scope {
@@ -68,7 +68,7 @@ Scope {
                 z: 999
             }
 
-            BatteryRightBar {
+            BatteryBarPopup {
                 brightnessService: BarLayoutState.getItem("brightnessService")
                 mprisService: BarLayoutState.getItem("mprisService")
                 pipewireService: BarLayoutState.getItem("pwService")
@@ -79,7 +79,7 @@ Scope {
                 anchors.fill: parent
                 z: 9999
 
-                visible: SysTrayState.openedMenu !== null || RightBarState.calendarOpen
+                visible: SysTrayState.openedMenu !== null || BarPopupState.calendarOpen
 
                 MouseArea {
                     anchors.fill: parent
@@ -103,8 +103,8 @@ Scope {
                             }
                         }
 
-                        if (RightBarState.calendarOpen) {
-                            RightBarState.calendarOpen = false
+                        if (BarPopupState.calendarOpen) {
+                            BarPopupState.calendarOpen = false
                         }
                     }
                 }

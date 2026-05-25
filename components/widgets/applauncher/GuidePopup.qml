@@ -4,14 +4,14 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Wayland
 import qs.config
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 
 PanelWindow {
     id: root
 
     property real s: Scales.uiScale
     
-    visible: RightBarState.guideOpen
+    visible: BarPopupState.guideOpen
     color: "transparent"
 
     anchors {
@@ -22,14 +22,14 @@ PanelWindow {
     }
 
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: RightBarState.guideOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: BarPopupState.guideOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
     WlrLayershell.exclusiveZone: -1
 
     MouseArea {
         anchors.fill: parent
         onClicked: {
-            RightBarState.guideOpen = false
-            RightBarState.weatherDetailOpen = false
+            BarPopupState.guideOpen = false
+            BarPopupState.weatherDetailOpen = false
         }
 
         Keys.forwardTo: [keyboardHandler]
@@ -38,11 +38,11 @@ PanelWindow {
     Item {
         id: keyboardHandler
         anchors.fill: parent
-        focus: RightBarState.guideOpen
+        focus: BarPopupState.guideOpen
 
         Keys.onPressed: function(event) {
             if (event.key === Qt.Key_Escape || event.key === Qt.Key_Slash) {
-                RightBarState.guideOpen = false
+                BarPopupState.guideOpen = false
                 event.accepted = true
             }
         }
@@ -58,8 +58,8 @@ PanelWindow {
         border.color: Theme.border
         radius: 0
 
-        opacity: RightBarState.guideOpen ? 1 : 0
-        scale: RightBarState.guideOpen ? 1 : 0.95
+        opacity: BarPopupState.guideOpen ? 1 : 0
+        scale: BarPopupState.guideOpen ? 1 : 0.95
 
         Behavior on opacity {
             NumberAnimation { duration: 150; easing.type: Easing.OutCubic }

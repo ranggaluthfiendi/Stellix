@@ -56,8 +56,8 @@ Item {
     onCalendarPopupRoundedChanged: save()
     property bool notifPopupRounded: false
     onNotifPopupRoundedChanged: save()
-    property bool rightbarPopupRounded: false
-    onRightbarPopupRoundedChanged: save()
+    property bool barPopupRounded: false
+    onBarPopupRoundedChanged: save()
     property bool barBorder: true
     onBarBorderChanged: save()
     property bool showSeparators: false
@@ -99,6 +99,8 @@ Item {
 
     property bool showScreenSystemStats: false
     onShowScreenSystemStatsChanged: save()
+
+    // --- Combined Stats Widget ---
     property real desktopStatsX: 40
     onDesktopStatsXChanged: save()
     property real desktopStatsY: 800
@@ -131,6 +133,131 @@ Item {
     onDesktopStatsNetLabelStyleChanged: save()
     property real desktopStatsScale: 1.0
     onDesktopStatsScaleChanged: save()
+
+    // --- Individual Metric Widgets ---
+    // CPU
+    property bool desktopCpuShow: true
+    onDesktopCpuShowChanged: save()
+    property real desktopCpuX: 40
+    onDesktopCpuXChanged: save()
+    property real desktopCpuY: 760
+    onDesktopCpuYChanged: save()
+    property real desktopCpuRotation: 0
+    onDesktopCpuRotationChanged: save()
+    property real desktopCpuScale: 1.0
+    onDesktopCpuScaleChanged: save()
+    property string desktopCpuColorMode: "accent"
+    onDesktopCpuColorModeChanged: save()
+
+    // GPU
+    property bool desktopGpuShow: true
+    onDesktopGpuShowChanged: save()
+    property real desktopGpuX: 140
+    onDesktopGpuXChanged: save()
+    property real desktopGpuY: 760
+    onDesktopGpuYChanged: save()
+    property real desktopGpuRotation: 0
+    onDesktopGpuRotationChanged: save()
+    property real desktopGpuScale: 1.0
+    onDesktopGpuScaleChanged: save()
+    property string desktopGpuColorMode: "accent"
+    onDesktopGpuColorModeChanged: save()
+
+    // MEM
+    property bool desktopMemShow: true
+    onDesktopMemShowChanged: save()
+    property real desktopMemX: 240
+    onDesktopMemXChanged: save()
+    property real desktopMemY: 760
+    onDesktopMemYChanged: save()
+    property real desktopMemRotation: 0
+    onDesktopMemRotationChanged: save()
+    property real desktopMemScale: 1.0
+    onDesktopMemScaleChanged: save()
+    property string desktopMemColorMode: "accent"
+    onDesktopMemColorModeChanged: save()
+
+    // DISK
+    property bool desktopDiskShow: false
+    onDesktopDiskShowChanged: save()
+    property real desktopDiskX: 340
+    onDesktopDiskXChanged: save()
+    property real desktopDiskY: 760
+    onDesktopDiskYChanged: save()
+    property real desktopDiskRotation: 0
+    onDesktopDiskRotationChanged: save()
+    property real desktopDiskScale: 1.0
+    onDesktopDiskScaleChanged: save()
+    property string desktopDiskColorMode: "accent"
+    onDesktopDiskColorModeChanged: save()
+
+    // UPTIME
+    property bool desktopUptimeShow: false
+    onDesktopUptimeShowChanged: save()
+    property real desktopUptimeX: 440
+    onDesktopUptimeXChanged: save()
+    property real desktopUptimeY: 760
+    onDesktopUptimeYChanged: save()
+    property real desktopUptimeRotation: 0
+    onDesktopUptimeRotationChanged: save()
+    property real desktopUptimeScale: 1.0
+    onDesktopUptimeScaleChanged: save()
+    property string desktopUptimeColorMode: "accent"
+    onDesktopUptimeColorModeChanged: save()
+
+    // TEMP
+    property bool desktopTempShow: false
+    onDesktopTempShowChanged: save()
+    property real desktopTempX: 540
+    onDesktopTempXChanged: save()
+    property real desktopTempY: 760
+    onDesktopTempYChanged: save()
+    property real desktopTempRotation: 0
+    onDesktopTempRotationChanged: save()
+    property real desktopTempScale: 1.0
+    onDesktopTempScaleChanged: save()
+    property string desktopTempColorMode: "accent"
+    onDesktopTempColorModeChanged: save()
+
+    // NET DOWN
+    property bool desktopNetDownShow: true
+    onDesktopNetDownShowChanged: save()
+    property real desktopNetDownX: 640
+    onDesktopNetDownXChanged: save()
+    property real desktopNetDownY: 760
+    onDesktopNetDownYChanged: save()
+    property real desktopNetDownRotation: 0
+    onDesktopNetDownRotationChanged: save()
+    property real desktopNetDownScale: 1.0
+    onDesktopNetDownScaleChanged: save()
+    property string desktopNetDownColorMode: "accent"
+    onDesktopNetDownColorModeChanged: save()
+    property string desktopNetDownLabel: "DOWN"
+    onDesktopNetDownLabelChanged: save()
+
+    // NET UP
+    property bool desktopNetUpShow: true
+    onDesktopNetUpShowChanged: save()
+    property real desktopNetUpX: 740
+    onDesktopNetUpXChanged: save()
+    property real desktopNetUpY: 760
+    onDesktopNetUpYChanged: save()
+    property real desktopNetUpRotation: 0
+    onDesktopNetUpRotationChanged: save()
+    property real desktopNetUpScale: 1.0
+    onDesktopNetUpScaleChanged: save()
+    property string desktopNetUpColorMode: "accent"
+    onDesktopNetUpColorModeChanged: save()
+    property string desktopNetUpLabel: "UP"
+    onDesktopNetUpLabelChanged: save()
+
+    // Stats display mode: "combined" or "individual"
+    property string statsDisplayMode: "combined"
+    onStatsDisplayModeChanged: save()
+
+    // Individual metrics layout preset: "row", "grid", "scattered"
+    property string individualStatsLayout: "row"
+    onIndividualStatsLayoutChanged: save()
 
     property bool showScreenWeather: false
     onShowScreenWeatherChanged: save()
@@ -233,6 +360,22 @@ Item {
     onDesktopEqualizerOpacityChanged: save()
     property real desktopStatsOpacity: 1.0
     onDesktopStatsOpacityChanged: save()
+    property real desktopCpuOpacity: 1.0
+    onDesktopCpuOpacityChanged: save()
+    property real desktopGpuOpacity: 1.0
+    onDesktopGpuOpacityChanged: save()
+    property real desktopMemOpacity: 1.0
+    onDesktopMemOpacityChanged: save()
+    property real desktopDiskOpacity: 1.0
+    onDesktopDiskOpacityChanged: save()
+    property real desktopUptimeOpacity: 1.0
+    onDesktopUptimeOpacityChanged: save()
+    property real desktopTempOpacity: 1.0
+    onDesktopTempOpacityChanged: save()
+    property real desktopNetDownOpacity: 1.0
+    onDesktopNetDownOpacityChanged: save()
+    property real desktopNetUpOpacity: 1.0
+    onDesktopNetUpOpacityChanged: save()
     property real desktopWeatherOpacity: 1.0
     onDesktopWeatherOpacityChanged: save()
     property real desktopQuickActionsOpacity: 1.0
@@ -500,7 +643,7 @@ Item {
         weatherPopupRounded = false
         calendarPopupRounded = false
         notifPopupRounded = false
-        rightbarPopupRounded = false
+        barPopupRounded = false
         barBorder = true
         showSeparators = false
         workspaceCount = 5
@@ -544,6 +687,18 @@ Item {
         desktopStatsNetLabelStyle = "short"
         desktopStatsScale = 1.0
 
+        statsDisplayMode = "combined"
+        individualStatsLayout = "row"
+
+        desktopCpuShow = true; desktopCpuX = 40; desktopCpuY = 760; desktopCpuRotation = 0; desktopCpuScale = 1.0; desktopCpuColorMode = "accent"
+        desktopGpuShow = true; desktopGpuX = 140; desktopGpuY = 760; desktopGpuRotation = 0; desktopGpuScale = 1.0; desktopGpuColorMode = "accent"
+        desktopMemShow = true; desktopMemX = 240; desktopMemY = 760; desktopMemRotation = 0; desktopMemScale = 1.0; desktopMemColorMode = "accent"
+        desktopDiskShow = false; desktopDiskX = 340; desktopDiskY = 760; desktopDiskRotation = 0; desktopDiskScale = 1.0; desktopDiskColorMode = "accent"
+        desktopUptimeShow = false; desktopUptimeX = 440; desktopUptimeY = 760; desktopUptimeRotation = 0; desktopUptimeScale = 1.0; desktopUptimeColorMode = "accent"
+        desktopTempShow = false; desktopTempX = 540; desktopTempY = 760; desktopTempRotation = 0; desktopTempScale = 1.0; desktopTempColorMode = "accent"
+        desktopNetDownShow = true; desktopNetDownX = 640; desktopNetDownY = 760; desktopNetDownRotation = 0; desktopNetDownScale = 1.0; desktopNetDownColorMode = "accent"; desktopNetDownLabel = "DOWN"
+        desktopNetUpShow = true; desktopNetUpX = 740; desktopNetUpY = 760; desktopNetUpRotation = 0; desktopNetUpScale = 1.0; desktopNetUpColorMode = "accent"; desktopNetUpLabel = "UP"
+
         showScreenWeather = false
         desktopWeatherX = 40
         desktopWeatherY = 600
@@ -582,6 +737,14 @@ Item {
         desktopClockOpacity = 1.0
         desktopNowPlayingOpacity = 1.0
         desktopStatsOpacity = 1.0
+        desktopCpuOpacity = 1.0
+        desktopGpuOpacity = 1.0
+        desktopMemOpacity = 1.0
+        desktopDiskOpacity = 1.0
+        desktopUptimeOpacity = 1.0
+        desktopTempOpacity = 1.0
+        desktopNetDownOpacity = 1.0
+        desktopNetUpOpacity = 1.0
         desktopWeatherOpacity = 1.0
         desktopQuickActionsOpacity = 1.0
 
@@ -630,7 +793,7 @@ Item {
             weatherPopupRounded: root.weatherPopupRounded,
             calendarPopupRounded: root.calendarPopupRounded,
             notifPopupRounded: root.notifPopupRounded,
-            rightbarPopupRounded: root.rightbarPopupRounded,
+            barPopupRounded: root.barPopupRounded,
             barBorder: root.barBorder,
             showSeparators: root.showSeparators,
             workspaceCount: root.workspaceCount,
@@ -677,6 +840,67 @@ Item {
             desktopStatsNetLabelStyle: root.desktopStatsNetLabelStyle,
             desktopStatsScale: root.desktopStatsScale,
 
+            statsDisplayMode: root.statsDisplayMode,
+            individualStatsLayout: root.individualStatsLayout,
+
+            desktopCpuShow: root.desktopCpuShow,
+            desktopCpuX: root.desktopCpuX,
+            desktopCpuY: root.desktopCpuY,
+            desktopCpuRotation: root.desktopCpuRotation,
+            desktopCpuScale: root.desktopCpuScale,
+            desktopCpuColorMode: root.desktopCpuColorMode,
+
+            desktopGpuShow: root.desktopGpuShow,
+            desktopGpuX: root.desktopGpuX,
+            desktopGpuY: root.desktopGpuY,
+            desktopGpuRotation: root.desktopGpuRotation,
+            desktopGpuScale: root.desktopGpuScale,
+            desktopGpuColorMode: root.desktopGpuColorMode,
+
+            desktopMemShow: root.desktopMemShow,
+            desktopMemX: root.desktopMemX,
+            desktopMemY: root.desktopMemY,
+            desktopMemRotation: root.desktopMemRotation,
+            desktopMemScale: root.desktopMemScale,
+            desktopMemColorMode: root.desktopMemColorMode,
+
+            desktopDiskShow: root.desktopDiskShow,
+            desktopDiskX: root.desktopDiskX,
+            desktopDiskY: root.desktopDiskY,
+            desktopDiskRotation: root.desktopDiskRotation,
+            desktopDiskScale: root.desktopDiskScale,
+            desktopDiskColorMode: root.desktopDiskColorMode,
+
+            desktopUptimeShow: root.desktopUptimeShow,
+            desktopUptimeX: root.desktopUptimeX,
+            desktopUptimeY: root.desktopUptimeY,
+            desktopUptimeRotation: root.desktopUptimeRotation,
+            desktopUptimeScale: root.desktopUptimeScale,
+            desktopUptimeColorMode: root.desktopUptimeColorMode,
+
+            desktopTempShow: root.desktopTempShow,
+            desktopTempX: root.desktopTempX,
+            desktopTempY: root.desktopTempY,
+            desktopTempRotation: root.desktopTempRotation,
+            desktopTempScale: root.desktopTempScale,
+            desktopTempColorMode: root.desktopTempColorMode,
+
+            desktopNetDownShow: root.desktopNetDownShow,
+            desktopNetDownX: root.desktopNetDownX,
+            desktopNetDownY: root.desktopNetDownY,
+            desktopNetDownRotation: root.desktopNetDownRotation,
+            desktopNetDownScale: root.desktopNetDownScale,
+            desktopNetDownColorMode: root.desktopNetDownColorMode,
+            desktopNetDownLabel: root.desktopNetDownLabel,
+
+            desktopNetUpShow: root.desktopNetUpShow,
+            desktopNetUpX: root.desktopNetUpX,
+            desktopNetUpY: root.desktopNetUpY,
+            desktopNetUpRotation: root.desktopNetUpRotation,
+            desktopNetUpScale: root.desktopNetUpScale,
+            desktopNetUpColorMode: root.desktopNetUpColorMode,
+            desktopNetUpLabel: root.desktopNetUpLabel,
+
             showScreenWeather: root.showScreenWeather,
             desktopWeatherX: root.desktopWeatherX,
             desktopWeatherY: root.desktopWeatherY,
@@ -720,6 +944,14 @@ Item {
             desktopNowPlayingOpacity: root.desktopNowPlayingOpacity,
             desktopEqualizerOpacity: root.desktopEqualizerOpacity,
             desktopStatsOpacity: root.desktopStatsOpacity,
+            desktopCpuOpacity: root.desktopCpuOpacity,
+            desktopGpuOpacity: root.desktopGpuOpacity,
+            desktopMemOpacity: root.desktopMemOpacity,
+            desktopDiskOpacity: root.desktopDiskOpacity,
+            desktopUptimeOpacity: root.desktopUptimeOpacity,
+            desktopTempOpacity: root.desktopTempOpacity,
+            desktopNetDownOpacity: root.desktopNetDownOpacity,
+            desktopNetUpOpacity: root.desktopNetUpOpacity,
             desktopWeatherOpacity: root.desktopWeatherOpacity,
             desktopQuickActionsOpacity: root.desktopQuickActionsOpacity,
 
@@ -772,7 +1004,7 @@ Item {
                     if (data.hasOwnProperty("weatherPopupRounded")) root.weatherPopupRounded = data.weatherPopupRounded
                     if (data.hasOwnProperty("calendarPopupRounded")) root.calendarPopupRounded = data.calendarPopupRounded
                     if (data.hasOwnProperty("notifPopupRounded")) root.notifPopupRounded = data.notifPopupRounded
-                    if (data.hasOwnProperty("rightbarPopupRounded")) root.rightbarPopupRounded = data.rightbarPopupRounded
+                    if (data.hasOwnProperty("barPopupRounded")) root.barPopupRounded = data.barPopupRounded
                     if (data.hasOwnProperty("barBorder")) root.barBorder = data.barBorder
                     if (data.hasOwnProperty("showSeparators")) root.showSeparators = data.showSeparators
                     if (data.hasOwnProperty("workspaceCount")) root.workspaceCount = data.workspaceCount
@@ -819,6 +1051,67 @@ Item {
                     if (data.hasOwnProperty("desktopStatsNetLabelStyle")) root.desktopStatsNetLabelStyle = data.desktopStatsNetLabelStyle
                     if (data.hasOwnProperty("desktopStatsScale")) root.desktopStatsScale = data.desktopStatsScale
 
+                    if (data.hasOwnProperty("statsDisplayMode")) root.statsDisplayMode = data.statsDisplayMode
+                    if (data.hasOwnProperty("individualStatsLayout")) root.individualStatsLayout = data.individualStatsLayout
+
+                    if (data.hasOwnProperty("desktopCpuShow")) root.desktopCpuShow = data.desktopCpuShow
+                    if (data.hasOwnProperty("desktopCpuX")) root.desktopCpuX = data.desktopCpuX
+                    if (data.hasOwnProperty("desktopCpuY")) root.desktopCpuY = data.desktopCpuY
+                    if (data.hasOwnProperty("desktopCpuRotation")) root.desktopCpuRotation = data.desktopCpuRotation
+                    if (data.hasOwnProperty("desktopCpuScale")) root.desktopCpuScale = data.desktopCpuScale
+                    if (data.hasOwnProperty("desktopCpuColorMode")) root.desktopCpuColorMode = data.desktopCpuColorMode
+
+                    if (data.hasOwnProperty("desktopGpuShow")) root.desktopGpuShow = data.desktopGpuShow
+                    if (data.hasOwnProperty("desktopGpuX")) root.desktopGpuX = data.desktopGpuX
+                    if (data.hasOwnProperty("desktopGpuY")) root.desktopGpuY = data.desktopGpuY
+                    if (data.hasOwnProperty("desktopGpuRotation")) root.desktopGpuRotation = data.desktopGpuRotation
+                    if (data.hasOwnProperty("desktopGpuScale")) root.desktopGpuScale = data.desktopGpuScale
+                    if (data.hasOwnProperty("desktopGpuColorMode")) root.desktopGpuColorMode = data.desktopGpuColorMode
+
+                    if (data.hasOwnProperty("desktopMemShow")) root.desktopMemShow = data.desktopMemShow
+                    if (data.hasOwnProperty("desktopMemX")) root.desktopMemX = data.desktopMemX
+                    if (data.hasOwnProperty("desktopMemY")) root.desktopMemY = data.desktopMemY
+                    if (data.hasOwnProperty("desktopMemRotation")) root.desktopMemRotation = data.desktopMemRotation
+                    if (data.hasOwnProperty("desktopMemScale")) root.desktopMemScale = data.desktopMemScale
+                    if (data.hasOwnProperty("desktopMemColorMode")) root.desktopMemColorMode = data.desktopMemColorMode
+
+                    if (data.hasOwnProperty("desktopDiskShow")) root.desktopDiskShow = data.desktopDiskShow
+                    if (data.hasOwnProperty("desktopDiskX")) root.desktopDiskX = data.desktopDiskX
+                    if (data.hasOwnProperty("desktopDiskY")) root.desktopDiskY = data.desktopDiskY
+                    if (data.hasOwnProperty("desktopDiskRotation")) root.desktopDiskRotation = data.desktopDiskRotation
+                    if (data.hasOwnProperty("desktopDiskScale")) root.desktopDiskScale = data.desktopDiskScale
+                    if (data.hasOwnProperty("desktopDiskColorMode")) root.desktopDiskColorMode = data.desktopDiskColorMode
+
+                    if (data.hasOwnProperty("desktopUptimeShow")) root.desktopUptimeShow = data.desktopUptimeShow
+                    if (data.hasOwnProperty("desktopUptimeX")) root.desktopUptimeX = data.desktopUptimeX
+                    if (data.hasOwnProperty("desktopUptimeY")) root.desktopUptimeY = data.desktopUptimeY
+                    if (data.hasOwnProperty("desktopUptimeRotation")) root.desktopUptimeRotation = data.desktopUptimeRotation
+                    if (data.hasOwnProperty("desktopUptimeScale")) root.desktopUptimeScale = data.desktopUptimeScale
+                    if (data.hasOwnProperty("desktopUptimeColorMode")) root.desktopUptimeColorMode = data.desktopUptimeColorMode
+
+                    if (data.hasOwnProperty("desktopTempShow")) root.desktopTempShow = data.desktopTempShow
+                    if (data.hasOwnProperty("desktopTempX")) root.desktopTempX = data.desktopTempX
+                    if (data.hasOwnProperty("desktopTempY")) root.desktopTempY = data.desktopTempY
+                    if (data.hasOwnProperty("desktopTempRotation")) root.desktopTempRotation = data.desktopTempRotation
+                    if (data.hasOwnProperty("desktopTempScale")) root.desktopTempScale = data.desktopTempScale
+                    if (data.hasOwnProperty("desktopTempColorMode")) root.desktopTempColorMode = data.desktopTempColorMode
+
+                    if (data.hasOwnProperty("desktopNetDownShow")) root.desktopNetDownShow = data.desktopNetDownShow
+                    if (data.hasOwnProperty("desktopNetDownX")) root.desktopNetDownX = data.desktopNetDownX
+                    if (data.hasOwnProperty("desktopNetDownY")) root.desktopNetDownY = data.desktopNetDownY
+                    if (data.hasOwnProperty("desktopNetDownRotation")) root.desktopNetDownRotation = data.desktopNetDownRotation
+                    if (data.hasOwnProperty("desktopNetDownScale")) root.desktopNetDownScale = data.desktopNetDownScale
+                    if (data.hasOwnProperty("desktopNetDownColorMode")) root.desktopNetDownColorMode = data.desktopNetDownColorMode
+                    if (data.hasOwnProperty("desktopNetDownLabel")) root.desktopNetDownLabel = data.desktopNetDownLabel
+
+                    if (data.hasOwnProperty("desktopNetUpShow")) root.desktopNetUpShow = data.desktopNetUpShow
+                    if (data.hasOwnProperty("desktopNetUpX")) root.desktopNetUpX = data.desktopNetUpX
+                    if (data.hasOwnProperty("desktopNetUpY")) root.desktopNetUpY = data.desktopNetUpY
+                    if (data.hasOwnProperty("desktopNetUpRotation")) root.desktopNetUpRotation = data.desktopNetUpRotation
+                    if (data.hasOwnProperty("desktopNetUpScale")) root.desktopNetUpScale = data.desktopNetUpScale
+                    if (data.hasOwnProperty("desktopNetUpColorMode")) root.desktopNetUpColorMode = data.desktopNetUpColorMode
+                    if (data.hasOwnProperty("desktopNetUpLabel")) root.desktopNetUpLabel = data.desktopNetUpLabel
+
                     if (data.hasOwnProperty("showScreenWeather")) root.showScreenWeather = data.showScreenWeather
                     if (data.hasOwnProperty("desktopWeatherX")) root.desktopWeatherX = data.desktopWeatherX
                     if (data.hasOwnProperty("desktopWeatherY")) root.desktopWeatherY = data.desktopWeatherY
@@ -862,6 +1155,14 @@ Item {
                     if (data.hasOwnProperty("desktopNowPlayingOpacity")) root.desktopNowPlayingOpacity = data.desktopNowPlayingOpacity
                     if (data.hasOwnProperty("desktopEqualizerOpacity")) root.desktopEqualizerOpacity = data.desktopEqualizerOpacity
                     if (data.hasOwnProperty("desktopStatsOpacity")) root.desktopStatsOpacity = data.desktopStatsOpacity
+                    if (data.hasOwnProperty("desktopCpuOpacity")) root.desktopCpuOpacity = data.desktopCpuOpacity
+                    if (data.hasOwnProperty("desktopGpuOpacity")) root.desktopGpuOpacity = data.desktopGpuOpacity
+                    if (data.hasOwnProperty("desktopMemOpacity")) root.desktopMemOpacity = data.desktopMemOpacity
+                    if (data.hasOwnProperty("desktopDiskOpacity")) root.desktopDiskOpacity = data.desktopDiskOpacity
+                    if (data.hasOwnProperty("desktopUptimeOpacity")) root.desktopUptimeOpacity = data.desktopUptimeOpacity
+                    if (data.hasOwnProperty("desktopTempOpacity")) root.desktopTempOpacity = data.desktopTempOpacity
+                    if (data.hasOwnProperty("desktopNetDownOpacity")) root.desktopNetDownOpacity = data.desktopNetDownOpacity
+                    if (data.hasOwnProperty("desktopNetUpOpacity")) root.desktopNetUpOpacity = data.desktopNetUpOpacity
                     if (data.hasOwnProperty("desktopWeatherOpacity")) root.desktopWeatherOpacity = data.desktopWeatherOpacity
                     if (data.hasOwnProperty("desktopQuickActionsOpacity")) root.desktopQuickActionsOpacity = data.desktopQuickActionsOpacity
 

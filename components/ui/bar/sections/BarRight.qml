@@ -3,7 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import qs.components.ui.bar.items
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.elements
 import qs.config
 import qs.services

@@ -5,7 +5,7 @@ import qs.components.widgets.systemtray
 import qs.components.elements
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 
 RowLayout {
     id: root

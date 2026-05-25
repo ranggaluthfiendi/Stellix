@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Services.UPower
 import qs.config
 import qs.components.elements
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 
 Rectangle {
     id: root
@@ -89,8 +89,8 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    RightBarState.closeAll()
-                    RightBarState.weatherDetailOpen = true
+                    BarPopupState.closeAll()
+                    BarPopupState.weatherDetailOpen = true
                 }
             }
         }
@@ -120,8 +120,8 @@ Rectangle {
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
-                    RightBarState.closeAll()
-                    RightBarState.notifPanelRequested = true
+                    BarPopupState.closeAll()
+                    BarPopupState.notifPanelRequested = true
                 }
             }
         }

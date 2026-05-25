@@ -53,7 +53,7 @@ Item {
     property bool dndEnabled: false
     property int calendarMonthOffset: 0
     property bool notifPanelRequested: false
-    // Updated by BatteryRightBar's NotificationServer
+    // Updated by BatteryBarPopup's NotificationServer
     property int notifCount: 0
 
     signal launcherToggleRequested()

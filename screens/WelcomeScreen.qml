@@ -5,7 +5,7 @@ import Quickshell.Wayland
 import qs.config
 import qs.services
 import qs.components.elements
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import "../components/widgets/applauncher/settings/components"
 
 PanelWindow {
@@ -26,7 +26,7 @@ PanelWindow {
     WlrLayershell.exclusiveZone: -1
 
     Connections {
-        target: RightBarState
+        target: BarPopupState
         function onWelcomeRequested() {
             root.active = true
             mainContent.currentIndex = 0
@@ -60,7 +60,7 @@ PanelWindow {
             onFinished: {
                 if (root.settingsData) root.settingsData.showWelcomeScreen = mainContent.localShowOnStartup
                 root.active = false
-                RightBarState.weatherDetailOpen = false
+                BarPopupState.weatherDetailOpen = false
             }
         }
 

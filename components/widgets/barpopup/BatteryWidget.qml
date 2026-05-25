@@ -93,6 +93,6 @@ Item {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton
-        onClicked: RightBarState.open = !RightBarState.open
+        onClicked: BarPopupState.open = !BarPopupState.open
     }
 }

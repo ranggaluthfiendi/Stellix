@@ -4,7 +4,7 @@ import QtQuick.Controls
 import Quickshell
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import "./settings"
 
 FloatingWindow {
@@ -16,7 +16,7 @@ FloatingWindow {
     property var colorService: null
     property var settingsData: null
 
-    visible: RightBarState.settingsOpen && (settingsData ? settingsData.settingsFloating : false)
+    visible: BarPopupState.settingsOpen && (settingsData ? settingsData.settingsFloating : false)
     title: "Stellix Control"
     
     implicitWidth: Theme.dp(940)
@@ -25,8 +25,8 @@ FloatingWindow {
     color: Theme.bgPrimary
 
     onVisibleChanged: {
-        if (!visible && RightBarState.settingsOpen && (settingsData ? settingsData.settingsFloating : false)) {
-            RightBarState.settingsOpen = false
+        if (!visible && BarPopupState.settingsOpen && (settingsData ? settingsData.settingsFloating : false)) {
+            BarPopupState.settingsOpen = false
         }
     }
 

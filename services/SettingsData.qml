@@ -15,6 +15,7 @@ Item {
     property bool connectivityExp: true
     property bool workspaceExp: true
     property bool systemExp: true
+    property bool metricsExp: true
 
     property bool showWelcomeScreen: true
     property bool settingsFloating: false
@@ -50,6 +51,7 @@ Item {
             connectivityExp: root.connectivityExp,
             workspaceExp: root.workspaceExp,
             systemExp: root.systemExp,
+            metricsExp: root.metricsExp,
             showWelcomeScreen: root.showWelcomeScreen,
             settingsFloating: root.settingsFloating,
             recentSearches: root.recentSearches
@@ -76,6 +78,7 @@ Item {
                     if (data.hasOwnProperty("connectivityExp")) root.connectivityExp = data.connectivityExp
                     if (data.hasOwnProperty("workspaceExp")) root.workspaceExp = data.workspaceExp
                     if (data.hasOwnProperty("systemExp")) root.systemExp = data.systemExp
+                    if (data.hasOwnProperty("metricsExp")) root.metricsExp = data.metricsExp
                     if (data.hasOwnProperty("showWelcomeScreen")) root.showWelcomeScreen = data.showWelcomeScreen
                     if (data.hasOwnProperty("settingsFloating")) root.settingsFloating = data.settingsFloating
                     if (data.hasOwnProperty("recentSearches") && Array.isArray(data.recentSearches)) root.recentSearches = data.recentSearches

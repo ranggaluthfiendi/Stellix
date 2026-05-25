@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.elements
 
 Item {
@@ -143,40 +143,40 @@ Item {
         acceptedButtons: Qt.LeftButton
 
         onClicked: {
-            if (RightBarState.weatherDetailOpen) {
-                RightBarState.weatherDetailOpen = false
+            if (BarPopupState.weatherDetailOpen) {
+                BarPopupState.weatherDetailOpen = false
             } else {
-                RightBarState.closeAll()
-                RightBarState.weatherDetailOpen = true
+                BarPopupState.closeAll()
+                BarPopupState.weatherDetailOpen = true
             }
         }
     }
 
     Connections {
-        target: RightBarState
+        target: BarPopupState
         function onOpenChanged() {
-            if (RightBarState.open) RightBarState.weatherDetailOpen = false
+            if (BarPopupState.open) BarPopupState.weatherDetailOpen = false
         }
         function onCalendarOpenChanged() {
-            if (RightBarState.calendarOpen) RightBarState.weatherDetailOpen = false
+            if (BarPopupState.calendarOpen) BarPopupState.weatherDetailOpen = false
         }
         function onWorkspaceSwitcherOpenChanged() {
-            if (RightBarState.workspaceSwitcherOpen) RightBarState.weatherDetailOpen = false
+            if (BarPopupState.workspaceSwitcherOpen) BarPopupState.weatherDetailOpen = false
         }
         function onSettingsOpenChanged() {
-            if (RightBarState.settingsOpen) RightBarState.weatherDetailOpen = false
+            if (BarPopupState.settingsOpen) BarPopupState.weatherDetailOpen = false
         }
         function onGuideOpenChanged() {
-            if (RightBarState.guideOpen) RightBarState.weatherDetailOpen = false
+            if (BarPopupState.guideOpen) BarPopupState.weatherDetailOpen = false
         }
         function onLauncherToggleRequested() {
-            RightBarState.weatherDetailOpen = false
+            BarPopupState.weatherDetailOpen = false
         }
     }
 
     PanelWindow {
         id: weatherPanel
-        visible: RightBarState.weatherDetailOpen
+        visible: BarPopupState.weatherDetailOpen
         color: "transparent"
 
         WlrLayershell.layer: WlrLayer.Overlay
@@ -283,8 +283,8 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    RightBarState.closeAll()
-                                    RightBarState.open = true
+                                    BarPopupState.closeAll()
+                                    BarPopupState.open = true
                                 }
                             }
                         }
@@ -307,8 +307,8 @@ Item {
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
                                 onClicked: {
-                                    RightBarState.closeAll()
-                                    RightBarState.notifPanelRequested = true
+                                    BarPopupState.closeAll()
+                                    BarPopupState.notifPanelRequested = true
                                 }
                             }
                         }
@@ -331,7 +331,7 @@ Item {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: RightBarState.weatherDetailOpen = false
+                                onClicked: BarPopupState.weatherDetailOpen = false
                             }
                         }
                     }

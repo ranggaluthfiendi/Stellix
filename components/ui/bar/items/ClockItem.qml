@@ -3,7 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.services
 import qs.config
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 
 Item {
     id: root
@@ -57,14 +57,14 @@ Item {
         acceptedButtons: Qt.LeftButton
 
         onClicked: {
-            RightBarState.calendarOpen = !RightBarState.calendarOpen
-            RightBarState.calendarMonthOffset = 0
+            BarPopupState.calendarOpen = !BarPopupState.calendarOpen
+            BarPopupState.calendarMonthOffset = 0
         }
     }
 
     PanelWindow {
         id: calendarPanel
-        visible: RightBarState.calendarOpen
+        visible: BarPopupState.calendarOpen
         color: "transparent"
 
         WlrLayershell.layer: WlrLayer.Overlay

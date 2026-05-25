@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.config
 import qs.services
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 
 Rectangle {
     id: appLauncherBtn
@@ -47,6 +47,6 @@ Rectangle {
         acceptedButtons: Qt.LeftButton
         onEntered: appLauncherBtn.hovered = true
         onExited: appLauncherBtn.hovered = false
-        onClicked: RightBarState.launcherToggleRequested()
+        onClicked: BarPopupState.launcherToggleRequested()
     }
 }

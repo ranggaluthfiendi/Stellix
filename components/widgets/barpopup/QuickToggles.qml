@@ -4,7 +4,7 @@ import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Networking
 import qs.config
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.elements
 
 Item {
@@ -114,11 +114,11 @@ Item {
                 MarqueeText {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
-                    text: root.connectedSsidName
+                    text: root.connectedSsidName || "WiFi"
                     textColor: wifiEnabled ? Theme.accent : Theme.textPrimary
-                    fontSize: Typography.sizeXXS || 10
+                    fontSize: 10
                     fontScale: s
-                    fontWeight: Typography.weightMedium || Font.Normal
+                    fontWeight: Font.Bold
                     scrolling: wifiEnabled
                     textPadding: 0
                 }
@@ -213,11 +213,11 @@ Item {
                 MarqueeText {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignVCenter
-                    text: root.btAdapterName
+                    text: root.btAdapterName || "Bluetooth"
                     textColor: btEnabled ? Theme.accent : Theme.textPrimary
-                    fontSize: Typography.sizeXXS || 10
+                    fontSize: 10
                     fontScale: s
-                    fontWeight: Typography.weightMedium || Font.Normal
+                    fontWeight: Font.Bold
                     scrolling: btEnabled
                     textPadding: 0
                 }

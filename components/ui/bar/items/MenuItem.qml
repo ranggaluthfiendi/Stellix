@@ -1,5 +1,5 @@
 import QtQuick
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.config
 
 BatteryWidget {

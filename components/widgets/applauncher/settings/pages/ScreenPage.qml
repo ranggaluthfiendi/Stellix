@@ -51,211 +51,193 @@ VabContentPage {
                 spacing: Theme.dp(12)
                 Layout.topMargin: Theme.dp(4)
 
+                // Display Mode Toggle
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Theme.dp(12)
-                    Text { text: "Layout Mode"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
+                    Text { text: "Display Mode"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
                     RowLayout {
                         spacing: Theme.dp(4)
                         Repeater {
-                            model: ["DEFAULT", "INLINE", "COMPACT"]
+                            model: ["COMBINED", "INDIVIDUAL"]
                             delegate: VabButton {
                                 text: modelData
-                                active: BarLayoutState.desktopStatsLayout === modelData.toLowerCase()
-                                onClicked: BarLayoutState.desktopStatsLayout = modelData.toLowerCase()
+                                active: BarLayoutState.statsDisplayMode === modelData.toLowerCase()
+                                onClicked: BarLayoutState.statsDisplayMode = modelData.toLowerCase()
                             }
                         }
                     }
                 }
 
-                RowLayout {
+                // --- Combined Mode Settings ---
+                ColumnLayout {
+                    visible: BarLayoutState.statsDisplayMode === "combined"
                     Layout.fillWidth: true
                     spacing: Theme.dp(12)
-                    Text { text: "Color Mode"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
-                    RowLayout {
-                        spacing: Theme.dp(4)
-                        Repeater {
-                            model: ["ACCENT", "WHITE", "BLACK"]
-                            delegate: VabButton {
-                                text: modelData
-                                active: BarLayoutState.desktopStatsColorMode === modelData.toLowerCase()
-                                onClicked: BarLayoutState.desktopStatsColorMode = modelData.toLowerCase()
-                            }
-                        }
-                    }
-                }
-
-                GridLayout {
-                    columns: 2
-                    Layout.fillWidth: true
-                    columnSpacing: Theme.dp(20)
-                    rowSpacing: Theme.dp(8)
 
                     RowLayout {
-                        spacing: Theme.dp(8)
                         Layout.fillWidth: true
-                        Text { text: "Show CPU"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
-                        VabSwitch {
-                            checked: BarLayoutState.desktopStatsShowCpu
-                            onToggled: BarLayoutState.desktopStatsShowCpu = !BarLayoutState.desktopStatsShowCpu
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.dp(8)
-                        Layout.fillWidth: true
-                        Text { text: "Show GPU"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
-                        VabSwitch {
-                            checked: BarLayoutState.desktopStatsShowGpu
-                            onToggled: BarLayoutState.desktopStatsShowGpu = !BarLayoutState.desktopStatsShowGpu
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.dp(8)
-                        Layout.fillWidth: true
-                        Text { text: "Show Memory"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
-                        VabSwitch {
-                            checked: BarLayoutState.desktopStatsShowMem
-                            onToggled: BarLayoutState.desktopStatsShowMem = !BarLayoutState.desktopStatsShowMem
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.dp(8)
-                        Layout.fillWidth: true
-                        Text { text: "Show Network"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
-                        VabSwitch {
-                            checked: BarLayoutState.desktopStatsShowNet
-                            onToggled: BarLayoutState.desktopStatsShowNet = !BarLayoutState.desktopStatsShowNet
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.dp(8)
-                        Layout.fillWidth: true
-                        Text { text: "Show Disk"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
-                        VabSwitch {
-                            checked: BarLayoutState.desktopStatsShowDisk
-                            onToggled: BarLayoutState.desktopStatsShowDisk = !BarLayoutState.desktopStatsShowDisk
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.dp(8)
-                        Layout.fillWidth: true
-                        Text { text: "Show Uptime"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
-                        VabSwitch {
-                            checked: BarLayoutState.desktopStatsShowUptime
-                            onToggled: BarLayoutState.desktopStatsShowUptime = !BarLayoutState.desktopStatsShowUptime
-                        }
-                    }
-
-                    RowLayout {
-                        spacing: Theme.dp(8)
-                        Layout.fillWidth: true
-                        Text { text: "Show Temperature"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
-                        VabSwitch {
-                            checked: BarLayoutState.desktopStatsShowTemp
-                            onToggled: BarLayoutState.desktopStatsShowTemp = !BarLayoutState.desktopStatsShowTemp
-                        }
-                    }
-                }
-
-                VabSectionHeader {
-                    title: "Network Labels"
-                    Layout.topMargin: Theme.dp(8)
-                }
-
-                Rectangle {
-                    id: netLabelContainer
-                    Layout.fillWidth: true
-                    height: netLabelRow.implicitHeight
-                    color: "transparent"
-
-                    property int _netLabelKey: 0
-
-                    Connections {
-                        target: BarLayoutState
-                        function onDesktopStatsNetDownLabelChanged() { netLabelContainer._netLabelKey++ }
-                        function onDesktopStatsNetUpLabelChanged() { netLabelContainer._netLabelKey++ }
-                    }
-
-                    RowLayout {
-                        id: netLabelRow
-                        anchors.fill: parent
                         spacing: Theme.dp(12)
-                        Text { text: "Preset"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
+                        Text { text: "Layout Mode"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
                         RowLayout {
                             spacing: Theme.dp(4)
                             Repeater {
-                                model: netLabelContainer._netLabelKey > 0 ? ["DOWN/UP", "DOWNLOAD/UPLOAD", "RX/TX", "IN/OUT"] : []
+                                model: ["DEFAULT", "INLINE", "COMPACT"]
                                 delegate: VabButton {
-                                    required property string modelData
                                     text: modelData
-                                    active: {
-                                        var preset = modelData
-                                        var down = preset.split("/")[0]
-                                        var up = preset.split("/")[1]
-                                        return BarLayoutState.desktopStatsNetDownLabel === down && BarLayoutState.desktopStatsNetUpLabel === up
-                                    }
-                                    onClicked: {
-                                        var preset = modelData
-                                        var parts = preset.split("/")
-                                        BarLayoutState.desktopStatsNetDownLabel = parts[0]
-                                        BarLayoutState.desktopStatsNetUpLabel = parts[1]
-                                        BarLayoutState.save()
+                                    active: BarLayoutState.desktopStatsLayout === modelData.toLowerCase()
+                                    onClicked: BarLayoutState.desktopStatsLayout = modelData.toLowerCase()
+                                }
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.dp(12)
+                        Text { text: "Color Mode"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
+                        RowLayout {
+                            spacing: Theme.dp(4)
+                            Repeater {
+                                model: ["ACCENT", "WHITE", "BLACK"]
+                                delegate: VabButton {
+                                    text: modelData
+                                    active: BarLayoutState.desktopStatsColorMode === modelData.toLowerCase()
+                                    onClicked: BarLayoutState.desktopStatsColorMode = modelData.toLowerCase()
+                                }
+                            }
+                        }
+                    }
+
+                    VabSectionHeader { title: "Visible Metrics" }
+
+                    GridLayout {
+                        columns: 2
+                        Layout.fillWidth: true
+                        columnSpacing: Theme.dp(20)
+                        rowSpacing: Theme.dp(8)
+
+                        Repeater {
+                            model: [
+                                { key: "Cpu", label: "Show CPU" },
+                                { key: "Gpu", label: "Show GPU" },
+                                { key: "Mem", label: "Show Memory" },
+                                { key: "Net", label: "Show Network" },
+                                { key: "Disk", label: "Show Disk" },
+                                { key: "Uptime", label: "Show Uptime" },
+                                { key: "Temp", label: "Show Temperature" }
+                            ]
+                            delegate: RowLayout {
+                                spacing: Theme.dp(8)
+                                Layout.fillWidth: true
+                                Text { text: modelData.label; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
+                                VabSwitch {
+                                    checked: BarLayoutState["desktopStatsShow" + modelData.key]
+                                    onToggled: BarLayoutState["desktopStatsShow" + modelData.key] = !BarLayoutState["desktopStatsShow" + modelData.key]
+                                }
+                            }
+                        }
+                    }
+
+                    VabSectionHeader { title: "Network Labels"; Layout.topMargin: Theme.dp(8) }
+
+                    Rectangle {
+                        id: netLabelContainer
+                        Layout.fillWidth: true
+                        height: netLabelRow.implicitHeight
+                        color: "transparent"
+
+                        property int _netLabelKey: 0
+
+                        Connections {
+                            target: BarLayoutState
+                            function onDesktopStatsNetDownLabelChanged() { netLabelContainer._netLabelKey++ }
+                            function onDesktopStatsNetUpLabelChanged() { netLabelContainer._netLabelKey++ }
+                        }
+
+                        RowLayout {
+                            id: netLabelRow
+                            anchors.fill: parent
+                            spacing: Theme.dp(12)
+                            Text { text: "Preset"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
+                            RowLayout {
+                                spacing: Theme.dp(4)
+                                Repeater {
+                                    model: netLabelContainer._netLabelKey > 0 ? ["DOWN/UP", "DOWNLOAD/UPLOAD", "RX/TX", "IN/OUT"] : []
+                                    delegate: VabButton {
+                                        required property string modelData
+                                        text: modelData
+                                        active: {
+                                            var preset = modelData
+                                            var down = preset.split("/")[0]
+                                            var up = preset.split("/")[1]
+                                            return BarLayoutState.desktopStatsNetDownLabel === down && BarLayoutState.desktopStatsNetUpLabel === up
+                                        }
+                                        onClicked: {
+                                            var preset = modelData
+                                            var parts = preset.split("/")
+                                            BarLayoutState.desktopStatsNetDownLabel = parts[0]
+                                            BarLayoutState.desktopStatsNetUpLabel = parts[1]
+                                            BarLayoutState.save()
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.dp(12)
+                        Text { text: "Widget Size"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
+                        VabSlider {
+                            Layout.fillWidth: true
+                            from: 0.5; to: 2.0; value: BarLayoutState.desktopStatsScale
+                            onValueChanged: BarLayoutState.desktopStatsScale = value
+                        }
+                        Text { text: Math.round(BarLayoutState.desktopStatsScale * 100) + "%"; color: Theme.accent; font.pixelSize: Theme.dp(10); font.weight: Font.Bold; Layout.preferredWidth: Theme.dp(36); horizontalAlignment: Text.AlignRight }
+                        VabButton { text: "Reset"; onClicked: BarLayoutState.desktopStatsScale = 1.0 }
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text { text: "Widget Position"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
+                        VabButton { text: "Reset Position"; onClicked: { BarLayoutState.desktopStatsX = 40; BarLayoutState.desktopStatsY = 800 } }
+                    }
                 }
 
-                RowLayout {
+                // --- Individual Mode Settings ---
+                ColumnLayout {
+                    visible: BarLayoutState.statsDisplayMode === "individual"
                     Layout.fillWidth: true
                     spacing: Theme.dp(12)
-                    Text {
-                        text: "Widget Size"
-                        color: Theme.textPrimary
-                        font.pixelSize: Theme.dp(10)
-                        Layout.preferredWidth: Theme.dp(100)
-                    }
-                    VabSlider {
-                        Layout.fillWidth: true
-                        from: 0.5
-                        to: 2.0
-                        value: BarLayoutState.desktopStatsScale
-                        onValueChanged: BarLayoutState.desktopStatsScale = value
-                    }
-                    Text {
-                        text: Math.round(BarLayoutState.desktopStatsScale * 100) + "%"
-                        color: Theme.accent
-                        font.pixelSize: Theme.dp(10)
-                        font.weight: Font.Bold
-                        Layout.preferredWidth: Theme.dp(36)
-                        horizontalAlignment: Text.AlignRight
-                    }
-                    VabButton {
-                        text: "Reset"
-                        onClicked: BarLayoutState.desktopStatsScale = 1.0
-                    }
-                }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    Text {
-                        text: "Widget Position"
-                        color: Theme.textPrimary
-                        font.pixelSize: Theme.dp(10)
+                    RowLayout {
                         Layout.fillWidth: true
-                    }
-                    VabButton {
-                        text: "Reset Position"
-                        onClicked: {
-                            BarLayoutState.desktopStatsX = 40
-                            BarLayoutState.desktopStatsY = 800
+                        spacing: Theme.dp(12)
+                        Text { text: "Layout Preset"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
+                        RowLayout {
+                            spacing: Theme.dp(4)
+                            Repeater {
+                                model: ["ROW", "GRID", "SCATTERED"]
+                                delegate: VabButton {
+                                    text: modelData
+                                    active: BarLayoutState.individualStatsLayout === modelData.toLowerCase()
+                                    onClicked: BarLayoutState.individualStatsLayout = modelData.toLowerCase()
+                                }
+                            }
                         }
+                    }
+
+                    VabSectionHeader { title: "Individual Metric Pages" }
+
+                    Text {
+                        text: "Each metric has its own dedicated settings page with controls for visibility, color, size, and position. Navigate to individual metric pages from the settings sidebar."
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.dp(9)
+                        font.italic: true
+                        wrapMode: Text.WordWrap
+                        Layout.fillWidth: true
                     }
                 }
             }
@@ -922,8 +904,8 @@ VabContentPage {
                         Layout.fillWidth: true
                         Text { text: "Right Bar Popup"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
                         VabSwitch {
-                            checked: BarLayoutState.rightbarPopupRounded
-                            onToggled: BarLayoutState.rightbarPopupRounded = !BarLayoutState.rightbarPopupRounded
+                            checked: BarLayoutState.barPopupRounded
+                            onToggled: BarLayoutState.barPopupRounded = !BarLayoutState.barPopupRounded
                         }
                     }
                 }

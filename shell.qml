@@ -5,8 +5,8 @@ import QtQuick
 import qs.screens
 import qs.services
 import qs.components.widgets.systemtray
-import qs.components.widgets.rightbar
-import qs.components.widgets.rightbar.services
+import qs.components.widgets.barpopup
+import qs.components.widgets.barpopup.services
 import qs.components.widgets.workspaceswitcher
 import qs.components.widgets.applauncher
 import qs.modules.bar
@@ -80,7 +80,7 @@ ShellRoot {
     Connections {
         target: brightnessService
         function onCurrentValueChanged() {
-            RightBarState.showIndicator("brightness", brightnessService.percentage / 100, false)
+            BarPopupState.showIndicator("brightness", brightnessService.percentage / 100, false)
         }
     }
 
@@ -88,14 +88,14 @@ ShellRoot {
         target: (pwService.sink && pwService.sink.audio) ? pwService.sink.audio : null
         ignoreUnknownSignals: true
         function onVolumeChanged() {
-            RightBarState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+            BarPopupState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
         }
         function onMutedChanged() {
-            RightBarState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+            BarPopupState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
         }
     }
 
-    // Since I don't have a direct reference to brightnessSvc here (it's in BatteryRightBar),
+    // Since I don't have a direct reference to brightnessSvc here (it's in BatteryBarPopup),
     // I will rely on the IPC or move brightnessSvc to shell.qml level.
 
     SettingsData {
@@ -117,14 +117,14 @@ ShellRoot {
     }
 
     Connections {
-        target: RightBarState
+        target: BarPopupState
         function onLauncherToggleRequested() {
-            if (RightBarState.launcherOpen) {
-                RightBarState.launcherOpen = false
+            if (BarPopupState.launcherOpen) {
+                BarPopupState.launcherOpen = false
                 launcher.close()
             } else {
-                RightBarState.closeAll()
-                RightBarState.launcherOpen = true
+                BarPopupState.closeAll()
+                BarPopupState.launcherOpen = true
                 launcher.open()
             }
         }
@@ -158,11 +158,11 @@ ShellRoot {
         description: "Open system settings"
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.settingsOpen) {
-                    RightBarState.settingsOpen = false
+                if (BarPopupState.settingsOpen) {
+                    BarPopupState.settingsOpen = false
                 } else {
-                    RightBarState.closeAll()
-                    RightBarState.settingsOpen = true
+                    BarPopupState.closeAll()
+                    BarPopupState.settingsOpen = true
                 }
             }
         }
@@ -175,11 +175,11 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.guideOpen) {
-                    RightBarState.guideOpen = false
+                if (BarPopupState.guideOpen) {
+                    BarPopupState.guideOpen = false
                 } else {
-                    RightBarState.closeAll()
-                    RightBarState.guideOpen = true
+                    BarPopupState.closeAll()
+                    BarPopupState.guideOpen = true
                 }
             }
         }
@@ -192,12 +192,12 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.workspaceSwitcherOpen) {
-                    RightBarState.workspaceSwitcherOpen = false
+                if (BarPopupState.workspaceSwitcherOpen) {
+                    BarPopupState.workspaceSwitcherOpen = false
                 } else {
-                    RightBarState.closeAll()
-                    RightBarState.workspaceSwitcherOpen = true
-                    RightBarState.notifPanelRequested = false
+                    BarPopupState.closeAll()
+                    BarPopupState.workspaceSwitcherOpen = true
+                    BarPopupState.notifPanelRequested = false
                 }
             }
         }
@@ -210,15 +210,15 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.workspaceSwitcherOpen)
-                    RightBarState.workspaceSwitcherOpen = false
-                if (RightBarState.launcherOpen && appLauncher.viewMode === 0) {
-                    RightBarState.launcherOpen = false
+                if (BarPopupState.workspaceSwitcherOpen)
+                    BarPopupState.workspaceSwitcherOpen = false
+                if (BarPopupState.launcherOpen && appLauncher.viewMode === 0) {
+                    BarPopupState.launcherOpen = false
                     launcher.close()
                 } else {
-                    RightBarState.closeAll()
+                    BarPopupState.closeAll()
                     appLauncher.viewMode = 0
-                    RightBarState.launcherOpen = true
+                    BarPopupState.launcherOpen = true
                     launcher.open()
                 }
             }
@@ -232,13 +232,13 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.launcherOpen && appLauncher.viewMode === 8) {
-                    RightBarState.launcherOpen = false
+                if (BarPopupState.launcherOpen && appLauncher.viewMode === 8) {
+                    BarPopupState.launcherOpen = false
                     launcher.close()
                 } else {
-                    RightBarState.closeAll()
+                    BarPopupState.closeAll()
                     appLauncher.viewMode = 8
-                    RightBarState.launcherOpen = true
+                    BarPopupState.launcherOpen = true
                     launcher.open()
                 }
             }
@@ -252,15 +252,15 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.launcherOpen) {
-                    RightBarState.launcherOpen = false
+                if (BarPopupState.launcherOpen) {
+                    BarPopupState.launcherOpen = false
                     launcher.close()
                 }
                 var currentWs = Hyprland.focusedWorkspace.id
                 var nextWs = currentWs + 1
                 Hyprland.dispatch("workspace " + nextWs)
-                RightBarState.workspaceSwitcherOpen = true
-                RightBarState.notifPanelRequested = false
+                BarPopupState.workspaceSwitcherOpen = true
+                BarPopupState.notifPanelRequested = false
                 wsFlashTimer.restart()
             }
         }
@@ -273,15 +273,15 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.launcherOpen) {
-                    RightBarState.launcherOpen = false
+                if (BarPopupState.launcherOpen) {
+                    BarPopupState.launcherOpen = false
                     launcher.close()
                 }
                 var currentWs = Hyprland.focusedWorkspace.id
                 var prevWs = Math.max(1, currentWs - 1)
                 Hyprland.dispatch("workspace " + prevWs)
-                RightBarState.workspaceSwitcherOpen = true
-                RightBarState.notifPanelRequested = false
+                BarPopupState.workspaceSwitcherOpen = true
+                BarPopupState.notifPanelRequested = false
                 wsFlashTimer.restart()
             }
         }
@@ -294,11 +294,11 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.open) {
-                    RightBarState.open = false
+                if (BarPopupState.open) {
+                    BarPopupState.open = false
                 } else {
-                    RightBarState.closeAll()
-                    RightBarState.open = true
+                    BarPopupState.closeAll()
+                    BarPopupState.open = true
                 }
             }
         }
@@ -311,11 +311,11 @@ ShellRoot {
 
         onPressedChanged: {
             if (pressed) {
-                if (RightBarState.weatherDetailOpen) {
-                    RightBarState.weatherDetailOpen = false
+                if (BarPopupState.weatherDetailOpen) {
+                    BarPopupState.weatherDetailOpen = false
                 } else {
-                    RightBarState.closeAll()
-                    RightBarState.weatherDetailOpen = true
+                    BarPopupState.closeAll()
+                    BarPopupState.weatherDetailOpen = true
                 }
             }
         }
@@ -326,17 +326,17 @@ ShellRoot {
         interval: 600
         repeat: false
         onTriggered: {
-            RightBarState.workspaceSwitcherOpen = false
+            BarPopupState.workspaceSwitcherOpen = false
         }
     }
 
     WorkspaceSwitcher {
         id: wsSwitcher
-        visible: RightBarState.workspaceSwitcherOpen
+        visible: BarPopupState.workspaceSwitcherOpen
         
         onCloseRequested: {
-            RightBarState.workspaceSwitcherOpen = false
-            RightBarState.weatherDetailOpen = false
+            BarPopupState.workspaceSwitcherOpen = false
+            BarPopupState.weatherDetailOpen = false
         }
     }
 
@@ -344,7 +344,7 @@ ShellRoot {
     IpcHandler {
         target: "indicator"
         function show(type: string, value: real, muted: bool): void {
-            RightBarState.showIndicator(type, value, muted)
+            BarPopupState.showIndicator(type, value, muted)
         }
     }
 }

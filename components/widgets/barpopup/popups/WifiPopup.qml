@@ -4,7 +4,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Networking
 import qs.config
-import qs.components.widgets.rightbar
+import qs.components.widgets.barpopup
 import qs.components.elements
 import Quickshell.Wayland
 
