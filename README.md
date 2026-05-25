@@ -1,19 +1,19 @@
-# ✨ Stellix Shell
+# Stellix Shell
 
 A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic theming, deep system integration, and a refined glass-dark aesthetic. 🌑
 
 ## Preview
 
-| Bar | Dashboard | Widgets |
+| 1 | 2 | 3|
 |:---:|:---------:|:-------:|
 | <img width="500" alt="bar" src="https://github.com/user-attachments/assets/e48a06a8-0465-41f3-bf20-880e29eda411" /> | <img width="500" alt="dashboard" src="https://github.com/user-attachments/assets/fdccc76e-ef95-4072-a9d5-75975f1b9273" /> | <img width="500" alt="widgets" src="https://github.com/user-attachments/assets/dd27722a-ed61-4c9a-bb0c-b31cd51ec4ef" /> |
 
 <details>
-<summary>Other</summary>
+<summary>Other Images</summary>
 
-| | | |
+| | Others | |
 |:---:|:---:|:---:|
-| <img width="500" alt="other" src="https://github.com/user-attachments/assets/8e67f468-2f62-488a-9e01-22cab6c81dd5" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/3f4d09b9-c4e2-4812-bc0b-a5989fa35b8d" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/a44562ce-9e81-4c62-b3e6-5f931946ad54" /> |
+| <img width="500" alt="other" src="https://github.com/user-attachments/assets/8e67f468-2f62-488a-9e01-22cab6c81dd5" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/3f4d09b9-c4e2-4812-bc0b-a5989fa35b8d" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/2d8270d7-6f1c-487e-bc7a-76a69cba81c7" /> |
 
 </details>
 
@@ -39,6 +39,22 @@ xdg-desktop-portal-hyprland · gvfs · udisks2 · polkit · gnome-keyring
 ## Install
 
 ```bash
+# Install dependencies
+yay -S quickshell-git hyprland hyprpaper qt6-base qt6-declarative qt6-svg \
+  networkmanager bluez bluez-utils pipewire pipewire-pulse playerctl \
+  matugen awww brightnessctl upower \
+  wl-clipboard cliphist grim slurp hyprshot \
+  xdg-desktop-portal-hyprland gvfs udisks2 polkit gnome-keyring
+
+# Install apps
+yay -S kitty fish nautilus brave-bin visual-studio-code-bin \
+  discord ferdium-bin btop cava ranger obs-studio
+
+# Enable services
+sudo systemctl enable --now NetworkManager bluetooth
+systemctl --user enable --now pipewire pipewire-pulse wireplumber
+
+# Clone config
 git clone https://github.com/YourUsername/quickshell-stellix.git ~/.config/quickshell
 qs
 ```
