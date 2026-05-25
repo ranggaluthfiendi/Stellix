@@ -1,3 +1,4 @@
+import qs.components.utils
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -5,7 +6,10 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Notifications
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 import qs.components.widgets.barpopup
 import qs.components.elements
 import Quickshell.Wayland

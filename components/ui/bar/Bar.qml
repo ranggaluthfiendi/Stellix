@@ -6,7 +6,10 @@ import Quickshell.Hyprland
 import qs.components.ui.bar.sections
 import qs.components.widgets.barpopup
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 
 Scope {
     id: root

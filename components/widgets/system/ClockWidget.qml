@@ -1,6 +1,10 @@
+import qs.components.utils
 import QtQuick
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 
 Item {
     id: root

@@ -6,7 +6,10 @@ import qs.components.elements
 import qs.components.widgets.media.nowplaying
 import qs.components.widgets.system
 import qs.components.widgets.barpopup
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 
 Scope {
     Variants {

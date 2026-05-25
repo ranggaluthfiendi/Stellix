@@ -1,4 +1,5 @@
 pragma Singleton
+import qs.core.settings
 import QtQuick
 import qs.components.widgets.barpopup
 

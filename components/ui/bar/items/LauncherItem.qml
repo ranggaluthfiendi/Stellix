@@ -1,7 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 import qs.components.widgets.barpopup
 
 Rectangle {

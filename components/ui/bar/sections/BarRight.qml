@@ -6,7 +6,10 @@ import qs.components.ui.bar.items
 import qs.components.widgets.barpopup
 import qs.components.elements
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 
 RowLayout {
     id: root

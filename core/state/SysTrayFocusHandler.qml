@@ -1,6 +1,9 @@
 import QtQuick
 import Quickshell.Hyprland
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 
 Item {
     Connections {

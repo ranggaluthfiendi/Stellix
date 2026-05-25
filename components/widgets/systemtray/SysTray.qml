@@ -7,7 +7,10 @@ import Quickshell.Services.SystemTray
 import qs.components.widgets.systemtray
 import qs.components.elements
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 
 Item {
     id: root

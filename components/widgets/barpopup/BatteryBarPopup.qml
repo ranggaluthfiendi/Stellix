@@ -5,10 +5,13 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.UPower
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 import qs.components.widgets.barpopup
 import qs.components.widgets.barpopup.popups
-import qs.components.widgets.barpopup.services
+import qs.core.services
 import qs.components.widgets.barpopup.sections
 import qs.components.elements
 

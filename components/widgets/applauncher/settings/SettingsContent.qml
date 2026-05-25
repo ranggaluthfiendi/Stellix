@@ -7,9 +7,12 @@ import Quickshell.Io
 import Quickshell.Networking
 import Quickshell.Bluetooth
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 import qs.components.widgets.barpopup
-import qs.components.widgets.barpopup.services
+import qs.core.services
 import qs.components.elements
 
 // Import modular pages and components

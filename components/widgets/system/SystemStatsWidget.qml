@@ -1,8 +1,12 @@
+import qs.components.utils
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 import qs.components.elements
 import "metrics"
 

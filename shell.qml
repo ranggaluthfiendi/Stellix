@@ -3,13 +3,15 @@ import Quickshell.Hyprland
 import Quickshell.Io
 import QtQuick
 import qs.screens
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 import qs.components.widgets.systemtray
 import qs.components.widgets.barpopup
-import qs.components.widgets.barpopup.services
 import qs.components.widgets.workspaceswitcher
 import qs.components.widgets.applauncher
-import qs.modules.bar
+import qs.components.ui.bar
 
 ShellRoot {
     Bar {}

@@ -4,7 +4,10 @@ import QtQuick.Controls
 import Quickshell
 import Quickshell.Bluetooth
 import qs.config
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 import "../components"
 
 VabContentPage {

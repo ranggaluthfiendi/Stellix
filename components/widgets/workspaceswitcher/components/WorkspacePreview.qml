@@ -1,3 +1,4 @@
+import qs.components.utils
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland

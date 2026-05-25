@@ -1,3 +1,4 @@
+import qs.components.utils
 import QtQuick
 import QtQuick.Layouts
 import Quickshell

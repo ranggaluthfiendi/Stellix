@@ -1,9 +1,13 @@
+import qs.components.utils
 import QtQuick
 import Quickshell
 import qs.config
 import qs.components.elements
 import qs.components.widgets.media.nowplaying
-import qs.services
+import qs.core.services
+import qs.core.state
+import qs.core.time
+import qs.core.settings
 
 Item {
     id: root
