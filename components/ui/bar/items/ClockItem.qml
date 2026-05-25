@@ -18,7 +18,7 @@ Item {
     readonly property real screenW: BarLayoutState.barScreenWidth > 0 ? BarLayoutState.barScreenWidth : Screen.width
     readonly property real centerMargin: Math.max(0, (screenW - popupW) / 2)
 
-    readonly property real popupRadius: BarLayoutState.calendarPopupRounded ? Theme.radiusMedium : 0
+    readonly property real popupRadius: 0
 
     readonly property string formattedTime: {
         var fmt = BarLayoutState.clock24Hour ? "HH" : "hh"

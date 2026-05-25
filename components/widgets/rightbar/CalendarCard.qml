@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.config
+import qs.services
 import qs.components.widgets.rightbar
 import qs.components.elements
 
@@ -29,13 +30,15 @@ Item {
         return names[now.getMonth()]
     }
 
-    readonly property real headerH: Theme.dp(64)
-    readonly property real weekdayH: Theme.dp(24)
-    readonly property real gridH: Theme.dp(210)
-    readonly property real footerH: Theme.dp(36)
-    readonly property real totalH: headerH + weekdayH + gridH + footerH
+    readonly property real headerH: Theme.dp(48)
+    readonly property real navH: Theme.dp(30)
+    readonly property real weekdayH: Theme.dp(22)
+    readonly property real gridH: Theme.dp(156)
+    readonly property real footerH: Theme.dp(44)
+    readonly property real totalH: headerH + navH + weekdayH + gridH + footerH + Theme.dp(3) // 3 separators
 
     implicitHeight: totalH
+    implicitWidth: Theme.dp(360)
 
     Timer {
         interval: 1000
@@ -85,128 +88,160 @@ Item {
         border.color: Theme.border
         radius: 0
 
-        Column {
+        ColumnLayout {
             anchors.fill: parent
             spacing: 0
 
             // ── Header: Month/Year + Nav ──
-            Item {
-                width: parent.width
-                height: root.headerH
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.headerH
+                color: "transparent"
 
                 RowLayout {
                     anchors.fill: parent
                     anchors.margins: Theme.dp(12)
-                    spacing: Theme.dp(8)
+                    spacing: Theme.dp(12)
 
-                    // Month/Year
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: Theme.dp(2)
-
-                        Text {
-                            text: root.monthNameFull + " " + root.now.getFullYear()
-                            color: Theme.textPrimary
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round(16 * s)
-                            font.weight: Font.Bold
-                        }
-
-                        Text {
-                            text: root.dayName + ", " + root.now.getDate() + " " + root.monthNameFull
-                            color: Theme.textMuted
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round(9 * s)
-                        }
-                    }
-
-                    // Time
+                    // Time on the Left
                     Text {
                         text: {
                             var h = root.now.getHours()
                             var m = root.now.getMinutes()
                             return (h < 10 ? "0" : "") + h + ":" + (m < 10 ? "0" : "") + m
                         }
-                        color: Theme.accent
+                        color: Theme.textPrimary
                         font.family: Typography.fontFamily
-                        font.pixelSize: Math.round(22 * s)
+                        font.pixelSize: Math.round(20 * s)
                         font.weight: Font.Bold
+                        Layout.alignment: Qt.AlignVCenter
                     }
 
-                    // Nav buttons
-                    RowLayout {
-                        spacing: Theme.dp(4)
+                    Item { Layout.fillWidth: true }
 
-                        NavButton {
-                            iconSource: chevronsLeftComp
-                            onClicked: RightBarState.calendarMonthOffset -= 12
-                        }
+                    // Consolidated Date on the Right
+                    ColumnLayout {
+                        spacing: 0
+                        Layout.alignment: Qt.AlignVCenter | Qt.AlignRight
 
-                        NavButton {
-                            iconSource: chevronLeftComp
-                            onClicked: RightBarState.prevMonth()
-                        }
-
-                        NavButton {
-                            iconSource: chevronRightComp
-                            onClicked: RightBarState.nextMonth()
-                        }
-
-                        NavButton {
-                            iconSource: chevronsRightComp
-                            onClicked: RightBarState.calendarMonthOffset += 12
+                        Text {
+                            text: root.dayName + ", " + root.now.getDate() + " " + root.monthNameFull + " " + root.now.getFullYear()
+                            color: Theme.accent
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round(11 * s)
+                            font.weight: Font.Bold
+                            horizontalAlignment: Text.AlignRight
                         }
                     }
                 }
             }
 
+            // Navigation Controls Row
             Rectangle {
-                width: parent.width
-                height: Theme.dp(1)
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.navH
+                color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.04)
+                
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: Theme.dp(10)
+                    anchors.rightMargin: Theme.dp(10)
+                    spacing: Theme.dp(4)
+
+                    NavButton {
+                        iconSource: chevronsLeftComp
+                        onClicked: RightBarState.calendarMonthOffset -= 12
+                    }
+
+                    NavButton {
+                        iconSource: chevronLeftComp
+                        onClicked: RightBarState.prevMonth()
+                    }
+
+                    Item { Layout.fillWidth: true }
+                    
+                    Rectangle {
+                        Layout.preferredHeight: Theme.dp(22)
+                        Layout.preferredWidth: Theme.dp(64)
+                        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
+                        radius: 0
+                        visible: RightBarState.calendarMonthOffset !== 0
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: "Today"
+                            color: Theme.accent
+                            font.pixelSize: Theme.dp(9)
+                            font.weight: Font.Bold
+                        }
+                        
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: RightBarState.calendarMonthOffset = 0
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    NavButton {
+                        iconSource: chevronRightComp
+                        onClicked: RightBarState.nextMonth()
+                    }
+
+                    NavButton {
+                        iconSource: chevronsRightComp
+                        onClicked: RightBarState.calendarMonthOffset += 12
+                    }
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
                 color: Theme.border
+                opacity: 0.5
             }
 
             // ── Weekday headers ──
-            Item {
-                width: parent.width
-                height: root.weekdayH
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.weekdayH
+                color: "transparent"
 
-                Repeater {
-                    model: ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]
-                    delegate: Text {
-                        required property var modelData
-                        required property int index
-                        x: index * (parent.width / 7)
-                        width: parent.width / 7
-                        height: parent.height
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                        text: modelData
-                        color: index >= 5 ? Theme.danger : Theme.textMuted
-                        font.family: Typography.fontFamily
-                        font.pixelSize: Math.round(9 * s)
-                        font.weight: Font.Medium
+                Row {
+                    anchors.fill: parent
+                    Repeater {
+                        model: ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"]
+                        delegate: Text {
+                            required property var modelData
+                            required property int index
+                            width: parent.width / 7
+                            height: parent.height
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            text: modelData
+                            color: index >= 5 ? Theme.danger : Theme.textMuted
+                            font.family: Typography.fontFamily
+                            font.pixelSize: Math.round(9 * s)
+                            font.weight: Font.Bold
+                            opacity: 0.8
+                        }
                     }
                 }
-            }
-
-            Rectangle {
-                width: parent.width
-                height: Theme.dp(1)
-                color: Theme.border
             }
 
             // ── Calendar grid ──
             Item {
-                width: parent.width
-                height: root.gridH
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.gridH
 
                 readonly property real cellW: width / 7
                 readonly property real cellH: height / 6
 
                 Repeater {
                     model: 42
-                    delegate: Rectangle {
+                    delegate: Item {
                         required property int index
                         readonly property int row: Math.floor(index / 7)
                         readonly property int col: index % 7
@@ -223,42 +258,48 @@ Item {
                         y: row * parent.cellH
                         width: parent.cellW
                         height: parent.cellH
-                        color: {
-                            if (isToday) return Theme.accent
-                            if (cellMouse.containsMouse && inMonth) return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08)
-                            if (pinned) return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
-                            return "transparent"
-                        }
-                        radius: 0
 
-                        Behavior on color {
-                            ColorAnimation { duration: 120 }
-                        }
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: info.d
-                            color: {
-                                if (!inMonth) return Qt.rgba(Theme.textMuted.r, Theme.textMuted.g, Theme.textMuted.b, 0.4)
-                                if (isToday) return Theme.bgPrimary
-                                if (pinned) return Theme.accent
-                                return Theme.textPrimary
-                            }
-                            font.family: Typography.fontFamily
-                            font.pixelSize: Math.round(11 * s)
-                            font.weight: isToday ? Font.Bold : Font.Normal
-                        }
-
-                        // Pin indicator
                         Rectangle {
-                            anchors.top: parent.top
-                            anchors.right: parent.right
-                            anchors.margins: Theme.dp(2)
-                            width: Theme.dp(4)
-                            height: Theme.dp(4)
-                            radius: width / 2
-                            color: Theme.warning
-                            visible: pinned && !isToday
+                            anchors.centerIn: parent
+                            width: Math.min(parent.width, parent.height) - Theme.dp(4)
+                            height: width
+                            radius: 0
+                            color: {
+                                if (isToday) return Theme.accent
+                                if (cellMouse.containsMouse && inMonth) return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1)
+                                if (pinned) return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
+                                return "transparent"
+                            }
+                            
+                            border.width: pinned && !isToday ? 1 : 0
+                            border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.5)
+
+                            Behavior on color { ColorAnimation { duration: 120 } }
+
+                            Text {
+                                anchors.centerIn: parent
+                                text: info.d
+                                color: {
+                                    if (!inMonth) return Qt.rgba(Theme.textMuted.r, Theme.textMuted.g, Theme.textMuted.b, 0.4)
+                                    if (isToday) return Theme.bgPrimary
+                                    if (pinned) return Theme.accent
+                                    return Theme.textPrimary
+                                }
+                                font.family: Typography.fontFamily
+                                font.pixelSize: Math.round(11 * s)
+                                font.weight: (isToday || pinned) ? Font.Bold : Font.Normal
+                            }
+
+                            Rectangle {
+                                anchors.bottom: parent.bottom
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.bottomMargin: Theme.dp(4)
+                                width: Theme.dp(3)
+                                height: Theme.dp(3)
+                                radius: 0
+                                color: isToday ? Theme.bgPrimary : Theme.accent
+                                visible: pinned
+                            }
                         }
 
                         MouseArea {
@@ -266,32 +307,33 @@ Item {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             hoverEnabled: true
-                            onClicked: RightBarState.togglePinnedDate(parent.key)
+                            onClicked: RightBarState.togglePinnedDate(key)
                         }
                     }
                 }
             }
 
             Rectangle {
-                width: parent.width
-                height: Theme.dp(1)
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
                 color: Theme.border
+                opacity: 0.5
             }
 
             // ── Footer ──
-            Item {
-                width: parent.width
-                height: root.footerH
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.footerH
+                color: "transparent"
 
                 RowLayout {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: Theme.dp(10)
+                    anchors.fill: parent
+                    anchors.leftMargin: Theme.dp(12)
+                    anchors.rightMargin: Theme.dp(12)
                     spacing: Theme.dp(8)
 
                     Text {
-                        text: root.pinnedCountInShownMonth() > 0 ? (root.pinnedCountInShownMonth() + " pinned this month") : "Click a date to pin/unpin"
+                        text: root.pinnedCountInShownMonth() > 0 ? (root.pinnedCountInShownMonth() + " pinned this month") : "Click a date to pin"
                         color: Theme.textMuted
                         font.family: Typography.fontFamily
                         font.pixelSize: Math.round(9 * s)
@@ -308,11 +350,11 @@ Item {
                     }
 
                     HoldButton {
-                        visible: RightBarState.pinnedDates.length > root.pinnedCountInShownMonth()
+                        visible: RightBarState.pinnedDates.length > 0
                         s: root.s
                         buttonLabel: "Clear All"
                         danger: true
-                        requireHold: false
+                        requireHold: true
                         onExecute: RightBarState.clearAllPinnedDates()
                     }
                 }
@@ -322,21 +364,20 @@ Item {
 
     component NavButton: Rectangle {
         property var iconSource
+        property string tooltip: ""
         signal clicked
-        Layout.preferredWidth: Theme.dp(26)
-        Layout.preferredHeight: Theme.dp(26)
-        color: navMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : "transparent"
-        border.width: 1
-        border.color: navMouse.containsMouse ? Theme.accent : Theme.border
-        radius: Theme.dp(4)
+        Layout.preferredWidth: Theme.dp(28)
+        Layout.preferredHeight: Theme.dp(28)
+        color: navMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.12) : "transparent"
+        radius: 0
 
-        Behavior on color {
-            ColorAnimation { duration: 120 }
-        }
+        Behavior on color { ColorAnimation { duration: 120 } }
 
         Loader {
             anchors.centerIn: parent
             sourceComponent: iconSource
+            opacity: navMouse.containsMouse ? 1.0 : 0.7
+            Behavior on opacity { NumberAnimation { duration: 120 } }
         }
 
         MouseArea {

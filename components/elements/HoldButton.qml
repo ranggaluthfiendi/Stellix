@@ -11,18 +11,32 @@ Rectangle {
     signal execute()
 
     readonly property real holdDuration: root.requireHold ? 1000 : 0
-    readonly property real minWidth: Theme.dp(60)
+    readonly property real minWidth: Theme.dp(64)
 
-    implicitWidth: Math.max(lbl.implicitWidth + Theme.dp(16), minWidth)
-    implicitHeight: Theme.dp(22)
-    color: root.confirming ? (root.danger ? Theme.danger : Theme.accent) : Theme.bgPrimary
+    implicitWidth: Math.max(lbl.implicitWidth + Theme.dp(20), minWidth)
+    implicitHeight: Theme.dp(26)
+    
+    color: {
+        if (root.confirming) return root.danger ? Theme.danger : Theme.accent
+        if (mouseArea.containsMouse) return root.danger ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.2) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2)
+        return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.04)
+    }
+    
     border.width: 1
-    border.color: root.confirming ? (root.danger ? Theme.danger : Theme.accent) : Theme.border
+    border.color: {
+        if (root.confirming) return "transparent"
+        if (mouseArea.containsMouse) return root.danger ? Theme.danger : Theme.accent
+        return Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.3)
+    }
+    
     radius: 0
     clip: true
 
     property bool confirming: false
     property real holdProgress: 0
+
+    Behavior on color { ColorAnimation { duration: 150 } }
+    Behavior on border.color { ColorAnimation { duration: 150 } }
 
     Timer {
         id: holdTimer
@@ -44,20 +58,22 @@ Rectangle {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         width: parent.width * root.holdProgress
-        color: root.danger ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.3) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+        color: root.danger ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.4) : Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.4)
+        visible: root.confirming
     }
 
     Text {
         id: lbl
         anchors.centerIn: parent
         text: root.confirming ? Math.ceil((1 - root.holdProgress) * root.holdDuration / 1000).toString() : root.buttonLabel
-        color: root.confirming ? "white" : (root.danger ? Theme.danger : Theme.textMuted)
+        color: root.confirming ? "white" : (mouseArea.containsMouse ? (root.danger ? Theme.danger : Theme.accent) : Theme.textSecondary)
         font.family: Typography.fontFamily
-        font.pixelSize: Math.round((Typography.sizeXXS || 8) * root.s)
-        font.weight: root.confirming ? (Typography.weightBold || Font.Bold) : (Typography.weightRegular || Font.Normal)
+        font.pixelSize: Math.round(9 * root.s)
+        font.weight: (root.confirming || mouseArea.containsMouse) ? Font.Bold : Font.Normal
     }
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor

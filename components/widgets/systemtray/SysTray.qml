@@ -12,7 +12,6 @@ import qs.services
 Item {
     id: root
 
-    property int visibleLimit: 8
     property bool hidePassiveItems: false
 
     property var trayItems: SystemTray.items && SystemTray.items.values
@@ -62,14 +61,17 @@ Item {
 
     property var processedTrayItems: sortAndFilterItems(trayItems)
     
-    readonly property bool shouldCollapse: !BarLayoutState.systrayShowAll || processedTrayItems.length > BarLayoutState.systrayCollapseLimit
+    readonly property bool shouldCollapse: !BarLayoutState.systrayShowAll && (processedTrayItems.length > BarLayoutState.systrayCollapseLimit)
     
-    property var visibleItems: (shouldCollapse && visibleLimit > 0)
-        ? processedTrayItems.slice(0, visibleLimit)
+    readonly property var barItems: shouldCollapse
+        ? processedTrayItems.slice(0, BarLayoutState.systrayCollapseLimit)
         : processedTrayItems
-    property var overflowItems: (shouldCollapse && visibleLimit > 0)
-        ? processedTrayItems.slice(visibleLimit)
+
+    readonly property var visibleItems: shouldCollapse
+        ? processedTrayItems.slice(BarLayoutState.systrayCollapseLimit)
         : []
+
+    readonly property var overflowItems: []
 
     property real itemSize: Theme.dp(26)
     property real spacing: Theme.dp(6)
@@ -83,12 +85,12 @@ Item {
 
     RowLayout {
         id: row
-        spacing: root.shouldCollapse ? 0 : root.spacing
+        spacing: root.spacing
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
 
         Repeater {
-            model: root.shouldCollapse ? 0 : root.processedTrayItems
+            model: root.barItems
             delegate: Item {
                 id: barItem
                 width: root.itemSize
@@ -255,69 +257,140 @@ Item {
         color: "transparent"
         property bool open: false
         visible: open && hasAnyTrayItems
-        implicitWidth: {
-            var cols = Math.min(Math.max(visibleItems.length, 1), 6)
-            return (cols * itemSize) + (Math.max(cols - 1, 0) * spacing) + Theme.dp(16)
-        }
-        implicitHeight: {
-            var cols = Math.min(Math.max(visibleItems.length, 1), 6)
-            var rows = Math.ceil(Math.max(visibleItems.length, 1) / cols)
-            return (rows * itemSize) + (Math.max(rows - 1, 0) * spacing) + Theme.dp(16) + (hasOverflow ? (itemSize + spacing) : 0)
-        }
+
+        readonly property int cols: Math.min(Math.max(visibleItems.length, 3), 5)
+        readonly property int rows: Math.ceil(visibleItems.length / cols)
+
+        implicitWidth: Theme.dp(240)
+        implicitHeight: trayContent.implicitHeight + Theme.dp(32)
+
         anchor.item: launcher
-        anchor.rect: BarLayoutState.isBottom ? Qt.rect(0, -(implicitHeight + Theme.dp(6)), 0, 0) : Qt.rect(0, launcher.height + Theme.dp(6), 0, 0)
+        anchor.rect: BarLayoutState.isBottom ? Qt.rect(0, -(implicitHeight + Theme.dp(8)), 0, 0) : Qt.rect(0, launcher.height + Theme.dp(8), 0, 0)
+
         Rectangle {
             anchors.fill: parent
-            color: Qt.rgba(Theme.bgPrimary.r, Theme.bgPrimary.g, Theme.bgPrimary.b, BarLayoutState.systrayOpacity)
+            color: Theme.bgSecondary
+            border.width: 1
+            border.color: Theme.border
+            radius: BarLayoutState.weatherPopupRounded ? Theme.radiusMedium : 0
+            
+            // Subtly darken the background slightly more for depth
+            Rectangle {
+                anchors.fill: parent
+                color: Qt.rgba(0,0,0,0.1)
+                radius: parent.radius
+                z: -1
+            }
+
             ColumnLayout {
-                anchors.fill: parent; anchors.margins: Theme.dp(8); spacing: Theme.dp(8)
-                GridLayout {
-                    columns: Math.min(Math.max(visibleItems.length, 1), 6)
-                    columnSpacing: spacing; rowSpacing: spacing
-                    Repeater {
-                        model: visibleItems
-                        delegate: SysTrayIcon { item: modelData; size: root.itemSize }
+                id: trayContent
+                anchors.fill: parent
+                anchors.margins: Theme.dp(16)
+                spacing: Theme.dp(12)
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(8)
+
+                    Text {
+                        text: "System Tray"
+                        color: Theme.accent
+                        font.family: Typography.fontFamily
+                        font.pixelSize: Theme.dp(11)
+                        font.weight: Font.Bold
+                    }
+
+                    Rectangle {
+                        Layout.preferredWidth: Theme.dp(18)
+                        Layout.preferredHeight: Theme.dp(18)
+                        color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15)
+                        radius: Theme.dp(4)
+                        
+                        Text {
+                            anchors.centerIn: parent
+                            text: root.visibleItems.length
+                            color: Theme.accent
+                            font.pixelSize: Theme.dp(9)
+                            font.weight: Font.Bold
+                        }
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    Rectangle {
+                        width: Theme.dp(24)
+                        height: Theme.dp(24)
+                        color: closeMouse.containsMouse ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.1) : "transparent"
+                        radius: Theme.dp(4)
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: "✕"
+                            color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
+                            font.pixelSize: Theme.dp(10)
+                        }
+
+                        MouseArea {
+                            id: closeMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: SysTrayState.forceCloseAll()
+                        }
                     }
                 }
-                Item {
-                    id: overflowButton
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 1
+                    color: Theme.border
+                    opacity: 0.5
+                }
+
+                GridLayout {
                     Layout.alignment: Qt.AlignHCenter
-                    width: itemSize; height: itemSize; visible: hasOverflow
-                    Rectangle {
-                        anchors.fill: parent
-                        color: mouseOverflow.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : "transparent"
-                        MouseArea {
-                            id: mouseOverflow; anchors.fill: parent
-                            onClicked: {
-                                if (overflowPopup.open) SysTrayState.closeAll()
-                                else { SysTrayState.closeAll(); overflowPopup.open = true; SysTrayState.openedOverflow = overflowPopup }
+                    columns: trayPopup.cols
+                    columnSpacing: Theme.dp(10)
+                    rowSpacing: Theme.dp(10)
+
+                    Repeater {
+                        model: root.visibleItems
+                        delegate: Item {
+                            width: root.itemSize + Theme.dp(8)
+                            height: root.itemSize + Theme.dp(8)
+                            required property var modelData
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: innerIconMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1) : "transparent"
+                                radius: 0
+                                border.width: innerIconMouse.containsMouse ? 1 : 0
+                                border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.3)
+                            }
+
+                            SysTrayIcon {
+                                anchors.centerIn: parent
+                                item: modelData
+                                size: root.itemSize
+                            }
+
+                            MouseArea {
+                                id: innerIconMouse
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                acceptedButtons: Qt.NoButton // Let SysTrayIcon handle clicks
                             }
                         }
-                        ChevronShape { anchors.centerIn: parent; width: Theme.dp(18); height: Theme.dp(18); direction: overflowPopup.open ? "up" : "down"; color: Theme.textPrimary }
                     }
                 }
-            }
-        }
-    }
-
-    PopupWindow {
-        id: overflowPopup
-        color: "transparent"
-        property bool open: false
-        visible: open && overflowItems.length > 0
-        implicitWidth: Math.min(overflowItems.length, 4) * itemSize
-        implicitHeight: Math.ceil(overflowItems.length / Math.min(overflowItems.length, 4)) * itemSize
-        anchor.window: trayPopup
-        anchor.rect: Qt.rect(trayPopup.width + Theme.dp(6), 0, 0, 0)
-        Rectangle {
-            anchors.fill: parent
-            color: Qt.rgba(Theme.bgSecondary.r, Theme.bgSecondary.g, Theme.bgSecondary.b, BarLayoutState.systrayOpacity)
-            GridLayout {
-                anchors.centerIn: parent
-                columns: Math.min(overflowItems.length, 4)
-                Repeater {
-                    model: overflowItems
-                    delegate: SysTrayIcon { item: modelData; size: root.itemSize }
+                
+                // Add a small footer message if it's empty (though popup won't show)
+                Text {
+                    visible: root.visibleItems.length === 0
+                    text: "No active items"
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.dp(9)
+                    font.italic: true
+                    Layout.alignment: Qt.AlignHCenter
                 }
             }
         }

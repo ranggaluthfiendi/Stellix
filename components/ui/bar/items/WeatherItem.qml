@@ -12,7 +12,7 @@ Item {
 
     property real s: Scales.uiScale
 
-    implicitWidth: weatherRow.implicitWidth + Theme.dp(12)
+    implicitWidth: weatherRow.implicitWidth + Theme.dp(16)
     implicitHeight: BarLayoutState.barHeight * s
 
     readonly property string weatherSection: BarLayoutState.findItemSection("weather")
@@ -66,50 +66,67 @@ Item {
 
     RowLayout {
         id: weatherRow
-        anchors.centerIn: parent
-        spacing: Theme.dp(4)
+        anchors.left: parent.left
+        anchors.leftMargin: Theme.dp(8)
+        anchors.verticalCenter: parent.verticalCenter
+        spacing: Theme.dp(6)
 
         Repeater {
             model: root.activeElements
-            delegate: Item {
-                required property string modelData
-                width: modelData === "icon" ? Theme.dp(14) : (modelData === "temp" ? weatherTemp.implicitWidth : weatherDesc.implicitWidth)
-                height: modelData === "icon" ? Theme.dp(14) : Math.max(weatherTemp.implicitHeight, weatherDesc.implicitHeight)
-
-                Loader {
-                    visible: parent.modelData === "icon"
-                    width: Theme.dp(14)
-                    height: Theme.dp(14)
-                    sourceComponent: {
-                        if (weatherIconType === "sunny") return sunnyComp
-                        if (weatherIconType === "cloudy") return cloudyComp
-                        if (weatherIconType === "rainy") return rainyComp
-                        if (weatherIconType === "thunder") return thunderComp
-                        if (weatherIconType === "snowy") return snowyComp
-                        if (weatherIconType === "foggy") return foggyComp
-                        return sunnyComp
+            delegate: Loader {
+                Layout.alignment: Qt.AlignVCenter
+                sourceComponent: {
+                    switch (modelData) {
+                        case "icon": return iconComp
+                        case "temp": return tempComp
+                        case "desc": return descComp
+                        default: return null
                     }
                 }
+            }
+        }
+    }
 
-                Text {
-                    id: weatherTemp
-                    visible: parent.modelData === "temp"
-                    text: weather.temp + weather.unitSymbol
-                    color: Theme.textPrimary
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Theme.dp(10)
-                    font.weight: Font.Bold
-                }
-
-                Text {
-                    id: weatherDesc
-                    visible: parent.modelData === "desc"
-                    text: weather.desc
-                    color: Theme.textSecondary
-                    font.family: Typography.fontFamily
-                    font.pixelSize: Theme.dp(8)
+    Component {
+        id: iconComp
+        Item {
+            implicitWidth: Theme.dp(14)
+            implicitHeight: Theme.dp(14)
+            Loader {
+                anchors.fill: parent
+                sourceComponent: {
+                    if (weatherIconType === "sunny") return sunnyComp
+                    if (weatherIconType === "cloudy") return cloudyComp
+                    if (weatherIconType === "rainy") return rainyComp
+                    if (weatherIconType === "thunder") return thunderComp
+                    if (weatherIconType === "snowy") return snowyComp
+                    if (weatherIconType === "foggy") return foggyComp
+                    return sunnyComp
                 }
             }
+        }
+    }
+
+    Component {
+        id: tempComp
+        Text {
+            text: weather.temp + weather.unitSymbol
+            color: Theme.textPrimary
+            font.family: Typography.fontFamily
+            font.pixelSize: Theme.dp(10)
+            font.weight: Font.Bold
+            verticalAlignment: Text.AlignVCenter
+        }
+    }
+
+    Component {
+        id: descComp
+        Text {
+            text: weather.desc
+            color: Theme.textSecondary
+            font.family: Typography.fontFamily
+            font.pixelSize: Theme.dp(8.5)
+            verticalAlignment: Text.AlignVCenter
         }
     }
 
