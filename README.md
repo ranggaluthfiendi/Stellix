@@ -2,7 +2,7 @@
 
 A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic theming, deep system integration, and a refined glass-dark aesthetic. 🌑
 
-## 📸 Preview
+## Preview
 
 | Bar | Dashboard | Widgets |
 |:---:|:---------:|:-------:|
@@ -17,7 +17,7 @@ A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic th
 
 </details>
 
-## 🚀 Features
+## Features
 
 - 🎨 **Dynamic Colors** -- Matugen extracts colors from your wallpaper, auto-syncs across the entire shell
 - 📊 **Adaptive Bar** -- Top/bottom position, rearrangeable items, custom opacity & blur
@@ -26,21 +26,24 @@ A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic th
 - 🔍 **App Launcher** -- Search apps, calculator, currency converter, clipboard, power menu
 - ⚙️ **Settings Panel** -- Full GUI settings with live keybind editor for Hyprland
 
-## 📦 Requirements
+## Requirements
 
 ```
-quickshell · hyprland · qt6-base · qt6-declarative
-networkmanager · bluez · pipewire · playerctl · matugen · awww
+quickshell · hyprland · hyprpaper · qt6-base · qt6-declarative · qt6-svg
+networkmanager · bluez · bluez-utils · pipewire · pipewire-pulse · playerctl
+matugen · awww · brightnessctl · upower
+wl-clipboard · cliphist · grim · slurp · hyprshot
+xdg-desktop-portal-hyprland · gvfs · udisks2 · polkit · gnome-keyring
 ```
 
-## 🛠️ Install
+## Install
 
 ```bash
 git clone https://github.com/YourUsername/quickshell-stellix.git ~/.config/quickshell
 qs
 ```
 
-## ⌨️ Keybinds
+## Keybinds
 
 | Shortcut | Action |
 |:---|:---|
@@ -51,9 +54,9 @@ qs
 | `Super + Tab` | 🔄 Workspace Switcher |
 | `Super + Alt (L/R)` | 🎛️ Rightbar Panel |
 
-## 🤝 Credits
+## Credits
 
-Developed by **Rangga Luthfiendi** 💻
+Developed by **Rangga Luthfiendi** 
 
 ---
-*Stellix Shell ^_^* 🐚
+Stellix Shell
