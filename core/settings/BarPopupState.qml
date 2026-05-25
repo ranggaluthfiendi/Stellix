@@ -19,7 +19,7 @@ Item {
             calendarOpen = false
             weatherDetailOpen = false
             workspaceSwitcherOpen = false
-            SysTrayState.forceCloseAll()
+            SysTrayState._closeTrayItems()
         }
     }
 
@@ -29,7 +29,7 @@ Item {
             open = false
             weatherDetailOpen = false
             workspaceSwitcherOpen = false
-            SysTrayState.forceCloseAll()
+            SysTrayState._closeTrayItems()
         }
     }
     property bool workspaceSwitcherOpen: false
@@ -38,7 +38,7 @@ Item {
             open = false
             calendarOpen = false
             weatherDetailOpen = false
-            SysTrayState.forceCloseAll()
+            SysTrayState._closeTrayItems()
         }
     }
     property bool launcherOpen: false
@@ -50,7 +50,7 @@ Item {
             open = false
             calendarOpen = false
             workspaceSwitcherOpen = false
-            SysTrayState.forceCloseAll()
+            SysTrayState._closeTrayItems()
         }
     }
     property bool dndEnabled: false

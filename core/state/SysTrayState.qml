@@ -5,37 +5,44 @@ import qs.components.widgets.barpopup
 
 QtObject {
     property var openedMenu: null
-    onOpenedMenuChanged: if (openedMenu) { BarPopupState.calendarOpen = false; BarPopupState.weatherDetailOpen = false; BarPopupState.workspaceSwitcherOpen = false }
+    onOpenedMenuChanged: {
+        if (openedMenu) {
+            BarPopupState.open = false
+            BarPopupState.calendarOpen = false
+            BarPopupState.weatherDetailOpen = false
+            BarPopupState.workspaceSwitcherOpen = false
+        }
+    }
 
     property var openedSubmenuEntry: null
     property var openedSubmenuPopup: null
     property var openedOverflow: null
-    onOpenedOverflowChanged: if (openedOverflow) { BarPopupState.calendarOpen = false; BarPopupState.weatherDetailOpen = false; BarPopupState.workspaceSwitcherOpen = false }
+    onOpenedOverflowChanged: {
+        if (openedOverflow) {
+            BarPopupState.open = false
+            BarPopupState.calendarOpen = false
+            BarPopupState.weatherDetailOpen = false
+            BarPopupState.workspaceSwitcherOpen = false
+        }
+    }
 
     property var openedTrayPanel: null
-    onOpenedTrayPanelChanged: if (openedTrayPanel) { BarPopupState.calendarOpen = false; BarPopupState.weatherDetailOpen = false; BarPopupState.workspaceSwitcherOpen = false }
+    onOpenedTrayPanelChanged: {
+        if (openedTrayPanel) {
+            BarPopupState.open = false
+            BarPopupState.calendarOpen = false
+            BarPopupState.weatherDetailOpen = false
+            BarPopupState.workspaceSwitcherOpen = false
+        }
+    }
 
     property bool blockClose: false
 
-    function closeAll() {
-        if (blockClose) return
-
-        if (openedMenu && openedMenu.internalVisible !== undefined) {
-            openedMenu.internalVisible = false
-        }
-
-        if (openedSubmenuPopup && openedSubmenuPopup.menuData !== undefined) {
-            openedSubmenuPopup.menuData = null
-        }
-
-        if (openedOverflow && openedOverflow.open !== undefined) {
-            openedOverflow.open = false
-        }
-
-        if (openedTrayPanel && openedTrayPanel.open !== undefined) {
-            openedTrayPanel.open = false
-        }
-
+    function _closeTrayItems() {
+        if (openedMenu && openedMenu.internalVisible !== undefined) openedMenu.internalVisible = false
+        if (openedSubmenuPopup && openedSubmenuPopup.menuData !== undefined) openedSubmenuPopup.menuData = null
+        if (openedOverflow && openedOverflow.open !== undefined) openedOverflow.open = false
+        if (openedTrayPanel && openedTrayPanel.open !== undefined) openedTrayPanel.open = false
         openedMenu = null
         openedSubmenuEntry = null
         openedSubmenuPopup = null
@@ -43,28 +50,13 @@ QtObject {
         openedTrayPanel = null
     }
 
+    function closeAll() {
+        if (blockClose) return
+        _closeTrayItems()
+    }
+
     function forceCloseAll() {
-        if (openedMenu && openedMenu.internalVisible !== undefined) {
-            openedMenu.internalVisible = false
-        }
-
-        if (openedSubmenuPopup && openedSubmenuPopup.menuData !== undefined) {
-            openedSubmenuPopup.menuData = null
-        }
-
-        if (openedOverflow && openedOverflow.open !== undefined) {
-            openedOverflow.open = false
-        }
-
-        if (openedTrayPanel && openedTrayPanel.open !== undefined) {
-            openedTrayPanel.open = false
-        }
-
-        openedMenu = null
-        openedSubmenuEntry = null
-        openedSubmenuPopup = null
-        openedOverflow = null
-        openedTrayPanel = null
+        _closeTrayItems()
         blockClose = false
     }
 }

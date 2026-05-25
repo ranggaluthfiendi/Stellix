@@ -54,7 +54,7 @@ VabContentPage {
             headerActions: RowLayout {
                 spacing: Theme.dp(4)
                 Repeater {
-                    model: ["ACCENT", "WHITE", "BLACK"]
+                    model: ["ACCENT", "SUCCESS", "DANGER", "WHITE", "BLACK"]
                     delegate: VabButton {
                         text: modelData
                         active: BarLayoutState["desktop" + page.metricKey + "ColorMode"] === modelData.toLowerCase()
@@ -81,29 +81,121 @@ VabContentPage {
         }
 
         VabSettingsCard {
+            id: netUpLabelCard
+            property bool expanded: false
             itemIndex: 3
             isFocused: page.focusInContent && page.contentFocusIndex === 3
             title: "Label"
             desc: BarLayoutState.desktopNetUpLabel || "UP"
 
-            headerActions: Rectangle {
-                Layout.preferredWidth: Theme.dp(100)
-                Layout.preferredHeight: Theme.dp(32)
-                color: Theme.bgSecondary
-                border.width: 1
-                border.color: netUpInput.activeFocus ? Theme.accent : Theme.border
-                TextInput {
-                    id: netUpInput
-                    anchors.fill: parent
-                    anchors.leftMargin: Theme.dp(8)
-                    verticalAlignment: TextInput.AlignVCenter
-                    text: BarLayoutState.desktopNetUpLabel || "UP"
-                    color: Theme.textPrimary
-                    font.pixelSize: Theme.dp(10)
-                    selectByMouse: true
-                    onAccepted: {
-                        BarLayoutState.desktopNetUpLabel = text
-                        BarLayoutState.save()
+            headerActions: VabButton {
+                text: netUpLabelCard.expanded ? "Close" : "Options"
+                onClicked: netUpLabelCard.expanded = !netUpLabelCard.expanded
+            }
+
+            ColumnLayout {
+                visible: netUpLabelCard.expanded
+                Layout.fillWidth: true
+                spacing: Theme.dp(10)
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(8)
+                    Text {
+                        text: "Custom"
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.dp(9)
+                        font.weight: Font.Bold
+                        Layout.preferredWidth: Theme.dp(60)
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Theme.dp(32)
+                        color: Theme.bgSecondary
+                        border.width: 1
+                        border.color: netUpInput.activeFocus ? Theme.accent : Theme.border
+                        TextInput {
+                            id: netUpInput
+                            anchors.fill: parent
+                            anchors.leftMargin: Theme.dp(8)
+                            verticalAlignment: TextInput.AlignVCenter
+                            text: BarLayoutState.desktopNetUpLabel || "UP"
+                            color: Theme.textPrimary
+                            font.pixelSize: Theme.dp(10)
+                            selectByMouse: true
+                        }
+                    }
+                    VabButton {
+                        text: "Apply"
+                        onClicked: {
+                            BarLayoutState.desktopNetUpLabel = netUpInput.text
+                            BarLayoutState.save()
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(4)
+                    Text {
+                        text: "Presets"
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.dp(9)
+                        font.weight: Font.Bold
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: Theme.dp(6)
+                        rowSpacing: Theme.dp(6)
+
+                        Repeater {
+                            model: [
+                                { label: "UP", value: "UP" },
+                                { label: "UPLOAD", value: "UPLOAD" },
+                                { label: "TX", value: "TX" },
+                                { label: "OUT", value: "OUT" },
+                                { label: "▲", value: "▲" },
+                                { label: "↑", value: "↑" }
+                            ]
+                            delegate: VabButton {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                text: modelData.label
+                                active: BarLayoutState.desktopNetUpLabel === modelData.value
+                                onClicked: {
+                                    BarLayoutState.desktopNetUpLabel = modelData.value
+                                    BarLayoutState.save()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(4)
+                    Text {
+                        text: "Label Color"
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.dp(9)
+                        font.weight: Font.Bold
+                    }
+                    RowLayout {
+                        spacing: Theme.dp(4)
+                        Repeater {
+                            model: ["ACCENT", "SUCCESS", "DANGER", "WHITE", "BLACK"]
+                            delegate: VabButton {
+                                required property string modelData
+                                Layout.fillWidth: true
+                                text: modelData
+                                active: BarLayoutState.desktopNetUpColorMode === modelData.toLowerCase()
+                                onClicked: {
+                                    BarLayoutState.desktopNetUpColorMode = modelData.toLowerCase()
+                                    BarLayoutState.save()
+                                }
+                            }
+                        }
                     }
                 }
             }

@@ -31,8 +31,8 @@ Item {
         var mode = BarLayoutState["desktop" + stateKey + "ColorMode"] || "accent"
         if (mode === "white") return Qt.rgba(1, 1, 1, 0.8)
         if (mode === "black") return Qt.rgba(0, 0, 0, 0.8)
-        if (stateKey === "NetDown") return Theme.success
-        if (stateKey === "NetUp") return Theme.danger
+        if (mode === "success") return Theme.success
+        if (mode === "danger") return Theme.danger
         return Theme.accent
     }
 

@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Services.Mpris
 import Quickshell.Io
 import QtCore
@@ -22,6 +23,36 @@ Item {
     property real length: 0
     property int artRefreshCounter: 0
     property string lastArtUrl: ""
+
+    property int targetWorkspace: 0
+
+    function findMediaWorkspace() {
+        root.targetWorkspace = 0
+        if (!root.activePlayer || !root.identity) return
+
+        let appName = root.identity.toLowerCase()
+        let toplevels = Hyprland.toplevels ? Hyprland.toplevels.values : []
+
+        for (let i = 0; i < toplevels.length; i++) {
+            let tl = toplevels[i]
+            if (!tl || !tl.workspace) continue
+
+            let tlClass = (tl.initialClass || "").toLowerCase()
+            let tlTitle = (tl.title || "").toLowerCase()
+            let tlApp = (tl.appId || "").toLowerCase()
+
+            if (tlClass.indexOf(appName) >= 0 || tlTitle.indexOf(appName) >= 0 || tlApp.indexOf(appName) >= 0) {
+                root.targetWorkspace = tl.workspace.id
+                return
+            }
+        }
+    }
+
+    function goToMediaWorkspace() {
+        if (root.targetWorkspace > 0) {
+            Hyprland.dispatch("workspace " + root.targetWorkspace)
+        }
+    }
 
     readonly property string artCacheDir: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata"
     readonly property string localArtFile: artCacheDir + "/current-cover.jpg"
@@ -152,6 +183,8 @@ Item {
             root.lastArtUrl = root.artUrl
             root.downloadArt(root.artUrl)
         }
+
+        root.findMediaWorkspace()
     }
 
     Connections {

@@ -60,7 +60,7 @@ Item {
     onBarPopupRoundedChanged: save()
     property bool barBorder: true
     onBarBorderChanged: save()
-    property bool showSeparators: false
+    property bool showSeparators: true
     onShowSeparatorsChanged: save()
     property int workspaceCount: 5
     onWorkspaceCountChanged: save()
@@ -68,19 +68,19 @@ Item {
     // SysTray options
     property bool systrayShowAll: true
     onSystrayShowAllChanged: save()
-    property int systrayCollapseLimit: 5
+    property int systrayCollapseLimit: 1
     onSystrayCollapseLimitChanged: save()
     property string systrayChevronPosition: "right"
     onSystrayChevronPositionChanged: save()
-    property string systrayChevronDirection: "down"
+    property string systrayChevronDirection: "right"
     onSystrayChevronDirectionChanged: save()
 
     // --- Desktop Widgets State ---
-    property bool showScreenClock: false
+    property bool showScreenClock: true
     onShowScreenClockChanged: save()
-    property real desktopClockX: 40
+    property real desktopClockX: 624
     onDesktopClockXChanged: save()
-    property real desktopClockY: 40
+    property real desktopClockY: 278
     onDesktopClockYChanged: save()
     property real desktopClockRotation: 0
     onDesktopClockRotationChanged: save()
@@ -101,17 +101,16 @@ Item {
     property int desktopClockAlignment: 1
     onDesktopClockAlignmentChanged: save()
 
-    property bool showScreenSystemStats: false
-    onShowScreenSystemStatsChanged: save()
+    property bool showScreenSystemStats: true
 
     // --- Combined Stats Widget ---
-    property real desktopStatsX: 40
+    property real desktopStatsX: 672
     onDesktopStatsXChanged: save()
     property real desktopStatsY: 800
     onDesktopStatsYChanged: save()
     property real desktopStatsRotation: 0
     onDesktopStatsRotationChanged: save()
-    property string desktopStatsLayout: "default"
+    property string desktopStatsLayout: "inline"
     onDesktopStatsLayoutChanged: save()
     property string desktopStatsColorMode: "accent"
     onDesktopStatsColorModeChanged: save()
@@ -125,7 +124,7 @@ Item {
     onDesktopStatsShowNetChanged: save()
     property bool desktopStatsShowDisk: false
     onDesktopStatsShowDiskChanged: save()
-    property bool desktopStatsShowUptime: false
+    property bool desktopStatsShowUptime: true
     onDesktopStatsShowUptimeChanged: save()
     property bool desktopStatsShowTemp: false
     onDesktopStatsShowTempChanged: save()
@@ -135,7 +134,11 @@ Item {
     onDesktopStatsNetUpLabelChanged: save()
     property string desktopStatsNetLabelStyle: "short"
     onDesktopStatsNetLabelStyleChanged: save()
-    property real desktopStatsScale: 1.0
+    property string desktopStatsNetDownLabelColorMode: "success"
+    onDesktopStatsNetDownLabelColorModeChanged: save()
+    property string desktopStatsNetUpLabelColorMode: "danger"
+    onDesktopStatsNetUpLabelColorModeChanged: save()
+    property real desktopStatsScale: 1.5
     onDesktopStatsScaleChanged: save()
 
     // --- Individual Metric Widgets ---
@@ -236,7 +239,7 @@ Item {
     onDesktopNetDownScaleChanged: save()
     property string desktopNetDownColorMode: "accent"
     onDesktopNetDownColorModeChanged: save()
-    property string desktopNetDownLabel: "DOWN"
+    property string desktopNetDownLabel: "DOWNLOAD"
     onDesktopNetDownLabelChanged: save()
 
     // NET UP
@@ -252,7 +255,7 @@ Item {
     onDesktopNetUpScaleChanged: save()
     property string desktopNetUpColorMode: "accent"
     onDesktopNetUpColorModeChanged: save()
-    property string desktopNetUpLabel: "UP"
+    property string desktopNetUpLabel: "UPLOAD"
     onDesktopNetUpLabelChanged: save()
 
     // Stats display mode: "combined" or "individual"
@@ -263,17 +266,17 @@ Item {
     property string individualStatsLayout: "row"
     onIndividualStatsLayoutChanged: save()
 
-    property bool showScreenWeather: false
+    property bool showScreenWeather: true
     onShowScreenWeatherChanged: save()
-    property real desktopWeatherX: 40
+    property real desktopWeatherX: 703
     onDesktopWeatherXChanged: save()
-    property real desktopWeatherY: 600
+    property real desktopWeatherY: 116
     onDesktopWeatherYChanged: save()
     property real desktopWeatherRotation: 0
     onDesktopWeatherRotationChanged: save()
-    property string desktopWeatherLayout: "default"
+    property string desktopWeatherLayout: "vertical"
     onDesktopWeatherLayoutChanged: save()
-    property real desktopWeatherScale: 1.0
+    property real desktopWeatherScale: 2
     onDesktopWeatherScaleChanged: save()
     property string desktopWeatherCity: ""
     onDesktopWeatherCityChanged: save()
@@ -327,7 +330,7 @@ Item {
     property real desktopNowPlayingScale: 1.0
     onDesktopNowPlayingScaleChanged: save()
 
-    property bool showScreenEqualizer: false
+    property bool showScreenEqualizer: true
     onShowScreenEqualizerChanged: save()
     property real desktopEqualizerX: 800
     onDesktopEqualizerXChanged: save()
@@ -395,7 +398,9 @@ Item {
     property bool snapLineYVisible: false
 
     property var leftItems: ["launcher", "workspace", "systray"]
-    property var centerItems: ["clock"]
+    property var centerItems: ["weather"]
+    property var rightItems: ["clock", "battery", "notif"]
+
     property bool weatherShowIcon: true
     onWeatherShowIconChanged: save()
     property bool weatherShowTemp: true
@@ -408,8 +413,6 @@ Item {
     onWeatherElementsChanged: save()
     property var weatherElementsDisabled: []
     onWeatherElementsDisabledChanged: save()
-
-    property var rightItems: ["battery", "notif", "weather"]
 
     property var hiddenItems: []
 
@@ -448,6 +451,14 @@ Item {
     readonly property var presets: [
         {
             name: "Default",
+            desc: "Current layout: weather center, clock+battery+notif right",
+            left: ["launcher", "workspace", "systray"],
+            center: ["weather"],
+            right: ["clock", "battery", "notif"],
+            hidden: ["launcher"]
+        },
+        {
+            name: "Classic",
             desc: "Classic layout with launcher, workspace, systray on left",
             left: ["launcher", "workspace", "systray"],
             center: ["clock"],
@@ -533,9 +544,9 @@ Item {
         return result
     }
 
-    property var visibleLeftItems: ["launcher", "workspace", "systray"]
-    property var visibleCenterItems: ["clock"]
-    property var visibleRightItems: ["battery", "notif", "weather"]
+    property var visibleLeftItems: ["workspace", "systray"]
+    property var visibleCenterItems: ["weather"]
+    property var visibleRightItems: ["clock", "battery", "notif"]
 
     function updateVisibleItems() {
         if (root._loading) return
@@ -628,9 +639,9 @@ Item {
     function resetAll() {
         barPosition = "top"
         leftItems = ["launcher", "workspace", "systray"]
-        centerItems = ["clock"]
-        rightItems = ["battery", "notif", "weather"]
-        hiddenItems = []
+        centerItems = ["weather"]
+        rightItems = ["clock", "battery", "notif"]
+        hiddenItems = ["launcher"]
         showBatteryPercentage = true
         clockFormat = "time"
         clock24Hour = true
@@ -649,13 +660,13 @@ Item {
         notifPopupRounded = false
         barPopupRounded = false
         barBorder = true
-        showSeparators = false
+        showSeparators = true
         workspaceCount = 5
 
         systrayShowAll = true
-        systrayCollapseLimit = 5
+        systrayCollapseLimit = 1
         systrayChevronPosition = "right"
-        systrayChevronDirection = "down"
+        systrayChevronDirection = "right"
 
         weatherShowIcon = true
         weatherShowTemp = true
@@ -664,9 +675,10 @@ Item {
         weatherElements = ["icon", "temp", "desc"]
         weatherElementsDisabled = []
 
-        showScreenClock = false
-        desktopClockX = 40
-        desktopClockY = 40
+        showScreenClock = true
+        desktopClockX = 624
+        desktopClockY = 278
+        desktopClockRotation = 0
         desktopClockColorMode = "accent"
         desktopClockScale = 1.0
         desktopClock24Hour = true
@@ -676,22 +688,25 @@ Item {
         desktopClockShowYear = false
         desktopClockAlignment = 1
 
-        showScreenSystemStats = false
-        desktopStatsX = 40
+        showScreenSystemStats = true
+        desktopStatsX = 672
         desktopStatsY = 800
-        desktopStatsLayout = "default"
+        desktopStatsRotation = 0
+        desktopStatsLayout = "inline"
         desktopStatsColorMode = "accent"
         desktopStatsShowCpu = true
         desktopStatsShowGpu = true
         desktopStatsShowMem = true
         desktopStatsShowNet = true
         desktopStatsShowDisk = false
-        desktopStatsShowUptime = false
+        desktopStatsShowUptime = true
         desktopStatsShowTemp = false
-        desktopStatsNetDownLabel = "DOWN"
-        desktopStatsNetUpLabel = "UP"
+        desktopStatsNetDownLabel = "DOWNLOAD"
+        desktopStatsNetUpLabel = "UPLOAD"
         desktopStatsNetLabelStyle = "short"
-        desktopStatsScale = 1.0
+        desktopStatsNetDownLabelColorMode = "success"
+        desktopStatsNetUpLabelColorMode = "danger"
+        desktopStatsScale = 1.5
 
         statsDisplayMode = "combined"
         individualStatsLayout = "row"
@@ -702,20 +717,22 @@ Item {
         desktopDiskShow = false; desktopDiskX = 340; desktopDiskY = 760; desktopDiskRotation = 0; desktopDiskScale = 1.0; desktopDiskColorMode = "accent"
         desktopUptimeShow = false; desktopUptimeX = 440; desktopUptimeY = 760; desktopUptimeRotation = 0; desktopUptimeScale = 1.0; desktopUptimeColorMode = "accent"
         desktopTempShow = false; desktopTempX = 540; desktopTempY = 760; desktopTempRotation = 0; desktopTempScale = 1.0; desktopTempColorMode = "accent"
-        desktopNetDownShow = true; desktopNetDownX = 640; desktopNetDownY = 760; desktopNetDownRotation = 0; desktopNetDownScale = 1.0; desktopNetDownColorMode = "accent"; desktopNetDownLabel = "DOWN"
-        desktopNetUpShow = true; desktopNetUpX = 740; desktopNetUpY = 760; desktopNetUpRotation = 0; desktopNetUpScale = 1.0; desktopNetUpColorMode = "accent"; desktopNetUpLabel = "UP"
+        desktopNetDownShow = true; desktopNetDownX = 640; desktopNetDownY = 760; desktopNetDownRotation = 0; desktopNetDownScale = 1.0; desktopNetDownColorMode = "accent"; desktopNetDownLabel = "DOWNLOAD"
+        desktopNetUpShow = true; desktopNetUpX = 740; desktopNetUpY = 760; desktopNetUpRotation = 0; desktopNetUpScale = 1.0; desktopNetUpColorMode = "accent"; desktopNetUpLabel = "UPLOAD"
 
-        showScreenWeather = false
-        desktopWeatherX = 40
-        desktopWeatherY = 600
-        desktopWeatherLayout = "default"
-        desktopWeatherScale = 1.0
+        showScreenWeather = true
+        desktopWeatherX = 703
+        desktopWeatherY = 116
+        desktopWeatherRotation = 0
+        desktopWeatherLayout = "vertical"
+        desktopWeatherScale = 2.0
         desktopWeatherCity = systemCity
         desktopWeatherUnit = "C"
 
         showScreenQuickActions = false
         desktopQuickActionsX = 800
         desktopQuickActionsY = 900
+        desktopQuickActionsRotation = 0
         desktopQuickActionsVisible = true
         desktopQuickActionsPinned = false
         desktopQuickActionsRadius = 12
@@ -724,11 +741,13 @@ Item {
         showScreenNowPlaying = false
         desktopNowPlayingX = 1400
         desktopNowPlayingY = 40
+        desktopNowPlayingRotation = 0
         desktopNowPlayingScale = 1.0
 
-        showScreenEqualizer = false
+        showScreenEqualizer = true
         desktopEqualizerX = 800
         desktopEqualizerY = 400
+        desktopEqualizerRotation = 0
         desktopEqualizerScale = 1.0
         desktopEqualizerColorMode = "accent"
         desktopEqualizerCustomColor = "#ffffff"
@@ -742,6 +761,7 @@ Item {
         desktopWidgetsOpacity = 1.0
         desktopClockOpacity = 1.0
         desktopNowPlayingOpacity = 1.0
+        desktopEqualizerOpacity = 1.0
         desktopStatsOpacity = 1.0
         desktopCpuOpacity = 1.0
         desktopGpuOpacity = 1.0
@@ -846,6 +866,8 @@ Item {
             desktopStatsNetDownLabel: root.desktopStatsNetDownLabel,
             desktopStatsNetUpLabel: root.desktopStatsNetUpLabel,
             desktopStatsNetLabelStyle: root.desktopStatsNetLabelStyle,
+            desktopStatsNetDownLabelColorMode: root.desktopStatsNetDownLabelColorMode,
+            desktopStatsNetUpLabelColorMode: root.desktopStatsNetUpLabelColorMode,
             desktopStatsScale: root.desktopStatsScale,
 
             statsDisplayMode: root.statsDisplayMode,
@@ -1059,6 +1081,8 @@ Item {
                     if (data.hasOwnProperty("desktopStatsNetDownLabel")) root.desktopStatsNetDownLabel = data.desktopStatsNetDownLabel
                     if (data.hasOwnProperty("desktopStatsNetUpLabel")) root.desktopStatsNetUpLabel = data.desktopStatsNetUpLabel
                     if (data.hasOwnProperty("desktopStatsNetLabelStyle")) root.desktopStatsNetLabelStyle = data.desktopStatsNetLabelStyle
+                    if (data.hasOwnProperty("desktopStatsNetDownLabelColorMode")) root.desktopStatsNetDownLabelColorMode = data.desktopStatsNetDownLabelColorMode
+                    if (data.hasOwnProperty("desktopStatsNetUpLabelColorMode")) root.desktopStatsNetUpLabelColorMode = data.desktopStatsNetUpLabelColorMode
                     if (data.hasOwnProperty("desktopStatsScale")) root.desktopStatsScale = data.desktopStatsScale
 
                     if (data.hasOwnProperty("statsDisplayMode")) root.statsDisplayMode = data.statsDisplayMode
@@ -1231,11 +1255,13 @@ Item {
                 if (allCurrent.indexOf(root.allItemIds[i]) === -1) changed = true
             }
             if (changed) root.save()
+
+            // Start city detection only after saved data is loaded
+            detectCityProc.running = true
         }
     }
 
     Component.onCompleted: {
-        detectCityProc.running = true
         load()
     }
 }

@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Shapes
 import qs.config
 import qs.components.elements
+import qs.core.state
 import Quickshell.Services.Mpris
 
 Item {
@@ -16,6 +17,8 @@ Item {
     property string artist: ""
 
     property bool isPlaying: false
+
+    readonly property var mprisSvc: BarLayoutState.getItem("mprisService")
 
     function cleanTitle(raw) {
         if (!raw) return ""
@@ -39,61 +42,34 @@ Item {
         return identity
     }
 
-    function updateTrack() {
-        if (!player) {
-            trackTitle = ""
-            artist = ""
-            return
+    function syncFromMprisService() {
+        if (root.mprisSvc) {
+            var newTitle = root.mprisSvc.title || ""
+            var newArtist = root.mprisSvc.artist || ""
+            var newPlaying = root.mprisSvc.isPlaying || false
+            if (trackTitle !== newTitle) trackTitle = newTitle
+            if (artist !== newArtist) artist = newArtist
+            if (isPlaying !== newPlaying) isPlaying = newPlaying
         }
-        trackTitle = cleanTitle(player.trackTitle || "")
-        artist = cleanArtist(player.trackArtist || "", player.identity || "")
-    }
-
-    function syncPlayback() {
-        if (!player) {
-            isPlaying = false
-            return
-        }
-
-        let newState = player.isPlaying === true
-
-        if (isPlaying !== newState) {
-            isPlaying = newState
-        }
-    }
-
-    onPlayerChanged: {
-        playerConn.target = null
-        playerConn.target = root.player
-        updateTrack()
-        syncPlayback()
-    }
-
-    Connections {
-        id: playerConn
-        target: root.player
-        ignoreUnknownSignals: true
-
-        function onTrackChanged() { root.updateTrack() }
-        function onPostTrackChanged() {
-            Qt.callLater(function() { root.updateTrack() })
-        }
-        function onPlaybackStateChanged() { root.syncPlayback() }
-        function onTrackTitleChanged() { root.updateTrack() }
-        function onTrackArtistChanged() { root.updateTrack() }
     }
 
     Timer {
         interval: 500
         running: true
         repeat: true
-        onTriggered: root.syncPlayback()
+        onTriggered: root.syncFromMprisService()
     }
 
-    Component.onCompleted: {
-        updateTrack()
-        syncPlayback()
+    Connections {
+        target: root.mprisSvc
+        ignoreUnknownSignals: true
+        function onTitleChanged() { root.syncFromMprisService() }
+        function onArtistChanged() { root.syncFromMprisService() }
+        function onIsPlayingChanged() { root.syncFromMprisService() }
+        function onActivePlayerChanged() { root.syncFromMprisService() }
     }
+
+    Component.onCompleted: root.syncFromMprisService()
 
     Item {
         id: controlBox
@@ -212,6 +188,7 @@ Item {
 
     property real contentWidth: {
         let w = Math.max(titleMarquee.textWidth, artistMarquee.textWidth)
-        return (w > 0 ? w : 200 * s) + 140 * s
+        let minW = 300 * s
+        return (w > minW ? w : minW) + 140 * s
     }
 }

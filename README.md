@@ -4,11 +4,18 @@ A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic th
 
 ## 📸 Preview
 
-> *Add your screenshots here*
-
 | Bar | Dashboard | Widgets |
 |:---:|:---------:|:-------:|
-| ![bar](./assets/bar.png) | ![dashboard](./assets/dashboard.png) | ![widgets](./assets/widgets.png) |
+| <img width="500" alt="bar" src="https://github.com/user-attachments/assets/e48a06a8-0465-41f3-bf20-880e29eda411" /> | <img width="500" alt="dashboard" src="https://github.com/user-attachments/assets/fdccc76e-ef95-4072-a9d5-75975f1b9273" /> | <img width="500" alt="widgets" src="https://github.com/user-attachments/assets/dd27722a-ed61-4c9a-bb0c-b31cd51ec4ef" /> |
+
+<details>
+<summary>Other</summary>
+
+| | | |
+|:---:|:---:|:---:|
+| <img width="500" alt="other" src="https://github.com/user-attachments/assets/8e67f468-2f62-488a-9e01-22cab6c81dd5" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/3f4d09b9-c4e2-4812-bc0b-a5989fa35b8d" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/a44562ce-9e81-4c62-b3e6-5f931946ad54" /> |
+
+</details>
 
 ## 🚀 Features
 

@@ -86,6 +86,7 @@ Item {
     property bool hasAnyTrayItems: processedTrayItems.length > 0
     property bool hasOverflow: overflowItems.length > 0
     readonly property bool trayPanelOpen: !!(trayPopup && trayPopup.open)
+    readonly property Item activeChevron: BarLayoutState.systrayChevronPosition === "left" ? chevronLeft : chevronRight
 
     implicitHeight: itemSize
     implicitWidth: row.implicitWidth
@@ -100,7 +101,6 @@ Item {
             id: chevronLeft
             width: root.itemSize
             height: root.itemSize
-            Layout.order: BarLayoutState.systrayChevronPosition === "left" ? 0 : 2
             visible: root.hasAnyTrayItems && root.shouldCollapse && BarLayoutState.systrayChevronPosition === "left"
 
             Rectangle {
@@ -120,15 +120,37 @@ Item {
                             trayPopup.open = true
                             SysTrayState.openedTrayPanel = trayPopup
                         }
+                        chevronLeftAnim.restart()
                     }
                 }
 
-                ChevronShape {
+                ChevronLeft {
                     anchors.centerIn: parent
                     width: Theme.dp(16)
                     height: Theme.dp(16)
-                    direction: BarLayoutState.systrayChevronDirection
                     color: Theme.textPrimary
+                    visible: BarLayoutState.systrayChevronDirection === "left"
+                }
+                ChevronRight {
+                    anchors.centerIn: parent
+                    width: Theme.dp(16)
+                    height: Theme.dp(16)
+                    color: Theme.textPrimary
+                    visible: BarLayoutState.systrayChevronDirection === "right"
+                }
+                ChevronDown {
+                    anchors.centerIn: parent
+                    width: Theme.dp(16)
+                    height: Theme.dp(16)
+                    color: Theme.textPrimary
+                    visible: BarLayoutState.systrayChevronDirection === "down"
+                }
+
+                SequentialAnimation on scale {
+                    id: chevronLeftAnim
+                    running: false
+                    NumberAnimation { to: 0.8; duration: 80 }
+                    NumberAnimation { to: 1.0; duration: 80 }
                 }
             }
         }
@@ -139,7 +161,6 @@ Item {
                 id: barItem
                 width: root.itemSize
                 height: root.itemSize
-                Layout.order: 1
                 
                 required property var modelData
                 
@@ -155,7 +176,6 @@ Item {
             id: chevronRight
             width: root.itemSize
             height: root.itemSize
-            Layout.order: BarLayoutState.systrayChevronPosition === "right" ? 2 : 0
             visible: root.hasAnyTrayItems && root.shouldCollapse && BarLayoutState.systrayChevronPosition === "right"
 
             Rectangle {
@@ -175,15 +195,37 @@ Item {
                             trayPopup.open = true
                             SysTrayState.openedTrayPanel = trayPopup
                         }
+                        chevronRightAnim.restart()
                     }
                 }
 
-                ChevronShape {
+                ChevronLeft {
                     anchors.centerIn: parent
                     width: Theme.dp(16)
                     height: Theme.dp(16)
-                    direction: BarLayoutState.systrayChevronDirection
                     color: Theme.textPrimary
+                    visible: BarLayoutState.systrayChevronDirection === "left"
+                }
+                ChevronRight {
+                    anchors.centerIn: parent
+                    width: Theme.dp(16)
+                    height: Theme.dp(16)
+                    color: Theme.textPrimary
+                    visible: BarLayoutState.systrayChevronDirection === "right"
+                }
+                ChevronDown {
+                    anchors.centerIn: parent
+                    width: Theme.dp(16)
+                    height: Theme.dp(16)
+                    color: Theme.textPrimary
+                    visible: BarLayoutState.systrayChevronDirection === "down"
+                }
+
+                SequentialAnimation on scale {
+                    id: chevronRightAnim
+                    running: false
+                    NumberAnimation { to: 0.8; duration: 80 }
+                    NumberAnimation { to: 1.0; duration: 80 }
                 }
             }
         }
@@ -310,8 +352,8 @@ Item {
         implicitWidth: Theme.dp(240)
         implicitHeight: trayContent.implicitHeight + Theme.dp(32)
 
-        anchor.item: launcher
-        anchor.rect: BarLayoutState.isBottom ? Qt.rect(0, -(implicitHeight + Theme.dp(8)), 0, 0) : Qt.rect(0, launcher.height + Theme.dp(8), 0, 0)
+        anchor.item: root.activeChevron
+        anchor.rect: BarLayoutState.isBottom ? Qt.rect(0, -(implicitHeight + Theme.dp(8)), 0, 0) : Qt.rect(0, root.activeChevron.height + Theme.dp(8), 0, 0)
 
         Rectangle {
             anchors.fill: parent

@@ -1,9 +1,9 @@
 import QtQuick
 import qs.config
 
-// Cloudy weather icon drawn with Canvas
 Item {
     id: root
+
     width: Theme.dp(18)
     height: Theme.dp(18)
 
@@ -12,32 +12,32 @@ Item {
 
     Canvas {
         id: canvas
+
         anchors.centerIn: parent
         width: root.iconSize
         height: root.iconSize
 
         onPaint: {
-            const ctx = getContext("2d")
-            ctx.reset()
+            var ctx = getContext("2d")
+
+            ctx.clearRect(0, 0, width, height)
 
             ctx.fillStyle = root.iconColor
 
             ctx.beginPath()
-            ctx.arc(width * 0.38, height * 0.45, width * 0.16, Math.PI, 0)
-            ctx.arc(width * 0.55, height * 0.38, width * 0.2, Math.PI, 0)
-            ctx.arc(width * 0.72, height * 0.48, width * 0.14, Math.PI, 0)
-            ctx.closePath()
+            ctx.arc(width * 0.38, height * 0.52, width * 0.16, Math.PI, 0)
+            ctx.arc(width * 0.55, height * 0.44, width * 0.2, Math.PI, 0)
+            ctx.arc(width * 0.72, height * 0.54, width * 0.14, Math.PI, 0)
 
-            ctx.fillRect(width * 0.22, height * 0.45, width * 0.56, height * 0.18)
+            ctx.lineTo(width * 0.78, height * 0.68)
+            ctx.lineTo(width * 0.22, height * 0.68)
+
+            ctx.closePath()
             ctx.fill()
         }
 
-        Connections {
-            target: root
-            function onIconColorChanged() { canvas.requestPaint() }
-        }
-
-        Component.onCompleted: requestPaint()
+        onWidthChanged: requestPaint()
+        onHeightChanged: requestPaint()
     }
 
     onIconColorChanged: canvas.requestPaint()

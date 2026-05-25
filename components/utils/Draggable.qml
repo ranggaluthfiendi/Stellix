@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.config
+import qs.core.state
 
 Item {
     id: root

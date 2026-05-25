@@ -27,6 +27,12 @@ Item {
         unit: BarLayoutState.desktopWeatherUnit
     }
 
+    Connections {
+        target: BarLayoutState
+        function onDesktopWeatherCityChanged() { weather.refresh() }
+        function onDesktopWeatherUnitChanged() { weather.refresh() }
+    }
+
     readonly property string weatherIconType: {
         var d = weather.desc.toLowerCase()
         if (d.includes("sun") || d.includes("clear")) return "sunny"

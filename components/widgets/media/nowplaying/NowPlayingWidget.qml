@@ -28,11 +28,35 @@ Item {
     readonly property real screenH: Screen.height
 
     readonly property var pwService: BarLayoutState.getItem("pwService")
-    readonly property real audioPeak: (media.player && media.player.isPlaying) ? (pwService ? pwService.audioPeak : 0) : 0
-    readonly property var cavaBars: media.hasMedia ? CavaService.bars : []
+    readonly property var mprisSvc: BarLayoutState.getItem("mprisService")
+    readonly property bool hasMedia: mprisSvc && mprisSvc.title !== ""
+    readonly property bool hasArt: mprisSvc && (mprisSvc.localArtPath !== "" || mprisSvc.artUrl !== "")
+    property string artKey: ""
+    property string failedArtKey: ""
+    property string failedArtKeyBg: ""
 
-    NowPlayingService {
-        id: media
+    readonly property string displayArtUrl: mprisSvc && mprisSvc.localArtPath !== ""
+        ? "file://" + mprisSvc.localArtPath
+        : (mprisSvc && mprisSvc.artUrl !== "" ? mprisSvc.artUrl : "")
+
+    Connections {
+        target: mprisSvc
+        ignoreUnknownSignals: true
+        function onLocalArtPathChanged() {
+            root.artKey = root.displayArtUrl
+            root.failedArtKey = ""
+            root.failedArtKeyBg = ""
+        }
+        function onArtUrlChanged() {
+            root.artKey = root.displayArtUrl
+            root.failedArtKey = ""
+            root.failedArtKeyBg = ""
+        }
+        function onArtRefreshCounterChanged() {
+            root.artKey = root.displayArtUrl
+            root.failedArtKey = ""
+            root.failedArtKeyBg = ""
+        }
     }
 
     Item {
@@ -44,7 +68,7 @@ Item {
         property real defaultX: 30 * s
         property real defaultY: screenH - height - 30 * s
 
-        property real mediaOffset: media.hasMedia ? 0 : -(140 * s)
+        property real mediaOffset: root.hasMedia ? 0 : -(140 * s)
 
         x: BarLayoutState.desktopNowPlayingX
         y: BarLayoutState.desktopNowPlayingY
@@ -90,7 +114,7 @@ Item {
             primary: Theme.accent
             background: Theme.surface
 
-            opacity: media.hasMedia ? (0.4 + root.audioPeak * 0.6) : 0.4
+            opacity: root.hasMedia ? (0.4 + root.audioPeak * 0.6) : 0.4
 
             Behavior on opacity {
                 NumberAnimation { duration: 150 }
@@ -107,13 +131,13 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                hoverEnabled: media.hasMedia
-                cursorShape: media.hasMedia && media.targetWorkspace > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                hoverEnabled: root.hasMedia
+                cursorShape: root.hasMedia && mprisSvc.targetWorkspace > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
                 onEntered: parent.artHovered = true
                 onExited: parent.artHovered = false
                 onClicked: {
-                    if (media.targetWorkspace > 0) {
-                        media.goToMediaWorkspace()
+                    if (mprisSvc.targetWorkspace > 0) {
+                        mprisSvc.goToMediaWorkspace()
                     }
                 }
             }
@@ -124,13 +148,15 @@ Item {
                 anchors.fill: parent
                 clip: true
                 asynchronous: true
+                cache: false
 
-                source: media.hasMedia && media.localArtPath !== ""
-                    ? "file://" + media.localArtPath
-                    : (media.hasMedia && media.artUrl !== "" ? media.artUrl : "")
+                source: root.hasMedia && root.artKey && root.artKey !== root.failedArtKey
+                    ? root.artKey : ""
                 fillMode: Image.PreserveAspectCrop
+                sourceSize.width: 140 * s
+                sourceSize.height: 97 * s
 
-                visible: media.hasMedia && (media.localArtPath !== "" || media.artUrl !== "") && status !== Image.Error
+                visible: status === Image.Ready
                 opacity: visible ? (parent.artHovered ? 0.35 : 1.0) : 0
 
                 Behavior on source {
@@ -145,7 +171,12 @@ Item {
                     NumberAnimation { duration: 200 }
                 }
 
-                onStatusChanged: if (status === Image.Error) source = ""
+                onStatusChanged: {
+                    if (status === Image.Error) {
+                        root.failedArtKey = root.displayArtUrl
+                        source = ""
+                    }
+                }
             }
 
             // Blurred background for better contrast and "smart" look
@@ -153,10 +184,28 @@ Item {
                 id: blurredBg
                 anchors.fill: parent
                 z: -1
-                source: coverArt.source
+                source: root.hasMedia && root.artKey && root.artKey !== root.failedArtKeyBg
+                    ? root.artKey : ""
                 fillMode: Image.PreserveAspectCrop
-                visible: coverArt.visible
+                visible: status === Image.Ready
+                cache: false
+                asynchronous: true
                 opacity: 0.4
+
+                Behavior on source {
+                    SequentialAnimation {
+                        NumberAnimation { target: blurredBg; property: "opacity"; to: 0; duration: 250; easing.type: Easing.OutCubic }
+                        PropertyAction { target: blurredBg; property: "source" }
+                        NumberAnimation { target: blurredBg; property: "opacity"; to: 0.4; duration: 250; easing.type: Easing.InCubic }
+                    }
+                }
+
+                onStatusChanged: {
+                    if (status === Image.Error) {
+                        root.failedArtKeyBg = root.displayArtUrl
+                        source = ""
+                    }
+                }
             }
 
             // --- Smooth Wave Visualizer Overlay ---
@@ -171,7 +220,7 @@ Item {
                 anchors.rightMargin: 10 * s
                 height: 40 * s
                 z: 6
-                active: media.hasMedia && media.player && media.player.isPlaying && !parent.artHovered && !media.hasArt
+                active: root.hasMedia && mprisSvc.isPlaying && !parent.artHovered && coverArt.status !== Image.Ready
                 waveColor: Theme.accent
                 opacity: 0.8
             }
@@ -180,7 +229,7 @@ Item {
                 anchors.centerIn: parent
                 width: 40 * s
                 height: 40 * s
-                visible: media.hasMedia && media.localArtPath === "" && media.artUrl === "" && !parent.artHovered
+                visible: root.hasMedia && coverArt.status !== Image.Ready && !parent.artHovered
                 // Wave already shown above
             }
 
@@ -188,7 +237,7 @@ Item {
                 anchors.fill: parent
                 color: Qt.rgba(0, 0, 0, 0.35)
                 opacity: parent.artHovered ? 1 : 0
-                visible: opacity > 0 && media.hasMedia
+                visible: opacity > 0 && root.hasMedia
                 z: 5
 
                 Behavior on opacity {
@@ -200,7 +249,7 @@ Item {
                 anchors.centerIn: parent
                 spacing: 8 * s
                 opacity: parent.artHovered ? 1 : 0
-                visible: opacity > 0 && media.hasMedia
+                visible: opacity > 0 && root.hasMedia
                 z: 10
 
                 Behavior on opacity {
@@ -213,7 +262,7 @@ Item {
                     width: 32 * s
                     height: 32 * s
                     source: {
-                        var de = media.player ? media.player.desktopEntry : ""
+                        var de = mprisSvc ? mprisSvc.desktopEntry : ""
                         if (de) {
                             var entry = DesktopEntries.byId(de)
                             if (entry && entry.icon) {
@@ -237,7 +286,7 @@ Item {
 
                 Text {
                     anchors.horizontalCenter: parent.horizontalCenter
-                    text: media.identity || ""
+                    text: mprisSvc ? mprisSvc.identity : ""
                     color: Theme.textPrimary
                     font.family: Typography.fontFamily
                     font.pixelSize: 9 * s
@@ -255,7 +304,7 @@ Item {
                     border.width: 1
                     border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.4)
                     radius: Theme.dp(4)
-                    visible: media.targetWorkspace > 0
+                    visible: mprisSvc && mprisSvc.targetWorkspace > 0
 
                     Row {
                         id: wsIndicatorRow
@@ -268,7 +317,7 @@ Item {
                         }
 
                         Text {
-                            text: "WS " + media.targetWorkspace
+                            text: "WS " + mprisSvc.targetWorkspace
                             color: Theme.accent
                             font.family: Typography.fontFamily
                             font.pixelSize: 8 * s
@@ -279,7 +328,7 @@ Item {
                     MouseArea {
                         anchors.fill: parent
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: media.goToMediaWorkspace()
+                        onClicked: mprisSvc.goToMediaWorkspace()
                     }
                 }
             }
@@ -289,11 +338,11 @@ Item {
             id: trackInfo
             s: root.s
             primary: Theme.textPrimary
-            player: media.player
+            player: mprisSvc ? mprisSvc.activePlayer : null
 
             x: (5 * s) + root.contentOffsetX + container.mediaOffset
 
-            opacity: media.hasMedia ? 1 : 0
+            opacity: root.hasMedia ? 1 : 0
             Behavior on opacity {
                 NumberAnimation { duration: 200 }
             }

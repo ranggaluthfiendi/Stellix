@@ -63,7 +63,7 @@ VabContentPage {
             headerActions: RowLayout {
                 spacing: Theme.dp(4)
                 Repeater {
-                    model: ["ACCENT", "WHITE", "BLACK"]
+                    model: ["ACCENT", "SUCCESS", "DANGER", "WHITE", "BLACK"]
                     delegate: VabButton {
                         text: modelData
                         active: BarLayoutState["desktop" + page.metricKey + "ColorMode"] === modelData.toLowerCase()

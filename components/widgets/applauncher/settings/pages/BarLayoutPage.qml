@@ -7,6 +7,7 @@ import qs.core.services
 import qs.core.state
 import qs.core.time
 import qs.core.settings
+import qs.components.elements
 import "../components"
 
 VabContentPage {
@@ -479,17 +480,19 @@ VabContentPage {
                     Layout.topMargin: Theme.dp(4)
                     Text { text: "Arrow Position"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
                     Rectangle {
+                        id: posLeftBtn
                         width: Theme.dp(28)
                         height: Theme.dp(28)
                         color: chevronLeftBtnMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.systrayChevronPosition === "left" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
                         radius: Theme.dp(4)
                         border.color: BarLayoutState.systrayChevronPosition === "left" ? Theme.accent : Theme.border
                         border.width: 1
-                        ChevronShape {
+                        scale: chevronLeftBtnMouse.containsMouse ? 1.1 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        ChevronLeft {
                             anchors.centerIn: parent
                             width: Theme.dp(14)
                             height: Theme.dp(14)
-                            direction: "left"
                             color: BarLayoutState.systrayChevronPosition === "left" ? Theme.accent : Theme.textMuted
                         }
                         MouseArea {
@@ -500,17 +503,19 @@ VabContentPage {
                         }
                     }
                     Rectangle {
+                        id: posRightBtn
                         width: Theme.dp(28)
                         height: Theme.dp(28)
                         color: chevronRightBtnMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.systrayChevronPosition === "right" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
                         radius: Theme.dp(4)
                         border.color: BarLayoutState.systrayChevronPosition === "right" ? Theme.accent : Theme.border
                         border.width: 1
-                        ChevronShape {
+                        scale: chevronRightBtnMouse.containsMouse ? 1.1 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        ChevronRight {
                             anchors.centerIn: parent
                             width: Theme.dp(14)
                             height: Theme.dp(14)
-                            direction: "right"
                             color: BarLayoutState.systrayChevronPosition === "right" ? Theme.accent : Theme.textMuted
                         }
                         MouseArea {
@@ -528,38 +533,42 @@ VabContentPage {
                     Layout.topMargin: Theme.dp(4)
                     Text { text: "Arrow Direction"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
                     Rectangle {
+                        id: dirLeftBtn
                         width: Theme.dp(28)
                         height: Theme.dp(28)
-                        color: arrowUpMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.systrayChevronDirection === "up" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
+                        color: arrowLeftMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.systrayChevronDirection === "left" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
                         radius: Theme.dp(4)
-                        border.color: BarLayoutState.systrayChevronDirection === "up" ? Theme.accent : Theme.border
+                        border.color: BarLayoutState.systrayChevronDirection === "left" ? Theme.accent : Theme.border
                         border.width: 1
-                        ChevronShape {
+                        scale: arrowLeftMouse.containsMouse ? 1.1 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        ChevronLeft {
                             anchors.centerIn: parent
                             width: Theme.dp(14)
                             height: Theme.dp(14)
-                            direction: "up"
-                            color: BarLayoutState.systrayChevronDirection === "up" ? Theme.accent : Theme.textMuted
+                            color: BarLayoutState.systrayChevronDirection === "left" ? Theme.accent : Theme.textMuted
                         }
                         MouseArea {
-                            id: arrowUpMouse
+                            id: arrowLeftMouse
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: BarLayoutState.systrayChevronDirection = "up"
+                            onClicked: BarLayoutState.systrayChevronDirection = "left"
                         }
                     }
                     Rectangle {
+                        id: dirDownBtn
                         width: Theme.dp(28)
                         height: Theme.dp(28)
                         color: arrowDownMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.systrayChevronDirection === "down" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
                         radius: Theme.dp(4)
                         border.color: BarLayoutState.systrayChevronDirection === "down" ? Theme.accent : Theme.border
                         border.width: 1
-                        ChevronShape {
+                        scale: arrowDownMouse.containsMouse ? 1.1 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        ChevronDown {
                             anchors.centerIn: parent
                             width: Theme.dp(14)
                             height: Theme.dp(14)
-                            direction: "down"
                             color: BarLayoutState.systrayChevronDirection === "down" ? Theme.accent : Theme.textMuted
                         }
                         MouseArea {
@@ -567,6 +576,29 @@ VabContentPage {
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: BarLayoutState.systrayChevronDirection = "down"
+                        }
+                    }
+                    Rectangle {
+                        id: dirRightBtn
+                        width: Theme.dp(28)
+                        height: Theme.dp(28)
+                        color: arrowRightDirMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.systrayChevronDirection === "right" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
+                        radius: Theme.dp(4)
+                        border.color: BarLayoutState.systrayChevronDirection === "right" ? Theme.accent : Theme.border
+                        border.width: 1
+                        scale: arrowRightDirMouse.containsMouse ? 1.1 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        ChevronRight {
+                            anchors.centerIn: parent
+                            width: Theme.dp(14)
+                            height: Theme.dp(14)
+                            color: BarLayoutState.systrayChevronDirection === "right" ? Theme.accent : Theme.textMuted
+                        }
+                        MouseArea {
+                            id: arrowRightDirMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            onClicked: BarLayoutState.systrayChevronDirection = "right"
                         }
                     }
                 }

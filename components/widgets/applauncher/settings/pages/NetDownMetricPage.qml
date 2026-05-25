@@ -54,7 +54,7 @@ VabContentPage {
             headerActions: RowLayout {
                 spacing: Theme.dp(4)
                 Repeater {
-                    model: ["ACCENT", "WHITE", "BLACK"]
+                    model: ["ACCENT", "SUCCESS", "DANGER", "WHITE", "BLACK"]
                     delegate: VabButton {
                         text: modelData
                         active: BarLayoutState["desktop" + page.metricKey + "ColorMode"] === modelData.toLowerCase()
@@ -81,29 +81,121 @@ VabContentPage {
         }
 
         VabSettingsCard {
+            id: netDownLabelCard
+            property bool expanded: false
             itemIndex: 3
             isFocused: page.focusInContent && page.contentFocusIndex === 3
             title: "Label"
             desc: BarLayoutState.desktopNetDownLabel || "DOWN"
 
-            headerActions: Rectangle {
-                Layout.preferredWidth: Theme.dp(100)
-                Layout.preferredHeight: Theme.dp(32)
-                color: Theme.bgSecondary
-                border.width: 1
-                border.color: netDownInput.activeFocus ? Theme.accent : Theme.border
-                TextInput {
-                    id: netDownInput
-                    anchors.fill: parent
-                    anchors.leftMargin: Theme.dp(8)
-                    verticalAlignment: TextInput.AlignVCenter
-                    text: BarLayoutState.desktopNetDownLabel || "DOWN"
-                    color: Theme.textPrimary
-                    font.pixelSize: Theme.dp(10)
-                    selectByMouse: true
-                    onAccepted: {
-                        BarLayoutState.desktopNetDownLabel = text
-                        BarLayoutState.save()
+            headerActions: VabButton {
+                text: netDownLabelCard.expanded ? "Close" : "Options"
+                onClicked: netDownLabelCard.expanded = !netDownLabelCard.expanded
+            }
+
+            ColumnLayout {
+                visible: netDownLabelCard.expanded
+                Layout.fillWidth: true
+                spacing: Theme.dp(10)
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(8)
+                    Text {
+                        text: "Custom"
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.dp(9)
+                        font.weight: Font.Bold
+                        Layout.preferredWidth: Theme.dp(60)
+                    }
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Theme.dp(32)
+                        color: Theme.bgSecondary
+                        border.width: 1
+                        border.color: netDownInput.activeFocus ? Theme.accent : Theme.border
+                        TextInput {
+                            id: netDownInput
+                            anchors.fill: parent
+                            anchors.leftMargin: Theme.dp(8)
+                            verticalAlignment: TextInput.AlignVCenter
+                            text: BarLayoutState.desktopNetDownLabel || "DOWN"
+                            color: Theme.textPrimary
+                            font.pixelSize: Theme.dp(10)
+                            selectByMouse: true
+                        }
+                    }
+                    VabButton {
+                        text: "Apply"
+                        onClicked: {
+                            BarLayoutState.desktopNetDownLabel = netDownInput.text
+                            BarLayoutState.save()
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(4)
+                    Text {
+                        text: "Presets"
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.dp(9)
+                        font.weight: Font.Bold
+                    }
+                    GridLayout {
+                        Layout.fillWidth: true
+                        columns: 2
+                        columnSpacing: Theme.dp(6)
+                        rowSpacing: Theme.dp(6)
+
+                        Repeater {
+                            model: [
+                                { label: "DOWN", value: "DOWN" },
+                                { label: "DOWNLOAD", value: "DOWNLOAD" },
+                                { label: "RX", value: "RX" },
+                                { label: "IN", value: "IN" },
+                                { label: "▼", value: "▼" },
+                                { label: "↓", value: "↓" }
+                            ]
+                            delegate: VabButton {
+                                required property var modelData
+                                Layout.fillWidth: true
+                                text: modelData.label
+                                active: BarLayoutState.desktopNetDownLabel === modelData.value
+                                onClicked: {
+                                    BarLayoutState.desktopNetDownLabel = modelData.value
+                                    BarLayoutState.save()
+                                }
+                            }
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(4)
+                    Text {
+                        text: "Label Color"
+                        color: Theme.textMuted
+                        font.pixelSize: Theme.dp(9)
+                        font.weight: Font.Bold
+                    }
+                    RowLayout {
+                        spacing: Theme.dp(4)
+                        Repeater {
+                            model: ["ACCENT", "SUCCESS", "DANGER", "WHITE", "BLACK"]
+                            delegate: VabButton {
+                                required property string modelData
+                                Layout.fillWidth: true
+                                text: modelData
+                                active: BarLayoutState.desktopNetDownColorMode === modelData.toLowerCase()
+                                onClicked: {
+                                    BarLayoutState.desktopNetDownColorMode = modelData.toLowerCase()
+                                    BarLayoutState.save()
+                                }
+                            }
+                        }
                     }
                 }
             }

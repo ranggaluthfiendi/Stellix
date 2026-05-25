@@ -147,7 +147,7 @@ VabContentPage {
                     Rectangle {
                         id: netLabelContainer
                         Layout.fillWidth: true
-                        height: netLabelRow.implicitHeight
+                        height: netLabelColumn.implicitHeight
                         color: "transparent"
 
                         property int _netLabelKey: 0
@@ -158,30 +158,167 @@ VabContentPage {
                             function onDesktopStatsNetUpLabelChanged() { netLabelContainer._netLabelKey++ }
                         }
 
-                        RowLayout {
-                            id: netLabelRow
+                        ColumnLayout {
+                            id: netLabelColumn
                             anchors.fill: parent
-                            spacing: Theme.dp(12)
-                            Text { text: "Preset"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.preferredWidth: Theme.dp(100) }
+                            spacing: Theme.dp(8)
+
                             RowLayout {
-                                spacing: Theme.dp(4)
-                                Repeater {
-                                    model: netLabelContainer._netLabelKey > 0 ? ["DOWN/UP", "DOWNLOAD/UPLOAD", "RX/TX", "IN/OUT"] : []
-                                    delegate: VabButton {
-                                        required property string modelData
-                                        text: modelData
-                                        active: {
-                                            var preset = modelData
-                                            var down = preset.split("/")[0]
-                                            var up = preset.split("/")[1]
-                                            return BarLayoutState.desktopStatsNetDownLabel === down && BarLayoutState.desktopStatsNetUpLabel === up
+                                Layout.fillWidth: true
+                                spacing: Theme.dp(8)
+                                Text {
+                                    text: "Down"
+                                    color: Theme.textMuted
+                                    font.pixelSize: Theme.dp(9)
+                                    font.weight: Font.Bold
+                                    Layout.preferredWidth: Theme.dp(50)
+                                }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: Theme.dp(28)
+                                    color: Theme.bgSecondary
+                                    border.width: 1
+                                    border.color: netDownInput.activeFocus ? Theme.accent : Theme.border
+                                    TextInput {
+                                        id: netDownInput
+                                        anchors.fill: parent
+                                        anchors.leftMargin: Theme.dp(8)
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        text: BarLayoutState.desktopStatsNetDownLabel || "DOWN"
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.dp(9)
+                                        selectByMouse: true
+                                    }
+                                }
+                                VabButton {
+                                    text: "Apply"
+                                    onClicked: {
+                                        BarLayoutState.desktopStatsNetDownLabel = netDownInput.text
+                                        BarLayoutState.save()
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Theme.dp(8)
+                                Text {
+                                    text: "Up"
+                                    color: Theme.textMuted
+                                    font.pixelSize: Theme.dp(9)
+                                    font.weight: Font.Bold
+                                    Layout.preferredWidth: Theme.dp(50)
+                                }
+                                Rectangle {
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: Theme.dp(28)
+                                    color: Theme.bgSecondary
+                                    border.width: 1
+                                    border.color: netUpInput.activeFocus ? Theme.accent : Theme.border
+                                    TextInput {
+                                        id: netUpInput
+                                        anchors.fill: parent
+                                        anchors.leftMargin: Theme.dp(8)
+                                        verticalAlignment: TextInput.AlignVCenter
+                                        text: BarLayoutState.desktopStatsNetUpLabel || "UP"
+                                        color: Theme.textPrimary
+                                        font.pixelSize: Theme.dp(9)
+                                        selectByMouse: true
+                                    }
+                                }
+                                VabButton {
+                                    text: "Apply"
+                                    onClicked: {
+                                        BarLayoutState.desktopStatsNetUpLabel = netUpInput.text
+                                        BarLayoutState.save()
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Theme.dp(8)
+                                Text {
+                                    text: "Presets"
+                                    color: Theme.textMuted
+                                    font.pixelSize: Theme.dp(9)
+                                    font.weight: Font.Bold
+                                    Layout.preferredWidth: Theme.dp(50)
+                                }
+                                RowLayout {
+                                    spacing: Theme.dp(4)
+                                    Repeater {
+                                        model: netLabelContainer._netLabelKey > 0 ? ["DOWN/UP", "DOWNLOAD/UPLOAD", "RX/TX", "IN/OUT", "▼/▲", "↓/↑"] : []
+                                        delegate: VabButton {
+                                            required property string modelData
+                                            text: modelData
+                                            active: {
+                                                var preset = modelData
+                                                var down = preset.split("/")[0]
+                                                var up = preset.split("/")[1]
+                                                return BarLayoutState.desktopStatsNetDownLabel === down && BarLayoutState.desktopStatsNetUpLabel === up
+                                            }
+                                            onClicked: {
+                                                var preset = modelData
+                                                var parts = preset.split("/")
+                                                BarLayoutState.desktopStatsNetDownLabel = parts[0]
+                                                BarLayoutState.desktopStatsNetUpLabel = parts[1]
+                                                BarLayoutState.save()
+                                            }
                                         }
-                                        onClicked: {
-                                            var preset = modelData
-                                            var parts = preset.split("/")
-                                            BarLayoutState.desktopStatsNetDownLabel = parts[0]
-                                            BarLayoutState.desktopStatsNetUpLabel = parts[1]
-                                            BarLayoutState.save()
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Theme.dp(8)
+                                Text {
+                                    text: "Down Color"
+                                    color: Theme.textMuted
+                                    font.pixelSize: Theme.dp(9)
+                                    font.weight: Font.Bold
+                                    Layout.preferredWidth: Theme.dp(50)
+                                }
+                                RowLayout {
+                                    spacing: Theme.dp(4)
+                                    Repeater {
+                                        model: ["ACCENT", "SUCCESS", "DANGER", "WHITE", "BLACK"]
+                                        delegate: VabButton {
+                                            required property string modelData
+                                            text: modelData
+                                            active: BarLayoutState.desktopStatsNetDownLabelColorMode === modelData.toLowerCase()
+                                            onClicked: {
+                                                BarLayoutState.desktopStatsNetDownLabelColorMode = modelData.toLowerCase()
+                                                BarLayoutState.save()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                spacing: Theme.dp(8)
+                                Text {
+                                    text: "Up Color"
+                                    color: Theme.textMuted
+                                    font.pixelSize: Theme.dp(9)
+                                    font.weight: Font.Bold
+                                    Layout.preferredWidth: Theme.dp(50)
+                                }
+                                RowLayout {
+                                    spacing: Theme.dp(4)
+                                    Repeater {
+                                        model: ["ACCENT", "SUCCESS", "DANGER", "WHITE", "BLACK"]
+                                        delegate: VabButton {
+                                            required property string modelData
+                                            text: modelData
+                                            active: BarLayoutState.desktopStatsNetUpLabelColorMode === modelData.toLowerCase()
+                                            onClicked: {
+                                                BarLayoutState.desktopStatsNetUpLabelColorMode = modelData.toLowerCase()
+                                                BarLayoutState.save()
+                                            }
                                         }
                                     }
                                 }

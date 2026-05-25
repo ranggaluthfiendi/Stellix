@@ -56,11 +56,39 @@ Item {
                 return Theme.textPrimary
             }
 
+            readonly property color netDownLabelColor: {
+                var mode = BarLayoutState.desktopStatsNetDownLabelColorMode || "success"
+                if (mode === "white") return Qt.rgba(1, 1, 1, 0.8)
+                if (mode === "black") return Qt.rgba(0, 0, 0, 0.8)
+                if (mode === "success") return Theme.success
+                if (mode === "danger") return Theme.danger
+                return Theme.accent
+            }
+            readonly property color netUpLabelColor: {
+                var mode = BarLayoutState.desktopStatsNetUpLabelColorMode || "danger"
+                if (mode === "white") return Qt.rgba(1, 1, 1, 0.8)
+                if (mode === "black") return Qt.rgba(0, 0, 0, 0.8)
+                if (mode === "success") return Theme.success
+                if (mode === "danger") return Theme.danger
+                return Theme.accent
+            }
+
+            property int _netLabelKey: 0
+            Connections {
+                target: BarLayoutState
+                function onDesktopStatsNetDownLabelChanged() { container._netLabelKey++ }
+                function onDesktopStatsNetUpLabelChanged() { container._netLabelKey++ }
+                function onDesktopStatsNetDownLabelColorModeChanged() { container._netLabelKey++ }
+                function onDesktopStatsNetUpLabelColorModeChanged() { container._netLabelKey++ }
+            }
+
             readonly property string netDownText: {
+                container._netLabelKey
                 var v = BarLayoutState.desktopStatsNetDownLabel
                 return (v !== undefined && v !== "") ? v : "DOWN"
             }
             readonly property string netUpText: {
+                container._netLabelKey
                 var v = BarLayoutState.desktopStatsNetUpLabel
                 return (v !== undefined && v !== "") ? v : "UP"
             }
@@ -73,7 +101,7 @@ Item {
                     Text { text: "CPU"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
                     Text {
                         text: sysSvc ? (Math.round(sysSvc.cpuCount * 4) + "%") : "0%"
-                        color: container.valueColor; font.pixelSize: 22 * s; font.weight: Font.Bold
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
                     }
                 }
             }
@@ -135,7 +163,7 @@ Item {
                     Text { text: "UPTIME"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
                     Text {
                         text: sysSvc && sysSvc.uptime ? sysSvc.uptime : "0d 0h"
-                        color: container.valueColor; font.pixelSize: 14 * s; font.weight: Font.Bold
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
                     }
                 }
             }
@@ -155,20 +183,24 @@ Item {
 
             Component {
                 id: netComp
-                RowLayout {
-                    spacing: 20 * s
+                ColumnLayout {
+                    spacing: 2 * s
                     visible: BarLayoutState.desktopStatsShowNet
-                    ColumnLayout {
-                        spacing: 2 * s
+                    RowLayout {
+                        spacing: 16 * s
                         Layout.alignment: Qt.AlignHCenter
-                        Text { text: root.netDownText !== undefined ? root.netDownText : "DOWN"; color: BarLayoutState.desktopStatsColorMode === "accent" ? Theme.success : container.labelColor; font.pixelSize: 9 * s; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                        Text { text: sysSvc ? sysSvc.netDown : "0 KB/s"; color: container.valueColor; font.pixelSize: 14 * s; font.weight: Font.Medium; horizontalAlignment: Text.AlignHCenter }
+                        ColumnLayout {
+                            spacing: 2 * s
+                            Layout.alignment: Qt.AlignHCenter
+                        Text { text: container.netDownText; color: container.netDownLabelColor; font.pixelSize: 10 * s; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                        Text { text: sysSvc ? sysSvc.netDown : "0 KB/s"; color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
                     }
                     ColumnLayout {
                         spacing: 2 * s
                         Layout.alignment: Qt.AlignHCenter
-                        Text { text: root.netUpText !== undefined ? root.netUpText : "UP"; color: BarLayoutState.desktopStatsColorMode === "accent" ? Theme.danger : container.labelColor; font.pixelSize: 9 * s; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
-                        Text { text: sysSvc ? sysSvc.netUp : "0 KB/s"; color: container.valueColor; font.pixelSize: 14 * s; font.weight: Font.Medium; horizontalAlignment: Text.AlignHCenter }
+                        Text { text: container.netUpText; color: container.netUpLabelColor; font.pixelSize: 10 * s; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                            Text { text: sysSvc ? sysSvc.netUp : "0 KB/s"; color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold; horizontalAlignment: Text.AlignHCenter }
+                        }
                     }
                 }
             }
@@ -189,7 +221,7 @@ Item {
                 Loader { sourceComponent: diskComp; visible: BarLayoutState.desktopStatsShowDisk }
                 Loader { sourceComponent: uptimeComp; visible: BarLayoutState.desktopStatsShowUptime }
                 Loader { sourceComponent: tempComp; visible: BarLayoutState.desktopStatsShowTemp }
-                Loader { sourceComponent: netComp; visible: BarLayoutState.desktopStatsShowNet; Layout.columnSpan: BarLayoutState.desktopStatsLayout === "compact" ? 2 : 1 }
+                Loader { sourceComponent: netComp; visible: BarLayoutState.desktopStatsShowNet; Layout.columnSpan: BarLayoutState.desktopStatsLayout === "compact" ? 2 : 2; active: BarLayoutState.desktopStatsShowNet }
             }
 
             Draggable {
