@@ -70,6 +70,10 @@ Item {
     onSystrayShowAllChanged: save()
     property int systrayCollapseLimit: 5
     onSystrayCollapseLimitChanged: save()
+    property string systrayChevronPosition: "right"
+    onSystrayChevronPositionChanged: save()
+    property string systrayChevronDirection: "down"
+    onSystrayChevronDirectionChanged: save()
 
     // --- Desktop Widgets State ---
     property bool showScreenClock: false
@@ -650,6 +654,8 @@ Item {
 
         systrayShowAll = true
         systrayCollapseLimit = 5
+        systrayChevronPosition = "right"
+        systrayChevronDirection = "down"
 
         weatherShowIcon = true
         weatherShowTemp = true
@@ -800,6 +806,8 @@ Item {
 
             systrayShowAll: root.systrayShowAll,
             systrayCollapseLimit: root.systrayCollapseLimit,
+            systrayChevronPosition: root.systrayChevronPosition,
+            systrayChevronDirection: root.systrayChevronDirection,
 
             weatherShowIcon: root.weatherShowIcon,
             weatherShowTemp: root.weatherShowTemp,
@@ -1011,6 +1019,8 @@ Item {
 
                     if (data.hasOwnProperty("systrayShowAll")) root.systrayShowAll = data.systrayShowAll
                     if (data.hasOwnProperty("systrayCollapseLimit")) root.systrayCollapseLimit = data.systrayCollapseLimit
+                    if (data.hasOwnProperty("systrayChevronPosition")) root.systrayChevronPosition = data.systrayChevronPosition
+                    if (data.hasOwnProperty("systrayChevronDirection")) root.systrayChevronDirection = data.systrayChevronDirection
 
                     if (data.hasOwnProperty("weatherShowIcon")) root.weatherShowIcon = data.weatherShowIcon
                     if (data.hasOwnProperty("weatherShowTemp")) root.weatherShowTemp = data.weatherShowTemp

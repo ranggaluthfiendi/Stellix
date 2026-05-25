@@ -64,14 +64,18 @@ Item {
 
     property var processedTrayItems: sortAndFilterItems(trayItems)
     
-    readonly property bool shouldCollapse: !BarLayoutState.systrayShowAll && (processedTrayItems.length > BarLayoutState.systrayCollapseLimit)
+    readonly property int visibleOnBar: BarLayoutState.systrayShowAll 
+        ? BarLayoutState.systrayCollapseLimit 
+        : 0
+    
+    readonly property bool shouldCollapse: processedTrayItems.length > visibleOnBar
     
     readonly property var barItems: shouldCollapse
-        ? processedTrayItems.slice(0, BarLayoutState.systrayCollapseLimit)
+        ? processedTrayItems.slice(0, visibleOnBar)
         : processedTrayItems
 
     readonly property var visibleItems: shouldCollapse
-        ? processedTrayItems.slice(BarLayoutState.systrayCollapseLimit)
+        ? processedTrayItems.slice(visibleOnBar)
         : []
 
     readonly property var overflowItems: []
@@ -92,37 +96,22 @@ Item {
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
 
-        Repeater {
-            model: root.barItems
-            delegate: Item {
-                id: barItem
-                width: root.itemSize
-                height: root.itemSize
-                
-                required property var modelData
-                
-                SysTrayIcon {
-                    anchors.fill: parent
-                    item: barItem.modelData
-                    size: root.itemSize
-                }
-            }
-        }
-
         Item {
-            id: launcher
+            id: chevronLeft
             width: root.itemSize
             height: root.itemSize
-            visible: root.hasAnyTrayItems && root.shouldCollapse
+            Layout.order: BarLayoutState.systrayChevronPosition === "left" ? 0 : 2
+            visible: root.hasAnyTrayItems && root.shouldCollapse && BarLayoutState.systrayChevronPosition === "left"
 
             Rectangle {
                 anchors.fill: parent
                 radius: 0
-                color: launcherMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : (trayPopup.open ? Theme.bgSecondary : "transparent")
+                color: chevronLeftMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : (trayPopup.open ? Theme.bgSecondary : "transparent")
                 
                 MouseArea {
-                    id: launcherMouse
+                    id: chevronLeftMouse
                     anchors.fill: parent
+                    hoverEnabled: true
                     onClicked: {
                         if (trayPopup.open) {
                             SysTrayState.forceCloseAll()
@@ -138,7 +127,62 @@ Item {
                     anchors.centerIn: parent
                     width: Theme.dp(16)
                     height: Theme.dp(16)
-                    direction: trayPopup.open ? "up" : "down"
+                    direction: BarLayoutState.systrayChevronDirection
+                    color: Theme.textPrimary
+                }
+            }
+        }
+
+        Repeater {
+            model: root.barItems
+            delegate: Item {
+                id: barItem
+                width: root.itemSize
+                height: root.itemSize
+                Layout.order: 1
+                
+                required property var modelData
+                
+                SysTrayIcon {
+                    anchors.fill: parent
+                    item: barItem.modelData
+                    size: root.itemSize
+                }
+            }
+        }
+
+        Item {
+            id: chevronRight
+            width: root.itemSize
+            height: root.itemSize
+            Layout.order: BarLayoutState.systrayChevronPosition === "right" ? 2 : 0
+            visible: root.hasAnyTrayItems && root.shouldCollapse && BarLayoutState.systrayChevronPosition === "right"
+
+            Rectangle {
+                anchors.fill: parent
+                radius: 0
+                color: chevronRightMouse.containsMouse ? Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.08) : (trayPopup.open ? Theme.bgSecondary : "transparent")
+                
+                MouseArea {
+                    id: chevronRightMouse
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        if (trayPopup.open) {
+                            SysTrayState.forceCloseAll()
+                        } else {
+                            SysTrayState.closeAll()
+                            trayPopup.open = true
+                            SysTrayState.openedTrayPanel = trayPopup
+                        }
+                    }
+                }
+
+                ChevronShape {
+                    anchors.centerIn: parent
+                    width: Theme.dp(16)
+                    height: Theme.dp(16)
+                    direction: BarLayoutState.systrayChevronDirection
                     color: Theme.textPrimary
                 }
             }
@@ -212,7 +256,6 @@ Item {
         menuLoader.active = true
         menuPopup.internalVisible = true
         SysTrayState.openedMenu = menuPopup
-        overflowPopup.open = false
     }
 
     PopupWindow {

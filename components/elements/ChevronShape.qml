@@ -24,10 +24,18 @@ Item {
                 ctx.moveTo(width * 0.2, height * 0.35)
                 ctx.lineTo(width * 0.5, height * 0.7)
                 ctx.lineTo(width * 0.8, height * 0.35)
-            } else {
+            } else if (root.direction === "down") {
                 ctx.moveTo(width * 0.35, height * 0.2)
                 ctx.lineTo(width * 0.7, height * 0.5)
                 ctx.lineTo(width * 0.35, height * 0.8)
+            } else if (root.direction === "left") {
+                ctx.moveTo(width * 0.7, height * 0.2)
+                ctx.lineTo(width * 0.35, height * 0.5)
+                ctx.lineTo(width * 0.7, height * 0.8)
+            } else if (root.direction === "right") {
+                ctx.moveTo(width * 0.3, height * 0.2)
+                ctx.lineTo(width * 0.65, height * 0.5)
+                ctx.lineTo(width * 0.3, height * 0.8)
             }
 
             ctx.closePath()
