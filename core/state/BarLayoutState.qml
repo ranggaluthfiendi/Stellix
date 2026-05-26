@@ -65,9 +65,9 @@ Item {
     property int workspaceCount: 5
     onWorkspaceCountChanged: save()
 
-    property string workspaceStyle: "dots"
+    property string workspaceStyle: "pills"
     onWorkspaceStyleChanged: save()
-    property int workspaceSpacing: 5
+    property int workspaceSpacing: 15
     onWorkspaceSpacingChanged: save()
     property int workspaceDotSize: 6
     onWorkspaceDotSizeChanged: save()
@@ -96,7 +96,7 @@ Item {
     ]
 
     // SysTray options
-    property bool systrayShowAll: true
+    property bool systrayShowAll: false
     onSystrayShowAllChanged: save()
     property int systrayCollapseLimit: 1
     onSystrayCollapseLimitChanged: save()
@@ -454,15 +454,15 @@ Item {
         }
     }
 
-    property bool showScreenNowPlaying: false
+    property bool showScreenNowPlaying: true
     onShowScreenNowPlayingChanged: save()
-    property real desktopNowPlayingX: 1400
+    property real desktopNowPlayingX: 32.1
     onDesktopNowPlayingXChanged: save()
-    property real desktopNowPlayingY: 40
+    property real desktopNowPlayingY: 810.8
     onDesktopNowPlayingYChanged: save()
     property real desktopNowPlayingRotation: 0
     onDesktopNowPlayingRotationChanged: save()
-    property real desktopNowPlayingScale: 1.0
+    property real desktopNowPlayingScale: 1.5
     onDesktopNowPlayingScaleChanged: save()
     property string desktopNowPlayingBgColorMode: "bg_secondary"
     onDesktopNowPlayingBgColorModeChanged: save()
@@ -475,16 +475,16 @@ Item {
     property string desktopNowPlayingCustomBgColor: "#ffffff"
     onDesktopNowPlayingCustomBgColorChanged: save()
 
-    property string desktopNowPlayingStyle: "nier"
+    property string desktopNowPlayingStyle: "card"
     onDesktopNowPlayingStyleChanged: save()
-    property int desktopNowPlayingRadius: 16
+    property int desktopNowPlayingRadius: 8
     onDesktopNowPlayingRadiusChanged: save()
 
     property bool showScreenEqualizer: true
     onShowScreenEqualizerChanged: save()
     property real desktopEqualizerX: 800
     onDesktopEqualizerXChanged: save()
-    property real desktopEqualizerY: 400
+    property real desktopEqualizerY: 760.9
     onDesktopEqualizerYChanged: save()
     property real desktopEqualizerRotation: 0
     onDesktopEqualizerRotationChanged: save()
@@ -944,8 +944,8 @@ Item {
         barBorder = true
         showSeparators = true
         workspaceCount = 5
-        workspaceStyle = "dots"
-        workspaceSpacing = 5
+        workspaceStyle = "pills"
+        workspaceSpacing = 15
         workspaceDotSize = 6
         workspaceActiveDotSize = 12
         workspaceRadius = 3
@@ -955,7 +955,7 @@ Item {
         workspaceInactiveColorMode = "transparent"
         workspaceHasWinColorMode = "text_primary"
 
-        systrayShowAll = true
+        systrayShowAll = false
         systrayCollapseLimit = 1
         systrayChevronPosition = "right"
         systrayChevronDirection = "right"
@@ -990,8 +990,8 @@ Item {
         desktopClockBorderColorMode = "transparent"
 
         showScreenSystemStats = true
-        desktopStatsX = 672
-        desktopStatsY = 800
+        desktopStatsX = 511.5
+        desktopStatsY = 891.8
         desktopStatsRotation = 0
         desktopStatsLayout = "inline"
         desktopStatsColorMode = "accent"
@@ -1035,7 +1035,7 @@ Item {
         desktopWeatherRotation = 0
         desktopWeatherLayout = "vertical"
         desktopWeatherScale = 2.0
-        desktopWeatherCity = systemCity
+        desktopWeatherCity = "Jakarta"
         desktopWeatherUnit = "C"
         desktopWeatherBgColorMode = "bg_secondary"
         desktopWeatherTextColorMode = "text_primary"
@@ -1048,22 +1048,22 @@ Item {
         showScreenQuickActions = false
         desktopQuickActionsInstances = [_createQuickActionsConfig()]
 
-        showScreenNowPlaying = false
-        desktopNowPlayingX = 1400
-        desktopNowPlayingY = 40
+        showScreenNowPlaying = true
+        desktopNowPlayingX = 32.1
+        desktopNowPlayingY = 810.8
         desktopNowPlayingRotation = 0
-        desktopNowPlayingScale = 1.0
+        desktopNowPlayingScale = 1.5
         desktopNowPlayingBgColorMode = "bg_secondary"
         desktopNowPlayingTextColorMode = "text_primary"
         desktopNowPlayingAccentColorMode = "accent"
         desktopNowPlayingBorderColorMode = "border"
         desktopNowPlayingCustomBgColor = "#ffffff"
-        desktopNowPlayingStyle = "nier"
-        desktopNowPlayingRadius = 16
+        desktopNowPlayingStyle = "card"
+        desktopNowPlayingRadius = 8
 
         showScreenEqualizer = true
         desktopEqualizerX = 800
-        desktopEqualizerY = 400
+        desktopEqualizerY = 760.9
         desktopEqualizerRotation = 0
         desktopEqualizerScale = 1.0
         desktopEqualizerColorMode = "accent"
