@@ -251,6 +251,7 @@ Item {
 
                             // --- Workspace ---
                             VabSidebarHeader { title: "Workspace"; expanded: settingsData.workspaceExp; onToggled: settingsData.workspaceExp = !settingsData.workspaceExp; Layout.topMargin: Theme.dp(8) }
+                            VabNavItem { label: "General"; index: 1; active: !root.isSearching && root.currentCategory === 1; visible: settingsData.workspaceExp }
                             VabNavItem { label: "Keybindings"; index: 4; active: !root.isSearching && root.currentCategory === 4; visible: settingsData.workspaceExp }
                             
                             // --- System ---
@@ -416,7 +417,7 @@ Item {
                 if (root.subFocusActive) root.subFocusActive = false; else if (root.focusInContent) root.focusInContent = false; else BarPopupState.settingsOpen = false
                 event.accepted = true; return
             }
-            var navOrder = [0, 9, 10, 11, 12, 3, 8, 2, 4, 5, 6, 13, 14, 15, 16, 17, 18, 19, 20]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
+            var navOrder = [0, 9, 10, 11, 12, 3, 8, 2, 1, 4, 5, 6, 13, 14, 15, 16, 17, 18, 19, 20]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
             if (event.key === Qt.Key_Right && !root.focusInContent) { root.focusInContent = true; root.contentFocusIndex = 0; event.accepted = true; return }
             if (event.key === Qt.Key_Left && root.focusInContent && !root.subFocusActive) { root.focusInContent = false; event.accepted = true; return }
             if (event.key === Qt.Key_Up) {

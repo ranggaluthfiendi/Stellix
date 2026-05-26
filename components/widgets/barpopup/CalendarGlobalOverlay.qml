@@ -35,6 +35,7 @@ PanelWindow {
         onPressed: {
             BarPopupState.calendarOpen = false
             BarPopupState.weatherDetailOpen = false
+            BarPopupState.mediaPopupOpen = false
         }
     }
 }

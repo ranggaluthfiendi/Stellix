@@ -65,6 +65,36 @@ Item {
     property int workspaceCount: 5
     onWorkspaceCountChanged: save()
 
+    property string workspaceStyle: "dots"
+    onWorkspaceStyleChanged: save()
+    property int workspaceSpacing: 5
+    onWorkspaceSpacingChanged: save()
+    property int workspaceDotSize: 6
+    onWorkspaceDotSizeChanged: save()
+    property int workspaceActiveDotSize: 12
+    onWorkspaceActiveDotSizeChanged: save()
+    property int workspaceRadius: 3
+    onWorkspaceRadiusChanged: save()
+    property bool workspaceShowNumbers: false
+    onWorkspaceShowNumbersChanged: save()
+    property bool workspaceShowEmpty: true
+    onWorkspaceShowEmptyChanged: save()
+    property string workspaceActiveColorMode: "accent"
+    onWorkspaceActiveColorModeChanged: save()
+    property string workspaceInactiveColorMode: "transparent"
+    onWorkspaceInactiveColorModeChanged: save()
+    property string workspaceHasWinColorMode: "text_primary"
+    onWorkspaceHasWinColorModeChanged: save()
+
+    readonly property var workspaceStyles: [
+        { value: "dots", label: "Classic Dots" },
+        { value: "pills", label: "Pills" },
+        { value: "numbers", label: "Numbers" },
+        { value: "lines", label: "Minimal Lines" },
+        { value: "geometric", label: "Geometric" },
+        { value: "nerves", label: "Nerves" }
+    ]
+
     // SysTray options
     property bool systrayShowAll: true
     onSystrayShowAllChanged: save()
@@ -100,6 +130,14 @@ Item {
     onDesktopClockShowYearChanged: save()
     property int desktopClockAlignment: 1
     onDesktopClockAlignmentChanged: save()
+    property string desktopClockBgColorMode: "transparent"
+    onDesktopClockBgColorModeChanged: save()
+    property string desktopClockTextColorMode: "accent"
+    onDesktopClockTextColorModeChanged: save()
+    property string desktopClockDateColorMode: "text_muted"
+    onDesktopClockDateColorModeChanged: save()
+    property string desktopClockBorderColorMode: "transparent"
+    onDesktopClockBorderColorModeChanged: save()
 
     property bool showScreenSystemStats: true
 
@@ -140,6 +178,22 @@ Item {
     onDesktopStatsNetUpLabelColorModeChanged: save()
     property real desktopStatsScale: 1.5
     onDesktopStatsScaleChanged: save()
+    property string desktopStatsBgColorMode: "bg_secondary"
+    onDesktopStatsBgColorModeChanged: save()
+    property string desktopStatsBorderColorMode: "border"
+    onDesktopStatsBorderColorModeChanged: save()
+    property string desktopStatsCustomBgColor: "#ffffff"
+    onDesktopStatsCustomBgColorChanged: save()
+    property string desktopStatsCpuColor: "#4CAF50"
+    onDesktopStatsCpuColorChanged: save()
+    property string desktopStatsGpuColor: "#2196F3"
+    onDesktopStatsGpuColorChanged: save()
+    property string desktopStatsMemColor: "#FF9800"
+    onDesktopStatsMemColorChanged: save()
+    property string desktopStatsNetDownColor: "#4CAF50"
+    onDesktopStatsNetDownColorChanged: save()
+    property string desktopStatsNetUpColor: "#f44336"
+    onDesktopStatsNetUpColorChanged: save()
 
     // --- Individual Metric Widgets ---
     // CPU
@@ -282,6 +336,20 @@ Item {
     onDesktopWeatherCityChanged: save()
     property string desktopWeatherUnit: "C"
     onDesktopWeatherUnitChanged: save()
+    property string desktopWeatherBgColorMode: "bg_secondary"
+    onDesktopWeatherBgColorModeChanged: save()
+    property string desktopWeatherTextColorMode: "text_primary"
+    onDesktopWeatherTextColorModeChanged: save()
+    property string desktopWeatherTempColorMode: "accent"
+    onDesktopWeatherTempColorModeChanged: save()
+    property string desktopWeatherDescColorMode: "text_muted"
+    onDesktopWeatherDescColorModeChanged: save()
+    property string desktopWeatherBorderColorMode: "border"
+    onDesktopWeatherBorderColorModeChanged: save()
+    property string desktopWeatherCustomBgColor: "#ffffff"
+    onDesktopWeatherCustomBgColorChanged: save()
+    property string desktopWeatherCustomTextColor: "#ffffff"
+    onDesktopWeatherCustomTextColorChanged: save()
 
     property string systemCity: ""
 
@@ -304,20 +372,87 @@ Item {
 
     property bool showScreenQuickActions: false
     onShowScreenQuickActionsChanged: save()
-    property real desktopQuickActionsX: 800
-    onDesktopQuickActionsXChanged: save()
-    property real desktopQuickActionsY: 900
-    onDesktopQuickActionsYChanged: save()
-    property real desktopQuickActionsRotation: 0
-    onDesktopQuickActionsRotationChanged: save()
-    property bool desktopQuickActionsVisible: true
-    onDesktopQuickActionsVisibleChanged: save()
-    property bool desktopQuickActionsPinned: false
-    onDesktopQuickActionsPinnedChanged: save()
-    property real desktopQuickActionsRadius: 12
-    onDesktopQuickActionsRadiusChanged: save()
-    property real desktopQuickActionsScale: 1.0
-    onDesktopQuickActionsScaleChanged: save()
+
+    property var desktopQuickActionsInstances: []
+    onDesktopQuickActionsInstancesChanged: save()
+
+    function _createQuickActionsConfig(override) {
+        var cfg = {
+            id: "qa_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+            name: "Quick Actions",
+            enabled: true,
+            x: 960, y: 900, rotation: 0, visible: true, autoHide: true,
+            radius: 12, scale: 1.0, opacity: 1.0,
+            model: [
+                { textIcon: "📸", action: "screenshot", label: "Shot", type: "action" },
+                { textIcon: "🔒", action: "lock", label: "Lock", type: "action" },
+                { textIcon: "☾", action: "sleep", label: "Sleep", type: "action" },
+                { textIcon: "↻", action: "restart", label: "Reboot", type: "action" },
+                { textIcon: "⏻", action: "power", label: "Off", type: "action" }
+            ],
+            bgColorMode: "bg_secondary",
+            hoverColorMode: "accent_soft",
+            borderColorMode: "border",
+            iconColorMode: "text_primary",
+            labelColorMode: "text_muted",
+            buttonSpacing: 2,
+            buttonPadding: 6,
+            showLabels: true,
+            iconSize: 16,
+            layoutDirection: "horizontal",
+            containerBgEnabled: true,
+            containerBgColorMode: "bg_secondary",
+            containerBorderEnabled: true,
+            containerBorderColorMode: "border",
+            borderEnabled: true,
+            hoverEnabled: true,
+            customBgColor: "#ffffff"
+        }
+        if (override) {
+            for (var key in override) {
+                cfg[key] = override[key]
+            }
+        }
+        return cfg
+    }
+
+    function addQuickActionsInstance() {
+        var arr = desktopQuickActionsInstances.slice()
+        arr.push(_createQuickActionsConfig())
+        desktopQuickActionsInstances = arr
+    }
+
+    function removeQuickActionsInstance(index) {
+        var arr = desktopQuickActionsInstances.slice()
+        arr.splice(index, 1)
+        desktopQuickActionsInstances = arr
+    }
+
+    function duplicateQuickActionsInstance(index) {
+        var arr = desktopQuickActionsInstances.slice()
+        var orig = JSON.parse(JSON.stringify(arr[index]))
+        orig.id = "qa_" + Date.now() + "_" + Math.floor(Math.random() * 1000)
+        orig.name = orig.name + " (copy)"
+        orig.x = orig.x + 40
+        orig.y = orig.y + 40
+        arr.splice(index + 1, 0, orig)
+        desktopQuickActionsInstances = arr
+    }
+
+    function getQuickActionsConfig(index) {
+        if (index >= 0 && index < desktopQuickActionsInstances.length) {
+            return desktopQuickActionsInstances[index]
+        }
+        return _createQuickActionsConfig()
+    }
+
+    function updateQuickActionsConfig(index, config) {
+        var arr = desktopQuickActionsInstances.slice()
+        if (index >= 0 && index < arr.length) {
+            arr[index] = config
+            desktopQuickActionsInstances = arr
+        }
+    }
 
     property bool showScreenNowPlaying: false
     onShowScreenNowPlayingChanged: save()
@@ -329,6 +464,21 @@ Item {
     onDesktopNowPlayingRotationChanged: save()
     property real desktopNowPlayingScale: 1.0
     onDesktopNowPlayingScaleChanged: save()
+    property string desktopNowPlayingBgColorMode: "bg_secondary"
+    onDesktopNowPlayingBgColorModeChanged: save()
+    property string desktopNowPlayingTextColorMode: "text_primary"
+    onDesktopNowPlayingTextColorModeChanged: save()
+    property string desktopNowPlayingAccentColorMode: "accent"
+    onDesktopNowPlayingAccentColorModeChanged: save()
+    property string desktopNowPlayingBorderColorMode: "border"
+    onDesktopNowPlayingBorderColorModeChanged: save()
+    property string desktopNowPlayingCustomBgColor: "#ffffff"
+    onDesktopNowPlayingCustomBgColorChanged: save()
+
+    property string desktopNowPlayingStyle: "nier"
+    onDesktopNowPlayingStyleChanged: save()
+    property int desktopNowPlayingRadius: 16
+    onDesktopNowPlayingRadiusChanged: save()
 
     property bool showScreenEqualizer: true
     onShowScreenEqualizerChanged: save()
@@ -342,6 +492,10 @@ Item {
     onDesktopEqualizerScaleChanged: save()
     property string desktopEqualizerColorMode: "accent"
     onDesktopEqualizerColorModeChanged: save()
+    property string desktopEqualizerBgColorMode: "transparent"
+    onDesktopEqualizerBgColorModeChanged: save()
+    property string desktopEqualizerBorderColorMode: "transparent"
+    onDesktopEqualizerBorderColorModeChanged: save()
     property string desktopEqualizerCustomColor: "#ffffff"
     onDesktopEqualizerCustomColorChanged: save()
     property string desktopEqualizerStyle: "wave"
@@ -385,11 +539,109 @@ Item {
     onDesktopNetUpOpacityChanged: save()
     property real desktopWeatherOpacity: 1.0
     onDesktopWeatherOpacityChanged: save()
-    property real desktopQuickActionsOpacity: 1.0
-    onDesktopQuickActionsOpacityChanged: save()
 
     property bool showIndicators: true
     onShowIndicatorsChanged: save()
+
+    property bool showVolumeIndicator: true
+    onShowVolumeIndicatorChanged: save()
+    property bool showBrightnessIndicator: true
+    onShowBrightnessIndicatorChanged: save()
+    property bool showPinnedIndicator: true
+    onShowPinnedIndicatorChanged: save()
+
+    property string indicatorPosition: "center"
+    onIndicatorPositionChanged: save()
+
+    property real indicatorScale: 1.0
+    onIndicatorScaleChanged: save()
+    property int indicatorWidth: 260
+    onIndicatorWidthChanged: save()
+    property int indicatorHeight: 64
+    onIndicatorHeightChanged: save()
+
+    property int indicatorProgressWidth: 120
+    onIndicatorProgressWidthChanged: save()
+
+    property string indicatorBgColorMode: "bg_secondary"
+    onIndicatorBgColorModeChanged: save()
+    property string indicatorBorderColorMode: "border"
+    onIndicatorBorderColorModeChanged: save()
+    property string indicatorProgressColorMode: "accent"
+    onIndicatorProgressColorModeChanged: save()
+    property string indicatorTextColorMode: "text_primary"
+    onIndicatorTextColorModeChanged: save()
+    property string indicatorIconColorMode: "accent"
+    onIndicatorIconColorModeChanged: save()
+    property string indicatorCustomBgColor: "#ffffff"
+    onIndicatorCustomBgColorChanged: save()
+    property string indicatorCustomProgressColor: "#4CAF50"
+    onIndicatorCustomProgressColorChanged: save()
+    property int indicatorRadius: 12
+    onIndicatorRadiusChanged: save()
+    property int indicatorBorderWidth: 1
+    onIndicatorBorderWidthChanged: save()
+    property real indicatorOpacity: 0.95
+    onIndicatorOpacityChanged: save()
+
+    property int indicatorTimeout: 1500
+    onIndicatorTimeoutChanged: save()
+    property int indicatorAnimationDuration: 200
+    onIndicatorAnimationDurationChanged: save()
+    property bool indicatorShowValue: true
+    onIndicatorShowValueChanged: save()
+    property bool indicatorShowProgress: true
+    onIndicatorShowProgressChanged: save()
+    property bool indicatorShowIcon: true
+    onIndicatorShowIconChanged: save()
+    property bool indicatorShowLabel: true
+    onIndicatorShowLabelChanged: save()
+    property string indicatorValuePosition: "right"
+    onIndicatorValuePositionChanged: save()
+
+    property string indicatorStyle: "rounded"
+    onIndicatorStyleChanged: save()
+    property string indicatorProgressStyle: "fill"
+    onIndicatorProgressStyleChanged: save()
+    property var indicatorElementOrder: ["icon", "label", "progress", "value"]
+    onIndicatorElementOrderChanged: save()
+
+    function moveIndicatorElement(fromIndex, toIndex) {
+        var arr = indicatorElementOrder.slice()
+        if (fromIndex < 0 || fromIndex >= arr.length) return
+        if (toIndex < 0 || toIndex >= arr.length) return
+        var item = arr.splice(fromIndex, 1)[0]
+        arr.splice(toIndex, 0, item)
+        indicatorElementOrder = arr
+    }
+
+    function moveMediaElement(fromIndex, toIndex) {
+        var arr = barMediaElementOrder.slice()
+        if (fromIndex < 0 || fromIndex >= arr.length) return
+        if (toIndex < 0 || toIndex >= arr.length) return
+        var item = arr.splice(fromIndex, 1)[0]
+        arr.splice(toIndex, 0, item)
+        barMediaElementOrder = arr
+    }
+
+    function toggleMediaHideElement(element) {
+        var arr = barMediaHideElements.slice()
+        var idx = arr.indexOf(element)
+        if (idx === -1) arr.push(element)
+        else arr.splice(idx, 1)
+        barMediaHideElements = arr
+    }
+
+    function isMediaElementHidden(element) {
+        return barMediaHideElements.indexOf(element) !== -1
+    }
+
+    readonly property var indicatorElementLabels: ({
+        "icon": "Icon",
+        "label": "Label",
+        "progress": "Progress",
+        "value": "Value"
+    })
 
     property bool desktopSearchFocus: false
     property real snapLineXPos: 0
@@ -397,7 +649,7 @@ Item {
     property real snapLineYPos: 0
     property bool snapLineYVisible: false
 
-    property var leftItems: ["launcher", "workspace", "systray"]
+    property var leftItems: ["launcher", "workspace", "systray", "media"]
     property var centerItems: ["weather"]
     property var rightItems: ["clock", "battery", "notif"]
 
@@ -414,10 +666,20 @@ Item {
     property var weatherElementsDisabled: []
     onWeatherElementsDisabledChanged: save()
 
+    // Bar Media Widget
+    property string barMediaStyle: "compact"
+    onBarMediaStyleChanged: save()
+    property var barMediaElementOrder: ["art", "text"]
+    onBarMediaElementOrderChanged: save()
+    property var barMediaHideElements: []
+    onBarMediaHideElementsChanged: save()
+    property string barMediaExpandDirection: "right"
+    onBarMediaExpandDirectionChanged: save()
+
     property var hiddenItems: []
 
-    readonly property var allItemIds: ["launcher", "workspace", "systray", "clock", "battery", "notif", "weather"]
-    readonly property var hideableItems: ["launcher", "workspace", "systray", "clock", "weather", "notif"]
+    readonly property var allItemIds: ["launcher", "workspace", "systray", "clock", "battery", "notif", "weather", "media"]
+    readonly property var hideableItems: ["launcher", "workspace", "systray", "clock", "weather", "notif", "media"]
 
     readonly property var weatherBarLayouts: []
 
@@ -435,6 +697,17 @@ Item {
         { value: "percentage", label: "Percentage Only" }
     ]
 
+    readonly property var barMediaStyles: [
+        { value: "compact", label: "Compact" },
+        { value: "icon", label: "Icon Only" },
+        { value: "expandable", label: "Expandable" }
+    ]
+
+    readonly property var barMediaElementLabels: ({
+        "art": "Music Note / Art",
+        "text": "Title / Artist"
+    })
+
     readonly property var itemLabels: ({
         "launcher": "App Launcher",
         "workspace": "Workspaces",
@@ -443,6 +716,7 @@ Item {
         "battery": "Battery",
         "notif": "Notifications",
         "weather": "Weather",
+        "media": "Media",
         "stats": "System Stats",
         "quickactions": "Quick Actions",
         "nowplaying": "Now Playing"
@@ -452,10 +726,10 @@ Item {
         {
             name: "Default",
             desc: "Current layout: weather center, clock+battery+notif right",
-            left: ["launcher", "workspace", "systray"],
+            left: ["launcher", "workspace", "systray", "media"],
             center: ["weather"],
             right: ["clock", "battery", "notif"],
-            hidden: ["launcher"]
+            hidden: []
         },
         {
             name: "Classic",
@@ -463,7 +737,7 @@ Item {
             left: ["launcher", "workspace", "systray"],
             center: ["clock"],
             right: ["battery", "notif", "weather"],
-            hidden: []
+            hidden: ["media"]
         },
         {
             name: "Centered",
@@ -471,7 +745,7 @@ Item {
             left: ["clock"],
             center: ["workspace"],
             right: ["battery", "notif", "weather"],
-            hidden: ["launcher", "systray"]
+            hidden: ["launcher", "systray", "media"]
         },
         {
             name: "Minimal",
@@ -479,7 +753,7 @@ Item {
             left: [],
             center: ["clock"],
             right: ["battery", "notif", "weather"],
-            hidden: ["launcher", "workspace", "systray"]
+            hidden: ["launcher", "workspace", "systray", "media"]
         },
         {
             name: "Productivity",
@@ -487,7 +761,7 @@ Item {
             left: ["launcher"],
             center: ["workspace", "clock"],
             right: ["battery", "notif", "weather"],
-            hidden: ["systray"]
+            hidden: ["systray", "media"]
         },
         {
             name: "Split",
@@ -495,7 +769,15 @@ Item {
             left: ["launcher", "workspace"],
             center: ["systray"],
             right: ["clock", "battery", "notif", "weather"],
-            hidden: []
+            hidden: ["media"]
+        },
+        {
+            name: "Media",
+            desc: "Media widget visible on left side",
+            left: ["launcher", "workspace", "media"],
+            center: ["weather"],
+            right: ["clock", "battery", "notif"],
+            hidden: ["systray"]
         }
     ]
 
@@ -544,7 +826,7 @@ Item {
         return result
     }
 
-    property var visibleLeftItems: ["workspace", "systray"]
+    property var visibleLeftItems: ["workspace", "systray", "media"]
     property var visibleCenterItems: ["weather"]
     property var visibleRightItems: ["clock", "battery", "notif"]
 
@@ -638,10 +920,10 @@ Item {
 
     function resetAll() {
         barPosition = "top"
-        leftItems = ["launcher", "workspace", "systray"]
+        leftItems = ["launcher", "workspace", "systray", "media"]
         centerItems = ["weather"]
         rightItems = ["clock", "battery", "notif"]
-        hiddenItems = ["launcher"]
+        hiddenItems = []
         showBatteryPercentage = true
         clockFormat = "time"
         clock24Hour = true
@@ -662,6 +944,16 @@ Item {
         barBorder = true
         showSeparators = true
         workspaceCount = 5
+        workspaceStyle = "dots"
+        workspaceSpacing = 5
+        workspaceDotSize = 6
+        workspaceActiveDotSize = 12
+        workspaceRadius = 3
+        workspaceShowNumbers = false
+        workspaceShowEmpty = true
+        workspaceActiveColorMode = "accent"
+        workspaceInactiveColorMode = "transparent"
+        workspaceHasWinColorMode = "text_primary"
 
         systrayShowAll = true
         systrayCollapseLimit = 1
@@ -675,6 +967,11 @@ Item {
         weatherElements = ["icon", "temp", "desc"]
         weatherElementsDisabled = []
 
+        barMediaStyle = "compact"
+        barMediaElementOrder = ["art", "text"]
+        barMediaHideElements = []
+        barMediaExpandDirection = "right"
+
         showScreenClock = true
         desktopClockX = 624
         desktopClockY = 278
@@ -687,6 +984,10 @@ Item {
         desktopClockShowWeekday = true
         desktopClockShowYear = false
         desktopClockAlignment = 1
+        desktopClockBgColorMode = "transparent"
+        desktopClockTextColorMode = "accent"
+        desktopClockDateColorMode = "text_muted"
+        desktopClockBorderColorMode = "transparent"
 
         showScreenSystemStats = true
         desktopStatsX = 672
@@ -707,6 +1008,14 @@ Item {
         desktopStatsNetDownLabelColorMode = "success"
         desktopStatsNetUpLabelColorMode = "danger"
         desktopStatsScale = 1.5
+        desktopStatsBgColorMode = "bg_secondary"
+        desktopStatsBorderColorMode = "border"
+        desktopStatsCustomBgColor = "#ffffff"
+        desktopStatsCpuColor = "#4CAF50"
+        desktopStatsGpuColor = "#2196F3"
+        desktopStatsMemColor = "#FF9800"
+        desktopStatsNetDownColor = "#4CAF50"
+        desktopStatsNetUpColor = "#f44336"
 
         statsDisplayMode = "combined"
         individualStatsLayout = "row"
@@ -728,21 +1037,29 @@ Item {
         desktopWeatherScale = 2.0
         desktopWeatherCity = systemCity
         desktopWeatherUnit = "C"
+        desktopWeatherBgColorMode = "bg_secondary"
+        desktopWeatherTextColorMode = "text_primary"
+        desktopWeatherTempColorMode = "accent"
+        desktopWeatherDescColorMode = "text_muted"
+        desktopWeatherBorderColorMode = "border"
+        desktopWeatherCustomBgColor = "#ffffff"
+        desktopWeatherCustomTextColor = "#ffffff"
 
         showScreenQuickActions = false
-        desktopQuickActionsX = 800
-        desktopQuickActionsY = 900
-        desktopQuickActionsRotation = 0
-        desktopQuickActionsVisible = true
-        desktopQuickActionsPinned = false
-        desktopQuickActionsRadius = 12
-        desktopQuickActionsScale = 1.0
+        desktopQuickActionsInstances = [_createQuickActionsConfig()]
 
         showScreenNowPlaying = false
         desktopNowPlayingX = 1400
         desktopNowPlayingY = 40
         desktopNowPlayingRotation = 0
         desktopNowPlayingScale = 1.0
+        desktopNowPlayingBgColorMode = "bg_secondary"
+        desktopNowPlayingTextColorMode = "text_primary"
+        desktopNowPlayingAccentColorMode = "accent"
+        desktopNowPlayingBorderColorMode = "border"
+        desktopNowPlayingCustomBgColor = "#ffffff"
+        desktopNowPlayingStyle = "nier"
+        desktopNowPlayingRadius = 16
 
         showScreenEqualizer = true
         desktopEqualizerX = 800
@@ -750,6 +1067,8 @@ Item {
         desktopEqualizerRotation = 0
         desktopEqualizerScale = 1.0
         desktopEqualizerColorMode = "accent"
+        desktopEqualizerBgColorMode = "transparent"
+        desktopEqualizerBorderColorMode = "transparent"
         desktopEqualizerCustomColor = "#ffffff"
         desktopEqualizerStyle = "wave"
         desktopEqualizerLineThickness = 2.0
@@ -775,6 +1094,34 @@ Item {
         desktopQuickActionsOpacity = 1.0
 
         showIndicators = true
+        showVolumeIndicator = true
+        showBrightnessIndicator = true
+        showPinnedIndicator = true
+        indicatorPosition = "center"
+        indicatorScale = 1.0
+        indicatorWidth = 260
+        indicatorHeight = 64
+        indicatorProgressWidth = 120
+        indicatorBgColorMode = "bg_secondary"
+        indicatorBorderColorMode = "border"
+        indicatorProgressColorMode = "accent"
+        indicatorTextColorMode = "text_primary"
+        indicatorIconColorMode = "accent"
+        indicatorCustomBgColor = "#ffffff"
+        indicatorCustomProgressColor = "#4CAF50"
+        indicatorRadius = 12
+        indicatorBorderWidth = 1
+        indicatorOpacity = 0.95
+        indicatorTimeout = 1500
+        indicatorAnimationDuration = 200
+        indicatorShowValue = true
+        indicatorShowProgress = true
+        indicatorShowIcon = true
+        indicatorShowLabel = true
+        indicatorValuePosition = "right"
+        indicatorStyle = "rounded"
+        indicatorProgressStyle = "fill"
+        indicatorElementOrder = ["icon", "label", "progress", "value"]
 
         save()
         layoutChanged()
@@ -823,6 +1170,16 @@ Item {
             barBorder: root.barBorder,
             showSeparators: root.showSeparators,
             workspaceCount: root.workspaceCount,
+            workspaceStyle: root.workspaceStyle,
+            workspaceSpacing: root.workspaceSpacing,
+            workspaceDotSize: root.workspaceDotSize,
+            workspaceActiveDotSize: root.workspaceActiveDotSize,
+            workspaceRadius: root.workspaceRadius,
+            workspaceShowNumbers: root.workspaceShowNumbers,
+            workspaceShowEmpty: root.workspaceShowEmpty,
+            workspaceActiveColorMode: root.workspaceActiveColorMode,
+            workspaceInactiveColorMode: root.workspaceInactiveColorMode,
+            workspaceHasWinColorMode: root.workspaceHasWinColorMode,
 
             systrayShowAll: root.systrayShowAll,
             systrayCollapseLimit: root.systrayCollapseLimit,
@@ -835,6 +1192,11 @@ Item {
             weatherBarLayout: root.weatherBarLayout,
             weatherElements: root.weatherElements,
             weatherElementsDisabled: root.weatherElementsDisabled,
+
+            barMediaStyle: root.barMediaStyle,
+            barMediaElementOrder: root.barMediaElementOrder,
+            barMediaHideElements: root.barMediaHideElements,
+            barMediaExpandDirection: root.barMediaExpandDirection,
 
             // Desktop Widgets
             showScreenClock: root.showScreenClock,
@@ -849,6 +1211,10 @@ Item {
             desktopClockShowWeekday: root.desktopClockShowWeekday,
             desktopClockShowYear: root.desktopClockShowYear,
             desktopClockAlignment: root.desktopClockAlignment,
+            desktopClockBgColorMode: root.desktopClockBgColorMode,
+            desktopClockTextColorMode: root.desktopClockTextColorMode,
+            desktopClockDateColorMode: root.desktopClockDateColorMode,
+            desktopClockBorderColorMode: root.desktopClockBorderColorMode,
 
             showScreenSystemStats: root.showScreenSystemStats,
             desktopStatsX: root.desktopStatsX,
@@ -869,6 +1235,14 @@ Item {
             desktopStatsNetDownLabelColorMode: root.desktopStatsNetDownLabelColorMode,
             desktopStatsNetUpLabelColorMode: root.desktopStatsNetUpLabelColorMode,
             desktopStatsScale: root.desktopStatsScale,
+            desktopStatsBgColorMode: root.desktopStatsBgColorMode,
+            desktopStatsBorderColorMode: root.desktopStatsBorderColorMode,
+            desktopStatsCustomBgColor: root.desktopStatsCustomBgColor,
+            desktopStatsCpuColor: root.desktopStatsCpuColor,
+            desktopStatsGpuColor: root.desktopStatsGpuColor,
+            desktopStatsMemColor: root.desktopStatsMemColor,
+            desktopStatsNetDownColor: root.desktopStatsNetDownColor,
+            desktopStatsNetUpColor: root.desktopStatsNetUpColor,
 
             statsDisplayMode: root.statsDisplayMode,
             individualStatsLayout: root.individualStatsLayout,
@@ -939,21 +1313,29 @@ Item {
             desktopWeatherScale: root.desktopWeatherScale,
             desktopWeatherCity: root.desktopWeatherCity,
             desktopWeatherUnit: root.desktopWeatherUnit,
+            desktopWeatherBgColorMode: root.desktopWeatherBgColorMode,
+            desktopWeatherTextColorMode: root.desktopWeatherTextColorMode,
+            desktopWeatherTempColorMode: root.desktopWeatherTempColorMode,
+            desktopWeatherDescColorMode: root.desktopWeatherDescColorMode,
+            desktopWeatherBorderColorMode: root.desktopWeatherBorderColorMode,
+            desktopWeatherCustomBgColor: root.desktopWeatherCustomBgColor,
+            desktopWeatherCustomTextColor: root.desktopWeatherCustomTextColor,
 
             showScreenQuickActions: root.showScreenQuickActions,
-            desktopQuickActionsX: root.desktopQuickActionsX,
-            desktopQuickActionsY: root.desktopQuickActionsY,
-            desktopQuickActionsRotation: root.desktopQuickActionsRotation,
-            desktopQuickActionsVisible: root.desktopQuickActionsVisible,
-            desktopQuickActionsPinned: root.desktopQuickActionsPinned,
-            desktopQuickActionsRadius: root.desktopQuickActionsRadius,
-            desktopQuickActionsScale: root.desktopQuickActionsScale,
+            desktopQuickActionsInstances: root.desktopQuickActionsInstances,
 
             showScreenNowPlaying: root.showScreenNowPlaying,
             desktopNowPlayingX: root.desktopNowPlayingX,
             desktopNowPlayingY: root.desktopNowPlayingY,
             desktopNowPlayingRotation: root.desktopNowPlayingRotation,
             desktopNowPlayingScale: root.desktopNowPlayingScale,
+            desktopNowPlayingBgColorMode: root.desktopNowPlayingBgColorMode,
+            desktopNowPlayingTextColorMode: root.desktopNowPlayingTextColorMode,
+            desktopNowPlayingAccentColorMode: root.desktopNowPlayingAccentColorMode,
+            desktopNowPlayingBorderColorMode: root.desktopNowPlayingBorderColorMode,
+            desktopNowPlayingCustomBgColor: root.desktopNowPlayingCustomBgColor,
+            desktopNowPlayingStyle: root.desktopNowPlayingStyle,
+            desktopNowPlayingRadius: root.desktopNowPlayingRadius,
 
             showScreenEqualizer: root.showScreenEqualizer,
             desktopEqualizerX: root.desktopEqualizerX,
@@ -961,6 +1343,8 @@ Item {
             desktopEqualizerRotation: root.desktopEqualizerRotation,
             desktopEqualizerScale: root.desktopEqualizerScale,
             desktopEqualizerColorMode: root.desktopEqualizerColorMode,
+            desktopEqualizerBgColorMode: root.desktopEqualizerBgColorMode,
+            desktopEqualizerBorderColorMode: root.desktopEqualizerBorderColorMode,
             desktopEqualizerCustomColor: root.desktopEqualizerCustomColor,
             desktopEqualizerStyle: root.desktopEqualizerStyle,
             desktopEqualizerLineThickness: root.desktopEqualizerLineThickness,
@@ -985,7 +1369,35 @@ Item {
             desktopWeatherOpacity: root.desktopWeatherOpacity,
             desktopQuickActionsOpacity: root.desktopQuickActionsOpacity,
 
-            showIndicators: root.showIndicators
+            showIndicators: root.showIndicators,
+
+            showVolumeIndicator: root.showVolumeIndicator,
+            showBrightnessIndicator: root.showBrightnessIndicator,
+            showPinnedIndicator: root.showPinnedIndicator,
+            indicatorPosition: root.indicatorPosition,
+            indicatorScale: root.indicatorScale,
+            indicatorWidth: root.indicatorWidth,
+            indicatorHeight: root.indicatorHeight,
+            indicatorBgColorMode: root.indicatorBgColorMode,
+            indicatorBorderColorMode: root.indicatorBorderColorMode,
+            indicatorProgressColorMode: root.indicatorProgressColorMode,
+            indicatorTextColorMode: root.indicatorTextColorMode,
+            indicatorIconColorMode: root.indicatorIconColorMode,
+            indicatorCustomBgColor: root.indicatorCustomBgColor,
+            indicatorCustomProgressColor: root.indicatorCustomProgressColor,
+            indicatorRadius: root.indicatorRadius,
+            indicatorBorderWidth: root.indicatorBorderWidth,
+            indicatorOpacity: root.indicatorOpacity,
+            indicatorTimeout: root.indicatorTimeout,
+            indicatorAnimationDuration: root.indicatorAnimationDuration,
+            indicatorShowValue: root.indicatorShowValue,
+            indicatorShowProgress: root.indicatorShowProgress,
+            indicatorShowIcon: root.indicatorShowIcon,
+            indicatorShowLabel: root.indicatorShowLabel,
+            indicatorValuePosition: root.indicatorValuePosition,
+            indicatorStyle: root.indicatorStyle,
+            indicatorProgressStyle: root.indicatorProgressStyle,
+            indicatorElementOrder: root.indicatorElementOrder
         }
         var json = JSON.stringify(data)
         // Escaping for shell: replace ' with '\''
@@ -1038,6 +1450,16 @@ Item {
                     if (data.hasOwnProperty("barBorder")) root.barBorder = data.barBorder
                     if (data.hasOwnProperty("showSeparators")) root.showSeparators = data.showSeparators
                     if (data.hasOwnProperty("workspaceCount")) root.workspaceCount = data.workspaceCount
+                    if (data.hasOwnProperty("workspaceStyle")) root.workspaceStyle = data.workspaceStyle
+                    if (data.hasOwnProperty("workspaceSpacing")) root.workspaceSpacing = data.workspaceSpacing
+                    if (data.hasOwnProperty("workspaceDotSize")) root.workspaceDotSize = data.workspaceDotSize
+                    if (data.hasOwnProperty("workspaceActiveDotSize")) root.workspaceActiveDotSize = data.workspaceActiveDotSize
+                    if (data.hasOwnProperty("workspaceRadius")) root.workspaceRadius = data.workspaceRadius
+                    if (data.hasOwnProperty("workspaceShowNumbers")) root.workspaceShowNumbers = data.workspaceShowNumbers
+                    if (data.hasOwnProperty("workspaceShowEmpty")) root.workspaceShowEmpty = data.workspaceShowEmpty
+                    if (data.hasOwnProperty("workspaceActiveColorMode")) root.workspaceActiveColorMode = data.workspaceActiveColorMode
+                    if (data.hasOwnProperty("workspaceInactiveColorMode")) root.workspaceInactiveColorMode = data.workspaceInactiveColorMode
+                    if (data.hasOwnProperty("workspaceHasWinColorMode")) root.workspaceHasWinColorMode = data.workspaceHasWinColorMode
 
                     if (data.hasOwnProperty("systrayShowAll")) root.systrayShowAll = data.systrayShowAll
                     if (data.hasOwnProperty("systrayCollapseLimit")) root.systrayCollapseLimit = data.systrayCollapseLimit
@@ -1050,6 +1472,16 @@ Item {
                     if (data.hasOwnProperty("weatherBarLayout")) root.weatherBarLayout = data.weatherBarLayout
                     if (data.hasOwnProperty("weatherElements") && Array.isArray(data.weatherElements)) root.weatherElements = data.weatherElements
                     if (data.hasOwnProperty("weatherElementsDisabled") && Array.isArray(data.weatherElementsDisabled)) root.weatherElementsDisabled = data.weatherElementsDisabled
+                    if (data.hasOwnProperty("barMediaStyle")) root.barMediaStyle = data.barMediaStyle
+                    if (data.hasOwnProperty("barMediaElementOrder") && Array.isArray(data.barMediaElementOrder)) {
+                        var cleanedOrder = []
+                        for (var i = 0; i < data.barMediaElementOrder.length; i++) {
+                            if (data.barMediaElementOrder[i] !== "icon") cleanedOrder.push(data.barMediaElementOrder[i])
+                        }
+                        root.barMediaElementOrder = cleanedOrder.length > 0 ? cleanedOrder : ["art", "text"]
+                    }
+                    if (data.hasOwnProperty("barMediaExpandDirection")) root.barMediaExpandDirection = data.barMediaExpandDirection
+                    if (data.hasOwnProperty("barMediaHideElements") && Array.isArray(data.barMediaHideElements)) root.barMediaHideElements = data.barMediaHideElements
 
                     // Desktop Widgets
                     if (data.hasOwnProperty("showScreenClock")) root.showScreenClock = data.showScreenClock
@@ -1064,6 +1496,10 @@ Item {
                     if (data.hasOwnProperty("desktopClockShowWeekday")) root.desktopClockShowWeekday = data.desktopClockShowWeekday
                     if (data.hasOwnProperty("desktopClockShowYear")) root.desktopClockShowYear = data.desktopClockShowYear
                     if (data.hasOwnProperty("desktopClockAlignment")) root.desktopClockAlignment = data.desktopClockAlignment
+                    if (data.hasOwnProperty("desktopClockBgColorMode")) root.desktopClockBgColorMode = data.desktopClockBgColorMode
+                    if (data.hasOwnProperty("desktopClockTextColorMode")) root.desktopClockTextColorMode = data.desktopClockTextColorMode
+                    if (data.hasOwnProperty("desktopClockDateColorMode")) root.desktopClockDateColorMode = data.desktopClockDateColorMode
+                    if (data.hasOwnProperty("desktopClockBorderColorMode")) root.desktopClockBorderColorMode = data.desktopClockBorderColorMode
 
                     if (data.hasOwnProperty("showScreenSystemStats")) root.showScreenSystemStats = data.showScreenSystemStats
                     if (data.hasOwnProperty("desktopStatsX")) root.desktopStatsX = data.desktopStatsX
@@ -1084,6 +1520,14 @@ Item {
                     if (data.hasOwnProperty("desktopStatsNetDownLabelColorMode")) root.desktopStatsNetDownLabelColorMode = data.desktopStatsNetDownLabelColorMode
                     if (data.hasOwnProperty("desktopStatsNetUpLabelColorMode")) root.desktopStatsNetUpLabelColorMode = data.desktopStatsNetUpLabelColorMode
                     if (data.hasOwnProperty("desktopStatsScale")) root.desktopStatsScale = data.desktopStatsScale
+                    if (data.hasOwnProperty("desktopStatsBgColorMode")) root.desktopStatsBgColorMode = data.desktopStatsBgColorMode
+                    if (data.hasOwnProperty("desktopStatsBorderColorMode")) root.desktopStatsBorderColorMode = data.desktopStatsBorderColorMode
+                    if (data.hasOwnProperty("desktopStatsCustomBgColor")) root.desktopStatsCustomBgColor = data.desktopStatsCustomBgColor
+                    if (data.hasOwnProperty("desktopStatsCpuColor")) root.desktopStatsCpuColor = data.desktopStatsCpuColor
+                    if (data.hasOwnProperty("desktopStatsGpuColor")) root.desktopStatsGpuColor = data.desktopStatsGpuColor
+                    if (data.hasOwnProperty("desktopStatsMemColor")) root.desktopStatsMemColor = data.desktopStatsMemColor
+                    if (data.hasOwnProperty("desktopStatsNetDownColor")) root.desktopStatsNetDownColor = data.desktopStatsNetDownColor
+                    if (data.hasOwnProperty("desktopStatsNetUpColor")) root.desktopStatsNetUpColor = data.desktopStatsNetUpColor
 
                     if (data.hasOwnProperty("statsDisplayMode")) root.statsDisplayMode = data.statsDisplayMode
                     if (data.hasOwnProperty("individualStatsLayout")) root.individualStatsLayout = data.individualStatsLayout
@@ -1154,21 +1598,62 @@ Item {
                     if (data.hasOwnProperty("desktopWeatherScale")) root.desktopWeatherScale = data.desktopWeatherScale
                     if (data.hasOwnProperty("desktopWeatherCity")) root.desktopWeatherCity = data.desktopWeatherCity
                     if (data.hasOwnProperty("desktopWeatherUnit")) root.desktopWeatherUnit = data.desktopWeatherUnit
+                    if (data.hasOwnProperty("desktopWeatherBgColorMode")) root.desktopWeatherBgColorMode = data.desktopWeatherBgColorMode
+                    if (data.hasOwnProperty("desktopWeatherTextColorMode")) root.desktopWeatherTextColorMode = data.desktopWeatherTextColorMode
+                    if (data.hasOwnProperty("desktopWeatherTempColorMode")) root.desktopWeatherTempColorMode = data.desktopWeatherTempColorMode
+                    if (data.hasOwnProperty("desktopWeatherDescColorMode")) root.desktopWeatherDescColorMode = data.desktopWeatherDescColorMode
+                    if (data.hasOwnProperty("desktopWeatherBorderColorMode")) root.desktopWeatherBorderColorMode = data.desktopWeatherBorderColorMode
+                    if (data.hasOwnProperty("desktopWeatherCustomBgColor")) root.desktopWeatherCustomBgColor = data.desktopWeatherCustomBgColor
+                    if (data.hasOwnProperty("desktopWeatherCustomTextColor")) root.desktopWeatherCustomTextColor = data.desktopWeatherCustomTextColor
                     
                     if (data.hasOwnProperty("showScreenQuickActions")) root.showScreenQuickActions = data.showScreenQuickActions
-                    if (data.hasOwnProperty("desktopQuickActionsX")) root.desktopQuickActionsX = data.desktopQuickActionsX
-                    if (data.hasOwnProperty("desktopQuickActionsY")) root.desktopQuickActionsY = data.desktopQuickActionsY
-                    if (data.hasOwnProperty("desktopQuickActionsRotation")) root.desktopQuickActionsRotation = data.desktopQuickActionsRotation
-                    if (data.hasOwnProperty("desktopQuickActionsVisible")) root.desktopQuickActionsVisible = data.desktopQuickActionsVisible
-                    if (data.hasOwnProperty("desktopQuickActionsPinned")) root.desktopQuickActionsPinned = data.desktopQuickActionsPinned
-                    if (data.hasOwnProperty("desktopQuickActionsRadius")) root.desktopQuickActionsRadius = data.desktopQuickActionsRadius
-                    if (data.hasOwnProperty("desktopQuickActionsScale")) root.desktopQuickActionsScale = data.desktopQuickActionsScale
+
+                    // Migration: convert old flat properties to new array format
+                    if (data.hasOwnProperty("desktopQuickActionsInstances")) {
+                        root.desktopQuickActionsInstances = data.desktopQuickActionsInstances
+                    } else if (data.hasOwnProperty("desktopQuickActionsX") || data.hasOwnProperty("desktopQuickActionsModel")) {
+                        var migrated = root._createQuickActionsConfig()
+                        if (data.hasOwnProperty("desktopQuickActionsX")) migrated.x = data.desktopQuickActionsX
+                        if (data.hasOwnProperty("desktopQuickActionsY")) migrated.y = data.desktopQuickActionsY
+                        if (data.hasOwnProperty("desktopQuickActionsRotation")) migrated.rotation = data.desktopQuickActionsRotation
+                        if (data.hasOwnProperty("desktopQuickActionsVisible")) migrated.visible = data.desktopQuickActionsVisible
+                        if (data.hasOwnProperty("desktopQuickActionsAutoHide")) migrated.autoHide = data.desktopQuickActionsAutoHide
+                        if (data.hasOwnProperty("desktopQuickActionsRadius")) migrated.radius = data.desktopQuickActionsRadius
+                        if (data.hasOwnProperty("desktopQuickActionsScale")) migrated.scale = data.desktopQuickActionsScale
+                        if (data.hasOwnProperty("desktopQuickActionsModel")) migrated.model = data.desktopQuickActionsModel
+                        if (data.hasOwnProperty("desktopQuickActionsBgColorMode")) migrated.bgColorMode = data.desktopQuickActionsBgColorMode
+                        if (data.hasOwnProperty("desktopQuickActionsHoverColorMode")) migrated.hoverColorMode = data.desktopQuickActionsHoverColorMode
+                        if (data.hasOwnProperty("desktopQuickActionsBorderColorMode")) migrated.borderColorMode = data.desktopQuickActionsBorderColorMode
+                        if (data.hasOwnProperty("desktopQuickActionsIconColorMode")) migrated.iconColorMode = data.desktopQuickActionsIconColorMode
+                        if (data.hasOwnProperty("desktopQuickActionsLabelColorMode")) migrated.labelColorMode = data.desktopQuickActionsLabelColorMode
+                        if (data.hasOwnProperty("desktopQuickActionsButtonSpacing")) migrated.buttonSpacing = data.desktopQuickActionsButtonSpacing
+                        if (data.hasOwnProperty("desktopQuickActionsButtonPadding")) migrated.buttonPadding = data.desktopQuickActionsButtonPadding
+                        if (data.hasOwnProperty("desktopQuickActionsShowLabels")) migrated.showLabels = data.desktopQuickActionsShowLabels
+                        if (data.hasOwnProperty("desktopQuickActionsIconSize")) migrated.iconSize = data.desktopQuickActionsIconSize
+                        if (data.hasOwnProperty("desktopQuickActionsLayoutDirection")) migrated.layoutDirection = data.desktopQuickActionsLayoutDirection
+                        if (data.hasOwnProperty("desktopQuickActionsContainerBgEnabled")) migrated.containerBgEnabled = data.desktopQuickActionsContainerBgEnabled
+                        if (data.hasOwnProperty("desktopQuickActionsContainerBgColorMode")) migrated.containerBgColorMode = data.desktopQuickActionsContainerBgColorMode
+                        if (data.hasOwnProperty("desktopQuickActionsContainerBorderEnabled")) migrated.containerBorderEnabled = data.desktopQuickActionsContainerBorderEnabled
+                        if (data.hasOwnProperty("desktopQuickActionsContainerBorderColorMode")) migrated.containerBorderColorMode = data.desktopQuickActionsContainerBorderColorMode
+                        if (data.hasOwnProperty("desktopQuickActionsBorderEnabled")) migrated.borderEnabled = data.desktopQuickActionsBorderEnabled
+                        if (data.hasOwnProperty("desktopQuickActionsHoverEnabled")) migrated.hoverEnabled = data.desktopQuickActionsHoverEnabled
+                        if (data.hasOwnProperty("desktopQuickActionsOpacity")) migrated.opacity = data.desktopQuickActionsOpacity
+                        if (data.hasOwnProperty("desktopQuickActionsCustomBgColor")) migrated.customBgColor = data.desktopQuickActionsCustomBgColor
+                        root.desktopQuickActionsInstances = [migrated]
+                    }
 
                     if (data.hasOwnProperty("showScreenNowPlaying")) root.showScreenNowPlaying = data.showScreenNowPlaying
                     if (data.hasOwnProperty("desktopNowPlayingX")) root.desktopNowPlayingX = data.desktopNowPlayingX
                     if (data.hasOwnProperty("desktopNowPlayingY")) root.desktopNowPlayingY = data.desktopNowPlayingY
                     if (data.hasOwnProperty("desktopNowPlayingRotation")) root.desktopNowPlayingRotation = data.desktopNowPlayingRotation
                     if (data.hasOwnProperty("desktopNowPlayingScale")) root.desktopNowPlayingScale = data.desktopNowPlayingScale
+                    if (data.hasOwnProperty("desktopNowPlayingBgColorMode")) root.desktopNowPlayingBgColorMode = data.desktopNowPlayingBgColorMode
+                    if (data.hasOwnProperty("desktopNowPlayingTextColorMode")) root.desktopNowPlayingTextColorMode = data.desktopNowPlayingTextColorMode
+                    if (data.hasOwnProperty("desktopNowPlayingAccentColorMode")) root.desktopNowPlayingAccentColorMode = data.desktopNowPlayingAccentColorMode
+                    if (data.hasOwnProperty("desktopNowPlayingBorderColorMode")) root.desktopNowPlayingBorderColorMode = data.desktopNowPlayingBorderColorMode
+                    if (data.hasOwnProperty("desktopNowPlayingCustomBgColor")) root.desktopNowPlayingCustomBgColor = data.desktopNowPlayingCustomBgColor
+                    if (data.hasOwnProperty("desktopNowPlayingStyle")) root.desktopNowPlayingStyle = data.desktopNowPlayingStyle
+                    if (data.hasOwnProperty("desktopNowPlayingRadius")) root.desktopNowPlayingRadius = data.desktopNowPlayingRadius
 
                     if (data.hasOwnProperty("showScreenEqualizer")) root.showScreenEqualizer = data.showScreenEqualizer
                     if (data.hasOwnProperty("desktopEqualizerX")) root.desktopEqualizerX = data.desktopEqualizerX
@@ -1176,6 +1661,8 @@ Item {
                     if (data.hasOwnProperty("desktopEqualizerRotation")) root.desktopEqualizerRotation = data.desktopEqualizerRotation
                     if (data.hasOwnProperty("desktopEqualizerScale")) root.desktopEqualizerScale = data.desktopEqualizerScale
                     if (data.hasOwnProperty("desktopEqualizerColorMode")) root.desktopEqualizerColorMode = data.desktopEqualizerColorMode
+                    if (data.hasOwnProperty("desktopEqualizerBgColorMode")) root.desktopEqualizerBgColorMode = data.desktopEqualizerBgColorMode
+                    if (data.hasOwnProperty("desktopEqualizerBorderColorMode")) root.desktopEqualizerBorderColorMode = data.desktopEqualizerBorderColorMode
                     if (data.hasOwnProperty("desktopEqualizerCustomColor")) root.desktopEqualizerCustomColor = data.desktopEqualizerCustomColor
                     if (data.hasOwnProperty("desktopEqualizerStyle")) root.desktopEqualizerStyle = data.desktopEqualizerStyle
                     if (data.hasOwnProperty("desktopEqualizerLineThickness")) root.desktopEqualizerLineThickness = data.desktopEqualizerLineThickness
@@ -1201,6 +1688,34 @@ Item {
                     if (data.hasOwnProperty("desktopQuickActionsOpacity")) root.desktopQuickActionsOpacity = data.desktopQuickActionsOpacity
 
                     if (data.hasOwnProperty("showIndicators")) root.showIndicators = data.showIndicators
+
+                    if (data.hasOwnProperty("showVolumeIndicator")) root.showVolumeIndicator = data.showVolumeIndicator
+                    if (data.hasOwnProperty("showBrightnessIndicator")) root.showBrightnessIndicator = data.showBrightnessIndicator
+                    if (data.hasOwnProperty("showPinnedIndicator")) root.showPinnedIndicator = data.showPinnedIndicator
+                    if (data.hasOwnProperty("indicatorPosition")) root.indicatorPosition = data.indicatorPosition
+                    if (data.hasOwnProperty("indicatorScale")) root.indicatorScale = data.indicatorScale
+                    if (data.hasOwnProperty("indicatorWidth")) root.indicatorWidth = data.indicatorWidth
+                    if (data.hasOwnProperty("indicatorHeight")) root.indicatorHeight = data.indicatorHeight
+                    if (data.hasOwnProperty("indicatorBgColorMode")) root.indicatorBgColorMode = data.indicatorBgColorMode
+                    if (data.hasOwnProperty("indicatorBorderColorMode")) root.indicatorBorderColorMode = data.indicatorBorderColorMode
+                    if (data.hasOwnProperty("indicatorProgressColorMode")) root.indicatorProgressColorMode = data.indicatorProgressColorMode
+                    if (data.hasOwnProperty("indicatorTextColorMode")) root.indicatorTextColorMode = data.indicatorTextColorMode
+                    if (data.hasOwnProperty("indicatorIconColorMode")) root.indicatorIconColorMode = data.indicatorIconColorMode
+                    if (data.hasOwnProperty("indicatorCustomBgColor")) root.indicatorCustomBgColor = data.indicatorCustomBgColor
+                    if (data.hasOwnProperty("indicatorCustomProgressColor")) root.indicatorCustomProgressColor = data.indicatorCustomProgressColor
+                    if (data.hasOwnProperty("indicatorRadius")) root.indicatorRadius = data.indicatorRadius
+                    if (data.hasOwnProperty("indicatorBorderWidth")) root.indicatorBorderWidth = data.indicatorBorderWidth
+                    if (data.hasOwnProperty("indicatorOpacity")) root.indicatorOpacity = data.indicatorOpacity
+                    if (data.hasOwnProperty("indicatorTimeout")) root.indicatorTimeout = data.indicatorTimeout
+                    if (data.hasOwnProperty("indicatorAnimationDuration")) root.indicatorAnimationDuration = data.indicatorAnimationDuration
+                    if (data.hasOwnProperty("indicatorShowValue")) root.indicatorShowValue = data.indicatorShowValue
+                    if (data.hasOwnProperty("indicatorShowProgress")) root.indicatorShowProgress = data.indicatorShowProgress
+                    if (data.hasOwnProperty("indicatorShowIcon")) root.indicatorShowIcon = data.indicatorShowIcon
+                    if (data.hasOwnProperty("indicatorShowLabel")) root.indicatorShowLabel = data.indicatorShowLabel
+                    if (data.hasOwnProperty("indicatorValuePosition")) root.indicatorValuePosition = data.indicatorValuePosition
+                    if (data.hasOwnProperty("indicatorStyle")) root.indicatorStyle = data.indicatorStyle
+                    if (data.hasOwnProperty("indicatorProgressStyle")) root.indicatorProgressStyle = data.indicatorProgressStyle
+                    if (data.hasOwnProperty("indicatorElementOrder")) root.indicatorElementOrder = data.indicatorElementOrder
 
                     loadFinishedTimer.start()
 
@@ -1258,6 +1773,11 @@ Item {
 
             // Start city detection only after saved data is loaded
             detectCityProc.running = true
+
+            // Ensure at least one QA instance exists
+            if (root.desktopQuickActionsInstances.length === 0) {
+                root.desktopQuickActionsInstances = [root._createQuickActionsConfig()]
+            }
         }
     }
 

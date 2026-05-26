@@ -13,63 +13,12 @@ Item {
     property color primary
     required property var player
 
-    property string trackTitle: ""
-    property string artist: ""
-
-    property bool isPlaying: false
-
     readonly property var mprisSvc: BarLayoutState.getItem("mprisService")
 
-    function cleanTitle(raw) {
-        if (!raw) return ""
-        var t = raw
-        t = t.replace(/\s*-\s*YouTube\s*$/i, "")
-        t = t.replace(/\s*\|\s*YouTube\s*$/i, "")
-        t = t.replace(/\s*\(\d+\)\s*$/i, "")
-        t = t.replace(/^\(\d+\)\s*/, "")
-        t = t.replace(/^\[\d+\]\s*/, "")
-        t = t.replace(/^\d+\.\s*/, "")
-        return t.trim()
+    function syncPlayback() {
+        if (!root.player || !root.player.canControl) return
+        root.player.togglePlaying()
     }
-
-    function cleanArtist(raw, identity) {
-        if (raw && raw.length > 0 && raw !== "Unknown" && raw !== "unknown") return raw
-        if (!identity) return ""
-        var id = identity.toLowerCase()
-        if (id.indexOf("firefox") >= 0 || id.indexOf("chrome") >= 0 || id.indexOf("brave") >= 0 || id.indexOf("chromium") >= 0 || id.indexOf("edge") >= 0) {
-            return ""
-        }
-        return identity
-    }
-
-    function syncFromMprisService() {
-        if (root.mprisSvc) {
-            var newTitle = root.mprisSvc.title || ""
-            var newArtist = root.mprisSvc.artist || ""
-            var newPlaying = root.mprisSvc.isPlaying || false
-            if (trackTitle !== newTitle) trackTitle = newTitle
-            if (artist !== newArtist) artist = newArtist
-            if (isPlaying !== newPlaying) isPlaying = newPlaying
-        }
-    }
-
-    Timer {
-        interval: 500
-        running: true
-        repeat: true
-        onTriggered: root.syncFromMprisService()
-    }
-
-    Connections {
-        target: root.mprisSvc
-        ignoreUnknownSignals: true
-        function onTitleChanged() { root.syncFromMprisService() }
-        function onArtistChanged() { root.syncFromMprisService() }
-        function onIsPlayingChanged() { root.syncFromMprisService() }
-        function onActivePlayerChanged() { root.syncFromMprisService() }
-    }
-
-    Component.onCompleted: root.syncFromMprisService()
 
     Item {
         id: controlBox
@@ -96,17 +45,7 @@ Item {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
-            onClicked: {
-                if (!root.player || !root.player.canControl)
-                    return
-
-                if (root.isPlaying)
-                    root.player.pause()
-                else
-                    root.player.play()
-
-                root.syncPlayback()
-            }
+            onClicked: root.syncPlayback()
         }
 
         Item {
@@ -117,14 +56,15 @@ Item {
             y: (controlBox.height - height) / 2
 
             Canvas {
+                id: playCanvas
                 anchors.fill: parent
-                visible: !root.isPlaying
+                visible: !mprisSvc || !mprisSvc.isPlaying
 
                 onPaint: {
                     var ctx = getContext("2d")
                     ctx.clearRect(0, 0, width, height)
 
-                    ctx.fillStyle = ctrlMouse.containsMouse ? Theme.accent : Theme.textPrimary
+                    ctx.fillStyle = ctrlMouse.containsMouse ? Theme.accent : root.primary
                     ctx.beginPath()
                     ctx.moveTo(0, 0)
                     ctx.lineTo(width, height / 2)
@@ -132,24 +72,29 @@ Item {
                     ctx.closePath()
                     ctx.fill()
                 }
+
+                Connections {
+                    target: mprisSvc
+                    function onIsPlayingChanged() { playCanvas.requestPaint() }
+                }
             }
 
             Row {
                 anchors.fill: parent
                 spacing: width * 0.2
-                visible: root.isPlaying
+                visible: mprisSvc && mprisSvc.isPlaying
 
                 Rectangle {
                     width: parent.width * 0.35
                     height: parent.height
-                    color: ctrlMouse.containsMouse ? Theme.accent : Theme.textPrimary
+                    color: ctrlMouse.containsMouse ? Theme.accent : root.primary
                     radius: 1 * s
                 }
 
                 Rectangle {
                     width: parent.width * 0.35
                     height: parent.height
-                    color: ctrlMouse.containsMouse ? Theme.accent : Theme.textPrimary
+                    color: ctrlMouse.containsMouse ? Theme.accent : root.primary
                     radius: 1 * s
                 }
             }
@@ -162,7 +107,7 @@ Item {
         y: 24 * s
         width: 300 * s
         height: 28 * s
-        text: root.trackTitle
+        text: mprisSvc ? mprisSvc.title : ""
         textColor: root.primary
         fontSize: 12
         fontScale: Scales.uiScale
@@ -177,7 +122,7 @@ Item {
         y: 52 * s
         width: 300 * s
         height: 24 * s
-        text: root.artist
+        text: mprisSvc ? mprisSvc.artist : ""
         textColor: root.primary
         fontSize: 10
         fontScale: Scales.uiScale

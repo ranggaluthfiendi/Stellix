@@ -56,6 +56,9 @@ Item {
 
     readonly property string artCacheDir: StandardPaths.writableLocation(StandardPaths.ConfigLocation).toString().replace(/^file:\/\//, "") + "/quickshell/savedata"
     readonly property string localArtFile: artCacheDir + "/current-cover.jpg"
+    readonly property string localTitleFile: artCacheDir + "/current-title.txt"
+    readonly property string localArtistFile: artCacheDir + "/current-artist.txt"
+    readonly property string persistentArtUrl: "file://" + localArtFile
 
     StdioCollector { id: artDownloadOut }
 
@@ -72,11 +75,44 @@ Item {
 
     function downloadArt(url) {
         if (!url || url === "") {
-            root.localArtPath = ""
             return
         }
         var escapedUrl = url.replace(/'/g, "'\\''")
         artDownload.exec(["sh", "-c", "mkdir -p '" + root.artCacheDir + "' && curl -fsSL --max-time 5 '" + escapedUrl + "' -o '" + root.localArtFile + "' 2>/dev/null"])
+    }
+
+    // Persist Title and Artist
+    Process { id: persistMeta }
+
+    function saveMetadata(t, a) {
+        if (!t || t === "") return
+        var safeTitle = t.replace(/'/g, "'\\''")
+        var safeArtist = a.replace(/'/g, "'\\''")
+        persistMeta.exec(["sh", "-c", "mkdir -p '" + root.artCacheDir + "' && echo '" + safeTitle + "' > '" + root.localTitleFile + "' && echo '" + safeArtist + "' > '" + root.localArtistFile + "'"])
+    }
+
+    StdioCollector {
+        id: metaLoader
+        onStreamFinished: {
+            var lines = this.text.split("\n")
+            for (var i = 0; i < lines.length; i++) {
+                var line = lines[i]
+                if (line.startsWith("TITLE:")) {
+                    if (root.title === "") root.title = line.substring(6).trim()
+                } else if (line.startsWith("ARTIST:")) {
+                    if (root.artist === "") root.artist = line.substring(7).trim()
+                }
+            }
+        }
+    }
+
+    Process {
+        id: metaLoadProc
+        stdout: metaLoader
+    }
+
+    function loadMetadata() {
+        metaLoadProc.exec(["sh", "-c", "printf 'TITLE:'; cat '" + root.localTitleFile + "' 2>/dev/null; printf '\\nARTIST:'; cat '" + root.localArtistFile + "' 2>/dev/null"])
     }
 
     function cleanTitle(raw) {
@@ -149,12 +185,7 @@ Item {
 
     function updateState() {
         if (!root.activePlayer) {
-            root.title = ""
-            root.artist = ""
-            root.artUrl = ""
-            root.localArtPath = ""
-            root.desktopEntry = ""
-            root.identity = ""
+            // Keep existing title/artist if empty (fall back to persistent)
             root.isPlaying = false
             root.hasPlayer = false
             root.position = 0
@@ -169,11 +200,22 @@ Item {
         root.identity = root.activePlayer.identity || ""
 
         var rawTitle = root.activePlayer.trackTitle || ""
-        root.title = root.cleanTitle(rawTitle)
+        var newTitle = root.cleanTitle(rawTitle)
 
         var rawArtist = root.activePlayer.trackArtist || ""
         var identity = root.activePlayer.identity || ""
-        root.artist = root.cleanArtist(rawArtist, identity, rawTitle)
+        var newArtist = root.cleanArtist(rawArtist, identity, rawTitle)
+
+        // Only update and save if the info is actually better or different
+        // If youtube artist is just "YouTube" or repeats title, ignore it if we have something better
+        if (newTitle !== "" && newTitle !== root.title) {
+            root.title = newTitle
+            root.artist = newArtist
+            root.saveMetadata(newTitle, newArtist)
+        } else if (newArtist !== "" && newArtist !== root.artist && newArtist.toLowerCase() !== "youtube") {
+            root.artist = newArtist
+            root.saveMetadata(root.title, newArtist)
+        }
 
         root.artUrl = root.activePlayer.trackArtUrl || ""
         root.position = root.activePlayer.position || 0
@@ -193,9 +235,7 @@ Item {
         ignoreUnknownSignals: true
 
         function onIsPlayingChanged() {
-            if (root.activePlayer && root.activePlayer.isPlaying) {
-                root.resolveActivePlayer()
-            }
+            root.resolveActivePlayer()
             root.updateState()
         }
         function onPlaybackStateChanged() {
@@ -230,7 +270,7 @@ Item {
 
     Timer {
         id: pollTimer
-        interval: 1500
+        interval: 1000 
         running: true
         repeat: true
         onTriggered: {
@@ -265,6 +305,8 @@ Item {
     }
 
     Component.onCompleted: {
+        root.localArtPath = root.localArtFile
+        root.loadMetadata()
         root.resolveActivePlayer()
         root.updateState()
     }

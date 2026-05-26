@@ -30,15 +30,15 @@ Scope {
     property var notificationService: null
 
     // For internal alias compatibility
-    readonly property alias brightnessSvc: root.brightnessService
-    readonly property alias mprisSvc: root.mprisService
-    readonly property alias pwSvc: root.pipewireService
-    readonly property alias notifSvc: root.notificationService
+    property alias brightnessSvc: root.brightnessService
+    property alias mprisSvc: root.mprisService
+    property alias pwSvc: root.pipewireService
+    property alias notifSvc: root.notificationService
 
     property bool wifiPopupOpen: false
     property bool btPopupOpen: false
     property bool powerPopupOpen: false
-    property bool notifPopupOpen: false
+    property bool notifPopupOpen: BarPopupState.notifPopupOpen
     property bool volumeExpanded: false
 
     readonly property real popupGap: Theme.dp(8)
@@ -80,14 +80,12 @@ Scope {
 
     onNotifYChanged: scheduleNotifAnchorRefresh()
     onNotifPopupOpenChanged: {
-        if (notifPopupOpen && BarPopupState.open) {
-            BarPopupState.open = false
-        }
+        BarPopupState.notifPopupOpen = notifPopupOpen
         scheduleNotifAnchorRefresh()
     }
     onVolumeExpandedChanged: {
         if (volumeExpanded) {
-            root.closeNotifPopup()
+            root.notifPopupOpen = false
         }
         scheduleNotifAnchorRefresh()
     }
@@ -116,29 +114,12 @@ Scope {
         target: BarPopupState
         function onOpenChanged() {
             if (BarPopupState.open) {
-                root.closeNotifPopup()
+                root.notifPopupOpen = false
                 root.scheduleNotifAnchorRefresh()
             } else {
                 root.wifiPopupOpen = false
                 root.btPopupOpen = false
                 root.powerPopupOpen = false
-                root.notifPopupOpen = false
-                BarPopupState.calendarOpen = false
-            }
-        }
-        function onCalendarOpenChanged() {
-            if (BarPopupState.calendarOpen) {
-                root.closeNotifPopup()
-            }
-        }
-        function onWorkspaceSwitcherOpenChanged() {
-            if (BarPopupState.workspaceSwitcherOpen) {
-                root.closeNotifPopup()
-            }
-        }
-        function onWeatherDetailOpenChanged() {
-            if (BarPopupState.weatherDetailOpen) {
-                root.closeNotifPopup()
             }
         }
     }
@@ -171,20 +152,20 @@ Scope {
             wifiPopupOpen  = !wifiPopupOpen
             if (wifiPopupOpen) {
                 powerPopupOpen = false
-                root.closeNotifPopup()
+                root.notifPopupOpen = false
             }
         } else if (name === "bluetooth") {
             btPopupOpen = !btPopupOpen
             if (btPopupOpen) {
                 powerPopupOpen = false
-                root.closeNotifPopup()
+                root.notifPopupOpen = false
             }
         } else if (name === "power") {
             powerPopupOpen = !powerPopupOpen
             if (powerPopupOpen) {
                 wifiPopupOpen = false
                 btPopupOpen = false
-                root.closeNotifPopup()
+                root.notifPopupOpen = false
             }
         }
     }
@@ -193,7 +174,7 @@ Scope {
         wifiPopupOpen  = false
         btPopupOpen    = false
         powerPopupOpen = false
-        notifPopupOpen = false
+        root.notifPopupOpen = false
         notifPopupUserOpened = false
     }
 
@@ -204,7 +185,7 @@ Scope {
     }
 
     function closeNotifPopup() {
-        notifPopupOpen = false
+        root.notifPopupOpen = false
         notifPopupUserOpened = false
     }
 
@@ -215,7 +196,7 @@ Scope {
 
     PanelWindow {
         id: outsideOverlay
-        visible: BarPopupState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen || BarPopupState.calendarOpen || BarPopupState.weatherDetailOpen || BarPopupState.workspaceSwitcherOpen
+        visible: BarPopupState.open || root.wifiPopupOpen || root.btPopupOpen || root.powerPopupOpen || root.notifPopupOpen || BarPopupState.calendarOpen || BarPopupState.weatherDetailOpen || BarPopupState.workspaceSwitcherOpen || BarPopupState.mediaPopupOpen
         color: "transparent"
 
         WlrLayershell.layer: WlrLayer.Top
@@ -235,15 +216,16 @@ Scope {
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.AllButtons
-            onPressed: {
-                if (BarPopupState.open) {
-                    BarPopupState.closeAll()
-                }
-                root.closeSidePopups()
-                root.closeNotifPopup()
-                BarPopupState.calendarOpen = false
-                BarPopupState.weatherDetailOpen = false
+        onPressed: {
+            if (BarPopupState.open) {
+                BarPopupState.closeAll()
             }
+            root.closeSidePopups()
+            root.closeNotifPopup()
+            BarPopupState.calendarOpen = false
+            BarPopupState.weatherDetailOpen = false
+            BarPopupState.mediaPopupOpen = false
+        }
         }
     }
 

@@ -33,29 +33,50 @@ Scope {
             WlrLayershell.exclusiveZone: -1
             WlrLayershell.keyboardFocus: BarLayoutState.desktopSearchFocus ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
+            // ==========================================
+            // DESKTOP WIDGETS (z-order: bottom to top)
+            // ==========================================
+
+            // --- Now Playing Widget ---
             NowPlayingWidget {
                 visible: BarLayoutState.showScreenNowPlaying
             }
+
+            // --- Equalizer Widget ---
             EqualizerWidget {
                 visible: BarLayoutState.showScreenEqualizer
             }
+
+            // --- Clock Widget ---
             ClockWidget {
                 visible: BarLayoutState.showScreenClock
             }
+
+            // --- System Stats Widget ---
             SystemStatsWidget {
                 visible: BarLayoutState.showScreenSystemStats
             }
+
+            // --- Weather Widget ---
             WeatherWidget {
                 visible: BarLayoutState.showScreenWeather
             }
-            QuickActionsWidget {
-                visible: BarLayoutState.showScreenQuickActions
+
+            // --- Quick Actions Widgets (multi-instance) ---
+            Repeater {
+                model: BarLayoutState.desktopQuickActionsInstances
+                delegate: QuickActionsWidget {
+                    instanceIndex: index
+                }
             }
 
-            // --- Snap Guides ---
+            // ==========================================
+            // SNAP GUIDES (visual alignment helpers)
+            // ==========================================
             Rectangle {
                 id: vSnapLine
-                width: 1; height: parent.height
+                width: 1
+                height: parent.height
                 x: BarLayoutState.snapLineXPos
                 color: Theme.accent
                 visible: BarLayoutState.snapLineXVisible
@@ -64,13 +85,17 @@ Scope {
 
             Rectangle {
                 id: hSnapLine
-                width: parent.width; height: 1
+                width: parent.width
+                height: 1
                 y: BarLayoutState.snapLineYPos
                 color: Theme.accent
                 visible: BarLayoutState.snapLineYVisible
                 z: 999
             }
 
+            // ==========================================
+            // BAR POPUP (battery widget overlay)
+            // ==========================================
             BatteryBarPopup {
                 brightnessService: BarLayoutState.getItem("brightnessService")
                 mprisService: BarLayoutState.getItem("mprisService")
@@ -78,10 +103,12 @@ Scope {
                 notificationService: BarLayoutState.getItem("notifService")
             }
 
+            // ==========================================
+            // CLICK CATCHER (close menus/popups)
+            // ==========================================
             Item {
                 anchors.fill: parent
                 z: 9999
-
                 visible: SysTrayState.openedMenu !== null || BarPopupState.calendarOpen
 
                 MouseArea {
@@ -90,22 +117,11 @@ Scope {
 
                     onPressed: (mouse) => {
                         if (SysTrayState.openedMenu) {
-                            const p = SysTrayState.openedMenu.mapFromItem(
-                                parent,
-                                mouse.x,
-                                mouse.y
-                            )
-
-                            if (
-                                p.x < 0 ||
-                                p.y < 0 ||
-                                p.x > SysTrayState.openedMenu.width ||
-                                p.y > SysTrayState.openedMenu.height
-                            ) {
+                            const p = SysTrayState.openedMenu.mapFromItem(parent, mouse.x, mouse.y)
+                            if (p.x < 0 || p.y < 0 || p.x > SysTrayState.openedMenu.width || p.y > SysTrayState.openedMenu.height) {
                                 SysTrayState.closeAll()
                             }
                         }
-
                         if (BarPopupState.calendarOpen) {
                             BarPopupState.calendarOpen = false
                         }

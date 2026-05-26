@@ -26,6 +26,7 @@ RowLayout {
         Layout.preferredWidth: 1
         Layout.preferredHeight: Theme.dp(14)
         Layout.alignment: Qt.AlignVCenter
+        Layout.leftMargin: Theme.dp(6)
         Layout.rightMargin: Theme.dp(6)
         color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.5)
     }

@@ -200,7 +200,7 @@ Item {
         }
 
         implicitWidth: root.popupW
-        implicitHeight: weatherDetailContent.implicitHeight
+        implicitHeight: weatherDetailContent.implicitHeight + Theme.dp(32)
 
         margins.left: root.isCenterWeather ? root.centerMargin : (root.isLeftWeather ? Theme.dp(5) : root.screenW - root.popupW - Theme.dp(5))
         margins.right: root.isCenterWeather ? root.centerMargin : (root.isRightWeather ? Theme.dp(5) : root.screenW - root.popupW - Theme.dp(5))
@@ -214,6 +214,7 @@ Item {
             border.width: 1
             border.color: Theme.border
             radius: root.popupRadius
+            clip: true
 
             property real animOpacity: 0
             opacity: animOpacity
@@ -239,8 +240,8 @@ Item {
 
             ColumnLayout {
                 id: weatherDetailContent
-                anchors.fill: parent
-                anchors.margins: Theme.dp(16)
+                width: parent.width - Theme.dp(32)
+                anchors.centerIn: parent
                 spacing: Theme.dp(14)
 
                 RowLayout {
@@ -495,6 +496,7 @@ Item {
         border.width: 1
         border.color: Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.3)
         radius: root.popupRadius > 0 ? Theme.radiusSmall : 0
+        clip: true
 
         ColumnLayout {
             anchors.fill: parent

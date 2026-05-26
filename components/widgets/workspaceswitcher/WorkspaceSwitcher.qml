@@ -39,7 +39,6 @@ PanelWindow {
     color: "transparent"
     onVisibleChanged: {
         if (visible) {
-            wsService.focusedId = wsService.activeWorkspaceId;
             wsService.refreshTrigger++;
             wsService.ensureFocusedVisible();
             animY = -Theme.dp(12);

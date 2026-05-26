@@ -638,13 +638,271 @@ VabContentPage {
             }
         }
 
+        VabSettingsCard {
+            id: mediaCard
+            property bool expanded: false
+            itemIndex: 12
+            isFocused: page.focusInContent && page.contentFocusIndex === 12
+            title: "Media"; desc: "Show or hide media widget"
+
+            headerActions: RowLayout {
+                spacing: Theme.dp(8)
+                VabButton {
+                    text: mediaCard.expanded ? "Close" : "Options"
+                    onClicked: mediaCard.expanded = !mediaCard.expanded
+                }
+                VabSwitch {
+                    checked: !BarLayoutState.isHidden("media")
+                    onToggled: BarLayoutState.toggleHide("media")
+                }
+            }
+
+            ColumnLayout {
+                visible: mediaCard.expanded
+                Layout.fillWidth: true
+                spacing: Theme.dp(12)
+                Layout.topMargin: Theme.dp(4)
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(6)
+                    Text { text: "Style"; color: Theme.textMuted; font.pixelSize: Theme.dp(9); font.weight: Font.Bold }
+                    Repeater {
+                        model: BarLayoutState.barMediaStyles
+                        delegate: Rectangle {
+                            id: mediaStyleRow
+                            required property int index
+                            required property var modelData
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Theme.dp(32)
+                            color: BarLayoutState.barMediaStyle === mediaStyleRow.modelData.value ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.1) : "transparent"
+                            border.width: 1
+                            border.color: BarLayoutState.barMediaStyle === mediaStyleRow.modelData.value ? Theme.accent : Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.3)
+                            Text { anchors.centerIn: parent; text: mediaStyleRow.modelData.label; color: BarLayoutState.barMediaStyle === mediaStyleRow.modelData.value ? Theme.accent : Theme.textPrimary; font.pixelSize: Theme.dp(9) }
+                            MouseArea { anchors.fill: parent; onClicked: BarLayoutState.barMediaStyle = mediaStyleRow.modelData.value }
+                        }
+                    }
+                }
+
+                VabSectionHeader {
+                    title: "Element Order"
+                }
+
+                Rectangle {
+                    id: mediaElementsContainer
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: mediaElementsColumn.implicitHeight
+                    color: "transparent"
+
+                    property int _mediaElementsKey: 0
+
+                    Connections {
+                        target: BarLayoutState
+                        function onBarMediaElementOrderChanged() { mediaElementsContainer._mediaElementsKey++ }
+                    }
+
+                    ColumnLayout {
+                        id: mediaElementsColumn
+                        anchors.fill: parent
+                        spacing: Theme.dp(8)
+
+                        Repeater {
+                            model: mediaElementsContainer._mediaElementsKey > 0 ? BarLayoutState.barMediaElementOrder.length : 0
+                            delegate: Rectangle {
+                                id: mediaElementCard
+                                required property int index
+
+                                readonly property string elementType: index < BarLayoutState.barMediaElementOrder.length ? BarLayoutState.barMediaElementOrder[index] : ""
+                                readonly property string elementLabel: BarLayoutState.barMediaElementLabels[elementType] || elementType
+                                readonly property string elementSymbol: elementType==="art"?"♪":(elementType==="text"?"T":"?")
+
+                                Layout.fillWidth: true
+                                Layout.preferredHeight: Theme.dp(32)
+                                color: meCardMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.08) : "transparent"
+                                border.width: 1
+                                border.color: meCardMouse.containsMouse ? Theme.accent : Qt.rgba(Theme.border.r, Theme.border.g, Theme.border.b, 0.5)
+                                radius: 0
+
+                                RowLayout {
+                                    anchors.fill: parent
+                                    anchors.leftMargin: Theme.dp(6)
+                                    anchors.rightMargin: Theme.dp(4)
+                                    spacing: Theme.dp(4)
+
+                                    Text {
+                                        text: mediaElementCard.elementSymbol
+                                        font.pixelSize: Theme.dp(12)
+                                        Layout.preferredWidth: Theme.dp(20)
+                                        horizontalAlignment: Text.AlignHCenter
+                                    }
+
+                                    Text { text: mediaElementCard.elementLabel; color: Theme.textPrimary; font.pixelSize: Theme.dp(9); font.weight: Font.Medium; Layout.fillWidth: true }
+
+                                    Rectangle {
+                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
+                                        visible: mediaElementCard.index > 0
+                                        Text { anchors.centerIn: parent; text: "▲"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                var a=BarLayoutState.barMediaElementOrder.slice(); var p=mediaElementCard.index; if(p>0){var t=a[p];a[p]=a[p-1];a[p-1]=t;BarLayoutState.barMediaElementOrder=a}
+                                            }
+                                        }
+                                    }
+                                    Rectangle {
+                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
+                                        visible: mediaElementCard.index < BarLayoutState.barMediaElementOrder.length-1
+                                        Text { anchors.centerIn: parent; text: "▼"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                var a=BarLayoutState.barMediaElementOrder.slice(); var p=mediaElementCard.index; if(p>=0&&p<a.length-1){var t=a[p];a[p]=a[p+1];a[p+1]=t;BarLayoutState.barMediaElementOrder=a}
+                                            }
+                                        }
+                                    }
+                                }
+                                MouseArea { id: meCardMouse; anchors.fill: parent; hoverEnabled: true; acceptedButtons: Qt.NoButton }
+                            }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: mediaPreviewBox
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.dp(28)
+                    color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.05)
+                    border.width: 1
+                    border.color: Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.2)
+                    radius: 0
+
+                    property int _mediaPreviewKey: 0
+
+                    Connections {
+                        target: BarLayoutState
+                        function onBarMediaElementOrderChanged() { mediaPreviewBox._mediaPreviewKey++ }
+                        function onBarMediaHideElementsChanged() { mediaPreviewBox._mediaPreviewKey++ }
+                    }
+
+                    Row {
+                        anchors.centerIn: parent
+                        spacing: Theme.dp(4)
+                        leftPadding: Theme.dp(8)
+                        rightPadding: Theme.dp(8)
+
+                        Repeater {
+                            model: mediaPreviewBox._mediaPreviewKey > 0 ? BarLayoutState.barMediaElementOrder : []
+                            delegate: Text {
+                                required property string modelData
+                                visible: !BarLayoutState.isMediaElementHidden(modelData)
+                                text: modelData==="art"?"♪":(modelData==="text"?"Title":"?")
+                                color: Theme.accent
+                                font.pixelSize: Theme.dp(10)
+                            }
+                        }
+                    }
+                }
+
+                VabSectionHeader {
+                    title: "Hide Elements in Bar"
+                }
+
+                Repeater {
+                    model: ["art", "text"]
+                    delegate: RowLayout {
+                        required property string modelData
+                        Layout.fillWidth: true
+                        spacing: Theme.dp(12)
+                        Text {
+                            text: BarLayoutState.barMediaElementLabels[modelData] || modelData
+                            color: Theme.textPrimary
+                            font.pixelSize: Theme.dp(10)
+                            Layout.fillWidth: true
+                        }
+                        VabSwitch {
+                            checked: !BarLayoutState.isMediaElementHidden(modelData)
+                            onToggled: BarLayoutState.toggleMediaHideElement(modelData)
+                        }
+                    }
+                }
+
+                VabSectionHeader {
+                    title: "Expand Direction"
+                    Layout.topMargin: Theme.dp(4)
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.dp(12)
+                    Text { text: "Direction"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); Layout.fillWidth: true }
+                    Rectangle {
+                        id: expandLeftBtn
+                        width: Theme.dp(28)
+                        height: Theme.dp(28)
+                        color: expandLeftBtnMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.barMediaExpandDirection === "left" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
+                        radius: Theme.dp(4)
+                        border.color: BarLayoutState.barMediaExpandDirection === "left" ? Theme.accent : Theme.border
+                        border.width: 1
+                        scale: expandLeftBtnMouse.containsMouse ? 1.1 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        ChevronLeft {
+                            anchors.centerIn: parent
+                            width: Theme.dp(14)
+                            height: Theme.dp(14)
+                            color: BarLayoutState.barMediaExpandDirection === "left" ? Theme.accent : Theme.textMuted
+                        }
+                        MouseArea {
+                            id: expandLeftBtnMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: BarLayoutState.barMediaExpandDirection = "left"
+                        }
+                    }
+                    Rectangle {
+                        id: expandRightBtn
+                        width: Theme.dp(28)
+                        height: Theme.dp(28)
+                        color: expandRightBtnMouse.containsMouse ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.15) : (BarLayoutState.barMediaExpandDirection === "right" ? Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.25) : "transparent")
+                        radius: Theme.dp(4)
+                        border.color: BarLayoutState.barMediaExpandDirection === "right" ? Theme.accent : Theme.border
+                        border.width: 1
+                        scale: expandRightBtnMouse.containsMouse ? 1.1 : 1.0
+                        Behavior on scale { NumberAnimation { duration: 150 } }
+                        ChevronRight {
+                            anchors.centerIn: parent
+                            width: Theme.dp(14)
+                            height: Theme.dp(14)
+                            color: BarLayoutState.barMediaExpandDirection === "right" ? Theme.accent : Theme.textMuted
+                        }
+                        MouseArea {
+                            id: expandRightBtnMouse
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: BarLayoutState.barMediaExpandDirection = "right"
+                        }
+                    }
+                }
+
+                Text {
+                    text: "Left: text expands to left. Right: text expands to right (default)."
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.dp(8)
+                    font.italic: true
+                }
+            }
+        }
+
         VabSectionHeader { title: "Battery Options"; Layout.topMargin: Theme.dp(10) }
 
         VabSettingsCard {
             id: batteryOptionsCard
             property bool expanded: false
-            itemIndex: 12
-            isFocused: page.focusInContent && page.contentFocusIndex === 12
+            itemIndex: 13
+            isFocused: page.focusInContent && page.contentFocusIndex === 13
             title: "Battery Customization"; desc: "Configure style, charging icon, and threshold"
 
             headerActions: VabButton {
@@ -810,20 +1068,6 @@ VabContentPage {
                     Text { text: "Low Battery Threshold (" + BarLayoutState.batteryLowThreshold + "%)"; color: Theme.textPrimary; font.pixelSize: Theme.dp(10) }
                     VabSlider { Layout.fillWidth: true; from: 5; to: 50; value: BarLayoutState.batteryLowThreshold; onValueChanged: BarLayoutState.batteryLowThreshold = Math.round(value) }
                 }
-            }
-        }
-
-        VabSectionHeader { title: "Workspace Options"; Layout.topMargin: Theme.dp(10) }
-
-        VabSettingsCard {
-            itemIndex: 13
-            isFocused: page.focusInContent && page.contentFocusIndex === 13
-            title: "Workspace Count"; desc: "Number of dots: " + BarLayoutState.workspaceCount
-
-            headerActions: VabSlider {
-                Layout.preferredWidth: Theme.dp(120)
-                from: 3; to: 10; value: BarLayoutState.workspaceCount
-                onValueChanged: BarLayoutState.workspaceCount = Math.round(value)
             }
         }
 

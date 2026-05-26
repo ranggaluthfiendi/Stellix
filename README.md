@@ -55,7 +55,7 @@ sudo systemctl enable --now NetworkManager bluetooth
 systemctl --user enable --now pipewire pipewire-pulse wireplumber
 
 # Clone config
-git clone https://github.com/YourUsername/quickshell-stellix.git ~/.config/quickshell
+git clone https://github.com/ranggaluthfiendi/Stellix.git ~/.config/quickshell
 qs
 ```
 

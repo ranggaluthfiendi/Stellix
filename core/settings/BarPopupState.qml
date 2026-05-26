@@ -19,6 +19,8 @@ Item {
             calendarOpen = false
             weatherDetailOpen = false
             workspaceSwitcherOpen = false
+            mediaPopupOpen = false
+            notifPopupOpen = false
             SysTrayState._closeTrayItems()
         }
     }
@@ -29,6 +31,8 @@ Item {
             open = false
             weatherDetailOpen = false
             workspaceSwitcherOpen = false
+            mediaPopupOpen = false
+            notifPopupOpen = false
             SysTrayState._closeTrayItems()
         }
     }
@@ -38,6 +42,8 @@ Item {
             open = false
             calendarOpen = false
             weatherDetailOpen = false
+            mediaPopupOpen = false
+            notifPopupOpen = false
             SysTrayState._closeTrayItems()
         }
     }
@@ -50,6 +56,31 @@ Item {
             open = false
             calendarOpen = false
             workspaceSwitcherOpen = false
+            mediaPopupOpen = false
+            notifPopupOpen = false
+            SysTrayState._closeTrayItems()
+        }
+    }
+    property bool mediaPopupOpen: false
+    onMediaPopupOpenChanged: {
+        if (mediaPopupOpen) {
+            open = false
+            calendarOpen = false
+            weatherDetailOpen = false
+            workspaceSwitcherOpen = false
+            notifPopupOpen = false
+            SysTrayState._closeTrayItems()
+        }
+    }
+
+    property bool notifPopupOpen: false
+    onNotifPopupOpenChanged: {
+        if (notifPopupOpen) {
+            open = false
+            calendarOpen = false
+            weatherDetailOpen = false
+            workspaceSwitcherOpen = false
+            mediaPopupOpen = false
             SysTrayState._closeTrayItems()
         }
     }
@@ -70,7 +101,7 @@ Item {
 
     Timer {
         id: indicatorHideTimer
-        interval: 1500
+        interval: BarLayoutState.indicatorTimeout
         repeat: false
         onTriggered: {
             root.indicatorVisible = false
@@ -135,6 +166,7 @@ Item {
         settingsOpen = false
         guideOpen = false
         weatherDetailOpen = false
+        mediaPopupOpen = false
         SysTrayState.forceCloseAll()
     }
 

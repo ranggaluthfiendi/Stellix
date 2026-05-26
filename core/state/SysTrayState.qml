@@ -11,6 +11,8 @@ QtObject {
             BarPopupState.calendarOpen = false
             BarPopupState.weatherDetailOpen = false
             BarPopupState.workspaceSwitcherOpen = false
+            BarPopupState.mediaPopupOpen = false
+            BarPopupState.notifPopupOpen = false
         }
     }
 
@@ -23,6 +25,8 @@ QtObject {
             BarPopupState.calendarOpen = false
             BarPopupState.weatherDetailOpen = false
             BarPopupState.workspaceSwitcherOpen = false
+            BarPopupState.mediaPopupOpen = false
+            BarPopupState.notifPopupOpen = false
         }
     }
 
@@ -33,6 +37,8 @@ QtObject {
             BarPopupState.calendarOpen = false
             BarPopupState.weatherDetailOpen = false
             BarPopupState.workspaceSwitcherOpen = false
+            BarPopupState.mediaPopupOpen = false
+            BarPopupState.notifPopupOpen = false
         }
     }
 

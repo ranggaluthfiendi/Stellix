@@ -37,6 +37,7 @@ PanelWindow {
         onPressed: {
             SysTrayState.forceCloseAll()
             BarPopupState.weatherDetailOpen = false
+            BarPopupState.mediaPopupOpen = false
         }
     }
 }

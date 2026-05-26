@@ -10,6 +10,7 @@ Rectangle {
     property string sectionLabel: ""
     property int itemIndex: -1
     property bool isFocused: false
+    property bool expanded: true
     
     // Highlight logic
     property bool isHighlighted: false
@@ -23,7 +24,7 @@ Rectangle {
         root.isHighlighted = true
         highlightTimer.restart()
     }
-
+    
     Connections {
         target: {
             var p = root.parent
@@ -127,7 +128,7 @@ Rectangle {
             id: mainContentContainer
             Layout.fillWidth: true
             spacing: Theme.dp(8)
-            visible: mainContentContainer.children.length > 0
+            visible: root.expanded && mainContentContainer.children.length > 0
         }
     }
 }

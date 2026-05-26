@@ -43,7 +43,12 @@ Scope {
     }
 
     onPinnedChanged: {
-        if (!_loadingState) state.applyState(root.pinned, root.autoHideEnabled)
+        if (!_loadingState) {
+            state.applyState(root.pinned, root.autoHideEnabled)
+            if (BarLayoutState.showPinnedIndicator) {
+                BarPopupState.showIndicator("pinned", pinned ? 1.0 : 0.0, false)
+            }
+        }
     }
     onAutoHideEnabledChanged: {
         if (!_loadingState) state.applyState(root.pinned, root.autoHideEnabled)
@@ -51,22 +56,6 @@ Scope {
 
     property bool _triggerHovering: false
     property bool _barHovering: false
-
-    property bool pinIndicatorVisible: false
-    property bool _pinIndicatorAnimating: false
-
-    Timer {
-        id: pinIndicatorTimer
-        interval: 1500
-        repeat: false
-        onTriggered: root.pinIndicatorVisible = false
-    }
-
-    function showPinIndicator() {
-        root.pinIndicatorVisible = true
-        root._pinIndicatorAnimating = true
-        pinIndicatorTimer.restart()
-    }
 
     readonly property bool expanded: pinned || (_triggerHovering || _barHovering)
 
@@ -165,7 +154,6 @@ Scope {
 
             onPressed: function(mouse) {
                 root.pinned = !root.pinned
-                root.showPinIndicator()
             }
         }
 
@@ -279,17 +267,16 @@ Scope {
         grabFocus: false
 
         anchor.window: bar
-        anchor.rect.x: Math.round((bar.width - Theme.dp(220)) / 2)
+        anchor.rect.x: Math.round((bar.width - vbIndicator.width) / 2)
         anchor.rect.y: root.isBottom
-            ? -(Theme.dp(40) + Theme.dp(4))
+            ? -(vbIndicator.height + Theme.dp(4))
             : bar.height + Theme.dp(4)
 
-        implicitWidth: Theme.dp(220)
-        implicitHeight: Theme.dp(40)
+        implicitWidth: vbIndicator.width
+        implicitHeight: vbIndicator.height
 
         VolumeBrightnessIndicator {
             id: vbIndicator
-            anchors.fill: parent
             indicatorType: BarPopupState.indicatorType
             indicatorValue: BarPopupState.indicatorValue
             indicatorMuted: BarPopupState.indicatorMuted
@@ -297,26 +284,5 @@ Scope {
         }
     }
 
-    // ── Pin Indicator ──
-    PopupWindow {
-        id: pinIndicatorPopup
-        visible: root.pinIndicatorVisible
-        color: "transparent"
-        grabFocus: false
-
-        anchor.window: bar
-        anchor.rect.x: Math.round((bar.width - Theme.dp(180)) / 2)
-        anchor.rect.y: root.isBottom
-            ? -(Theme.dp(40) + Theme.dp(4))
-            : bar.height + Theme.dp(4)
-
-        implicitWidth: Theme.dp(180)
-        implicitHeight: Theme.dp(40)
-
-        PinIndicator {
-            anchors.fill: parent
-            isPinned: root.pinned
-            animating: root._pinIndicatorAnimating
-        }
-    }
+    // --- Separate PinIndicator removed as it is now integrated ---
 }

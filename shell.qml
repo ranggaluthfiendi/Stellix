@@ -82,7 +82,9 @@ ShellRoot {
     Connections {
         target: brightnessService
         function onCurrentValueChanged() {
-            BarPopupState.showIndicator("brightness", brightnessService.percentage / 100, false)
+            if (BarLayoutState.showBrightnessIndicator) {
+                BarPopupState.showIndicator("brightness", brightnessService.percentage / 100, false)
+            }
         }
     }
 
@@ -90,10 +92,14 @@ ShellRoot {
         target: (pwService.sink && pwService.sink.audio) ? pwService.sink.audio : null
         ignoreUnknownSignals: true
         function onVolumeChanged() {
-            BarPopupState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+            if (BarLayoutState.showVolumeIndicator) {
+                BarPopupState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+            }
         }
         function onMutedChanged() {
-            BarPopupState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+            if (BarLayoutState.showVolumeIndicator) {
+                BarPopupState.showIndicator("volume", pwService.sink.audio.volume, pwService.sink.audio.muted)
+            }
         }
     }
 

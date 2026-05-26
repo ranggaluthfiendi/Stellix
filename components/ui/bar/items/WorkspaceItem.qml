@@ -93,7 +93,7 @@ Item {
     Row {
         id: wsRow
         anchors.centerIn: parent
-        spacing: Scales.dp(5)
+        spacing: Scales.dp(BarLayoutState.workspaceSpacing)
 
         Repeater {
             model: root.wsCount
@@ -107,9 +107,14 @@ Item {
 
                 property bool active: workspace?.active ?? false
                 property bool hasWin: root.hasWindows(wsId)
+                property bool shouldShow: BarLayoutState.workspaceShowEmpty || hasWin || active
 
-                width: Scales.dp(12)
-                height: Scales.dp(12)
+                visible: shouldShow
+                width: {
+                    if (BarLayoutState.workspaceStyle === "pills") return active ? Scales.dp(BarLayoutState.workspaceActiveDotSize * 2) : Scales.dp(BarLayoutState.workspaceDotSize)
+                    return Scales.dp(BarLayoutState.workspaceActiveDotSize)
+                }
+                height: root.height
 
                 Component.onCompleted: {
                     const ws = Hyprland.workspaces.values.find(w => w.id === wsId)
@@ -131,48 +136,102 @@ Item {
                 Rectangle {
                     id: box
                     anchors.centerIn: parent
-                    width: Scales.dp(active ? 12 : 6)
-                    height: Scales.dp(active ? 12 : 6)
-                    radius: Scales.dp(3)
+                    
+                    width: {
+                        if (BarLayoutState.workspaceStyle === "pills") return active ? Scales.dp(BarLayoutState.workspaceActiveDotSize * 2) : Scales.dp(BarLayoutState.workspaceDotSize)
+                        if (BarLayoutState.workspaceStyle === "lines") return Scales.dp(active ? BarLayoutState.workspaceActiveDotSize : BarLayoutState.workspaceDotSize)
+                        if (BarLayoutState.workspaceStyle === "numbers") return Scales.dp(20)
+                        return Scales.dp(active ? BarLayoutState.workspaceActiveDotSize : BarLayoutState.workspaceDotSize)
+                    }
+                    
+                    height: {
+                        if (BarLayoutState.workspaceStyle === "lines") return Scales.dp(2)
+                        if (BarLayoutState.workspaceStyle === "numbers") return Scales.dp(20)
+                        if (BarLayoutState.workspaceStyle === "dots") return Scales.dp(active ? BarLayoutState.workspaceActiveDotSize : BarLayoutState.workspaceDotSize)
+                        return Scales.dp(BarLayoutState.workspaceDotSize)
+                    }
+                    
+                    radius: {
+                        if (BarLayoutState.workspaceStyle === "geometric") return 0
+                        if (BarLayoutState.workspaceStyle === "pills") return height / 2
+                        if (BarLayoutState.workspaceStyle === "dots") return active ? Scales.dp(BarLayoutState.workspaceRadius * 2) : Scales.dp(BarLayoutState.workspaceRadius)
+                        return Scales.dp(BarLayoutState.workspaceRadius)
+                    }
+                    rotation: BarLayoutState.workspaceStyle === "geometric" ? 45 : 0
 
                     color: {
-                        if (wsMouse.containsMouse) {
+                        if (BarLayoutState.workspaceStyle === "dots") {
+                            if (wsMouse.containsMouse) {
+                                if (active && hasWin)
+                                    return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85)
+                                if (active && !hasWin)
+                                    return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.6)
+                                if (!active && hasWin)
+                                    return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35)
+                                return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.15)
+                            }
                             if (active && hasWin)
-                                return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.85)
+                                return Theme.accent
                             if (active && !hasWin)
-                                return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.6)
+                                return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.4)
                             if (!active && hasWin)
-                                return Qt.rgba(Theme.accent.r, Theme.accent.g, Theme.accent.b, 0.35)
-                            return Qt.rgba(Theme.textPrimary.r, Theme.textPrimary.g, Theme.textPrimary.b, 0.15)
+                                return Theme.textPrimary
+                            return "transparent"
                         }
-                        if (active && hasWin)
-                            return Theme.accent
-                        if (active && !hasWin)
-                            return Qt.rgba(
-                                Theme.accent.r,
-                                Theme.accent.g,
-                                Theme.accent.b,
-                                0.4
-                            )
-                        if (!active && hasWin)
-                            return Theme.textPrimary
-                        return "transparent"
+
+                        let baseColor = Theme.textMuted
+                        if (active) {
+                            if (BarLayoutState.workspaceActiveColorMode === "accent") baseColor = Theme.accent
+                            else if (BarLayoutState.workspaceActiveColorMode === "success") baseColor = Theme.success
+                            else baseColor = Theme.textPrimary
+                        } else if (hasWin) {
+                            if (BarLayoutState.workspaceHasWinColorMode === "accent") baseColor = Theme.accent
+                            else if (BarLayoutState.workspaceHasWinColorMode === "text_muted") baseColor = Theme.textMuted
+                            else baseColor = Theme.textPrimary
+                        }
+
+                        if (wsMouse.containsMouse) return Qt.rgba(baseColor.r, baseColor.g, baseColor.b, 0.8)
+                        
+                        if (!active && !hasWin) return "transparent"
+                        
+                        return baseColor
                     }
 
                     border.width: (!active && !hasWin) ? Scales.dp(1) : 0
-                    border.color: Theme.textPrimary
+                    border.color: BarLayoutState.workspaceStyle === "dots" ? Theme.textPrimary : Theme.textMuted
+
+                    Text {
+                        anchors.centerIn: parent
+                        visible: BarLayoutState.workspaceShowNumbers || BarLayoutState.workspaceStyle === "numbers"
+                        text: wsItem.wsId.toString()
+                        color: active ? Theme.bgPrimary : Theme.textPrimary
+                        font.pixelSize: Scales.dp(10)
+                        font.weight: Font.Bold
+                        rotation: -parent.rotation
+                    }
 
                     Behavior on width {
-                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
                     }
                     Behavior on height {
-                        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: 250; easing.type: Easing.OutCubic }
                     }
                     Behavior on color {
                         ColorAnimation { duration: 250; easing.type: Easing.OutCubic }
                     }
                     Behavior on radius {
                         NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+                    }
+                    
+                    // Nerves style extra lines
+                    Rectangle {
+                        visible: BarLayoutState.workspaceStyle === "nerves" && active
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.bottom
+                        anchors.topMargin: Scales.dp(2)
+                        width: parent.width * 0.6
+                        height: Scales.dp(1)
+                        color: Theme.accent
                     }
                 }
 

@@ -25,8 +25,16 @@ RowLayout {
     Loader {
         id: loader
         Layout.alignment: Qt.AlignVCenter
-        Layout.leftMargin: (delegate.modelData === "battery" && BarLayoutState.batteryStyle === "percentage") ? Theme.dp(4) : 0
-        Layout.rightMargin: (delegate.modelData === "battery" && BarLayoutState.batteryStyle === "percentage") ? Theme.dp(4) : 0
+        Layout.leftMargin: {
+            if (delegate.modelData === "battery" && BarLayoutState.batteryStyle === "percentage") return Theme.dp(4)
+            if (delegate.modelData === "workspace") return Theme.dp(6)
+            return 0
+        }
+        Layout.rightMargin: {
+            if (delegate.modelData === "battery" && BarLayoutState.batteryStyle === "percentage") return Theme.dp(4)
+            if (delegate.modelData === "workspace") return Theme.dp(6)
+            return 0
+        }
 
         onStatusChanged: {
             if (status === Loader.Ready && item) {
@@ -47,6 +55,7 @@ RowLayout {
                 case "battery": return Qt.resolvedUrl("MenuItem.qml")
                 case "notif": return Qt.resolvedUrl("NotifItem.qml")
                 case "weather": return Qt.resolvedUrl("WeatherItem.qml")
+                case "media": return Qt.resolvedUrl("BarMediaItem.qml")
                 default: return ""
             }
         }
