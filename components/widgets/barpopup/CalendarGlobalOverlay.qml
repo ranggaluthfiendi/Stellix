@@ -36,6 +36,7 @@ PanelWindow {
             BarPopupState.calendarOpen = false
             BarPopupState.weatherDetailOpen = false
             BarPopupState.mediaPopupOpen = false
+            BarPopupState.notifPopupOpen = false
         }
     }
 }

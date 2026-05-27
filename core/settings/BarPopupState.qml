@@ -167,6 +167,7 @@ Item {
         guideOpen = false
         weatherDetailOpen = false
         mediaPopupOpen = false
+        notifPopupOpen = false
         SysTrayState.forceCloseAll()
     }
 

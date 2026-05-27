@@ -109,7 +109,7 @@ Scope {
             Item {
                 anchors.fill: parent
                 z: 9999
-                visible: SysTrayState.openedMenu !== null || BarPopupState.calendarOpen
+                visible: SysTrayState.openedMenu !== null || BarPopupState.calendarOpen || BarPopupState.mediaPopupOpen || BarPopupState.notifPopupOpen || BarPopupState.weatherDetailOpen
 
                 MouseArea {
                     anchors.fill: parent
@@ -124,6 +124,15 @@ Scope {
                         }
                         if (BarPopupState.calendarOpen) {
                             BarPopupState.calendarOpen = false
+                        }
+                        if (BarPopupState.mediaPopupOpen) {
+                            BarPopupState.mediaPopupOpen = false
+                        }
+                        if (BarPopupState.notifPopupOpen) {
+                            BarPopupState.notifPopupOpen = false
+                        }
+                        if (BarPopupState.weatherDetailOpen) {
+                            BarPopupState.weatherDetailOpen = false
                         }
                     }
                 }

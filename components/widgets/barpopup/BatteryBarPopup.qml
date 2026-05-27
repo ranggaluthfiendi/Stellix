@@ -38,8 +38,17 @@ Scope {
     property bool wifiPopupOpen: false
     property bool btPopupOpen: false
     property bool powerPopupOpen: false
-    property bool notifPopupOpen: BarPopupState.notifPopupOpen
+    property bool notifPopupOpen: false
     property bool volumeExpanded: false
+
+    Connections {
+        target: BarPopupState
+        function onNotifPopupOpenChanged() {
+            if (root.notifPopupOpen !== BarPopupState.notifPopupOpen) {
+                root.notifPopupOpen = BarPopupState.notifPopupOpen
+            }
+        }
+    }
 
     readonly property real popupGap: Theme.dp(8)
 
@@ -80,7 +89,9 @@ Scope {
 
     onNotifYChanged: scheduleNotifAnchorRefresh()
     onNotifPopupOpenChanged: {
-        BarPopupState.notifPopupOpen = notifPopupOpen
+        if (BarPopupState.notifPopupOpen !== notifPopupOpen) {
+            BarPopupState.notifPopupOpen = notifPopupOpen
+        }
         scheduleNotifAnchorRefresh()
     }
     onVolumeExpandedChanged: {
@@ -225,6 +236,7 @@ Scope {
             BarPopupState.calendarOpen = false
             BarPopupState.weatherDetailOpen = false
             BarPopupState.mediaPopupOpen = false
+            BarPopupState.notifPopupOpen = false
         }
         }
     }
