@@ -26,31 +26,16 @@ A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic th
 - 🔍 **App Launcher** -- Search apps, calculator, currency converter, clipboard, power menu
 - ⚙️ **Settings Panel** -- Full GUI settings with live keybind editor for Hyprland
 
-## Requirements
+## Keybinds
 
-### Core
-```
-quickshell · hyprland · hyprpaper · qt6-base · qt6-declarative · qt6-svg
-```
-
-### System Services
-```
-networkmanager · bluez · bluez-utils · pipewire · pipewire-pulse · wireplumber
-playerctl · upower · xdg-desktop-portal-hyprland · gvfs · udisks2 · polkit · gnome-keyring
-```
-
-### Tools & Utilities
-```
-matugen · awww · brightnessctl · wl-clipboard · cliphist
-grim · slurp · hyprshot · hyprlock · cava · bc · curl
-qt6ct · qt5ct
-```
-
-### Recommended Applications
-```
-kitty · fish · nautilus · brave-bin · visual-studio-code-bin
-discord · ferdium-bin · btop · ranger · obs-studio
-```
+| Shortcut | Action |
+|:---|:---|
+| `Super + R` / `Alt + Space` | 🔍 App Launcher |
+| `Super + I` | ⚙️ Settings |
+| `Super + V` | 📋 Clipboard |
+| `Super + /` | 📖 Shortcut Guide |
+| `Super + Tab` | 🔄 Workspace Switcher |
+| `Super + Alt (L/R)` | 🎛️ Rightbar Panel |
 
 ## Install
 
@@ -68,22 +53,6 @@ git clone https://github.com/ranggaluthfiendi/Stellix.git ~/.config/quickshell/s
 # Run the installer
 ~/.config/quickshell/stellix/install.sh
 ```
-
-The installer will:
-- Check existing packages and only install missing ones
-- Ask before installing each category of packages
-- Enable required system services
-- Install Quickshell, Hyprland, and Matugen configurations
-- **Add `qs -c ~/.config/quickshell/stellix` to Hyprland autostart (execs.conf)**
-- Create wallpaper directory
-- Generate initial Matugen theme colors
-
-**Check Mode** (`--check` or `-c`):
-- Lists all dependencies (installed vs missing)
-- Checks configuration files
-- Checks system services status
-- Checks script permissions
-- Does NOT install or modify anything
 
 ### Option 2: Manual Installation
 
@@ -115,40 +84,46 @@ chmod +x ~/.config/matugen/*.sh
 qs -c ~/.config/quickshell/stellix
 ```
 
-## Keybinds
+The installer will:
+- Check existing packages and only install missing ones
+- Ask before installing each category of packages
+- Enable required system services
+- Install Quickshell, Hyprland, and Matugen configurations
+- **Add `qs -c ~/.config/quickshell/stellix` to Hyprland autostart (execs.conf)**
+- Create wallpaper directory
+- Generate initial Matugen theme colors
 
-| Shortcut | Action |
-|:---|:---|
-| `Super + R` / `Alt + Space` | 🔍 App Launcher |
-| `Super + I` | ⚙️ Settings |
-| `Super + V` | 📋 Clipboard |
-| `Super + /` | 📖 Shortcut Guide |
-| `Super + Tab` | 🔄 Workspace Switcher |
-| `Super + Alt (L/R)` | 🎛️ Rightbar Panel |
+**Check Mode** (`--check` or `-c`):
+- Lists all dependencies (installed vs missing)
+- Checks configuration files
+- Checks system services status
+- Checks script permissions
+- Does NOT install or modify anything
 
-## Scripts
+## Requirements
 
-| Script | Description |
-|:---|:---|
-| `install.sh` | Comprehensive installer with dependency checking |
-| `setup-permissions.sh` | Makes all shell scripts executable |
-| `scripts/vb-control.sh` | Volume/brightness control with Quickshell IPC indicator |
-| `scripts/cava_daemon.sh` | Cava audio visualizer daemon for equalizer widget |
+### Core
+```
+quickshell · hyprland · hyprpaper · qt6-base · qt6-declarative · qt6-svg
+```
 
-## Matugen Integration
+### System Services
+```
+networkmanager · bluez · bluez-utils · pipewire · pipewire-pulse · wireplumber
+playerctl · upower · xdg-desktop-portal-hyprland · gvfs · udisks2 · polkit · gnome-keyring
+```
 
-Stellix uses Matugen for dynamic theming. The configuration supports:
-- **Quickshell** - JSON color output for QML theme
-- **GTK3/GTK4** - CSS color themes
-- **KDE** - kdeglobals color scheme
-- **Qt5ct/Qt6ct** - Qt color themes
-- **Hyprland** - Color variables for Hyprland config
-- **Kitty** - Terminal color theme
-- **Fish** - Shell color theme
+### Tools & Utilities
+```
+matugen · awww · brightnessctl · wl-clipboard · cliphist
+grim · slurp · hyprshot · hyprlock · cava · bc · curl
+qt6ct · qt5ct
+```
 
-To reapply theme:
-```bash
-~/.config/matugen/apply-theme.sh dark
+### Recommended Applications
+```
+kitty · fish · nautilus · brave-bin · visual-studio-code-bin
+discord · ferdium-bin · btop · ranger · obs-studio
 ```
 
 ## Credits
