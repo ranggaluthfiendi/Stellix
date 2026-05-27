@@ -126,41 +126,6 @@ qs -c ~/.config/quickshell/stellix
 | `Super + Tab` | 🔄 Workspace Switcher |
 | `Super + Alt (L/R)` | 🎛️ Rightbar Panel |
 
-## Project Structure
-
-```
-stellix/
-├── shell.qml              # Main entry point
-├── components/            # UI components
-│   ├── elements/          # Reusable UI elements
-│   ├── ui/                # Bar and UI layouts
-│   ├── utils/             # Utility components (drag, rotate)
-│   └── widgets/           # Widget implementations
-│       ├── applauncher/   # App launcher with settings
-│       ├── barpopup/      # Bar popup overlays
-│       ├── media/         # Media player widgets
-│       ├── misc/          # Miscellaneous widgets
-│       ├── system/        # System widgets (battery, quick actions)
-│       ├── systemtray/    # System tray implementation
-│       └── workspaceswitcher/  # Workspace switcher
-├── config/                # Design tokens (Theme, Dimens, Scales, Typography)
-├── core/                  # Core services and state
-│   ├── services/          # Background services (Pipewire, Mpris, etc.)
-│   ├── settings/          # Settings state management
-│   ├── state/             # UI state management
-│   └── time/              # Time-related utilities
-├── data/                  # Static data files
-├── icons/                 # Custom icons
-├── savedata/              # Runtime saved data (colors, pins, etc.)
-├── screens/               # Screen-level components
-├── scripts/               # Shell scripts
-│   ├── cava_daemon.sh     # Cava audio visualizer daemon
-│   └── vb-control.sh      # Volume/brightness control with IPC
-├── matugen.toml           # Matugen configuration (symlink)
-├── install.sh             # Automated installer
-└── setup-permissions.sh   # Script permissions helper
-```
-
 ## Scripts
 
 | Script | Description |
@@ -191,4 +156,3 @@ To reapply theme:
 Developed by **Rangga Luthfiendi** 
 
 ---
-Stellix Shell
