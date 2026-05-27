@@ -6,14 +6,14 @@ A modern, aesthetic shell built with **Quickshell** for **Hyprland**. Dynamic th
 
 | 1 | 2 | 3|
 |:---:|:---------:|:-------:|
-| <img width="500" alt="bar" src="https://github.com/user-attachments/assets/e48a06a8-0465-41f3-bf20-880e29eda411" /> | <img width="500" alt="dashboard" src="https://github.com/user-attachments/assets/fdccc76e-ef95-4072-a9d5-75975f1b9273" /> | <img width="500" alt="widgets" src="https://github.com/user-attachments/assets/dd27722a-ed61-4c9a-bb0c-b31cd51ec4ef" /> |
+| <img width="500" alt="1" src="https://github.com/user-attachments/assets/fb518ad4-005a-4593-9fbd-9b32edd3e8b0" /> | <img width="500" alt="2" src="https://github.com/user-attachments/assets/fdccc76e-ef95-4072-a9d5-75975f1b9273" /> | <img width="500" alt="3" src="https://github.com/user-attachments/assets/dd27722a-ed61-4c9a-bb0c-b31cd51ec4ef" /> |
 
 <details>
 <summary>Other Images</summary>
 
 | | Others | |
 |:---:|:---:|:---:|
-| <img width="500" alt="other" src="https://github.com/user-attachments/assets/8e67f468-2f62-488a-9e01-22cab6c81dd5" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/3f4d09b9-c4e2-4812-bc0b-a5989fa35b8d" /> | <img width="500" alt="other" src="https://github.com/user-attachments/assets/2d8270d7-6f1c-487e-bc7a-76a69cba81c7" /> |
+| <img width="500" alt="4" src="https://github.com/user-attachments/assets/8e67f468-2f62-488a-9e01-22cab6c81dd5" /> | <img width="500" alt="5" src="https://github.com/user-attachments/assets/3f4d09b9-c4e2-4812-bc0b-a5989fa35b8d" /> | <img width="500" alt="6" src="https://github.com/user-attachments/assets/2d8270d7-6f1c-487e-bc7a-76a69cba81c7" /> |
 
 </details>
 
