@@ -10,6 +10,9 @@ Item {
     BaseMetric {
         metricName: "RAM"
         stateKey: "Mem"
-        valueText: sysSvc ? (Math.round(sysSvc.memUsed / 1024) + " GB") : "0 GB"
+        valueText: {
+            if (!sysSvc) return "0%"
+            return Math.round(sysSvc.memUsage) + "%"
+        }
     }
 }

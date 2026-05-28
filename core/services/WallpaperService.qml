@@ -136,6 +136,9 @@ Item {
         onExited: function(exitCode, exitStatus) {
             var output = applyCollector.text.trim()
             root.isApplying = false
+            if (exitCode !== 0) {
+                console.error("[WallpaperService] awww failed with exit code:", exitCode, "output:", output)
+            }
         }
     }
 
@@ -183,15 +186,15 @@ Item {
 
         var cmd
         if (root.transitionType === "instant") {
-            cmd = "nohup awww img '" + path + "' --transition-type simple --transition-step 255" + outputArg + " </dev/null >/dev/null 2>&1 &"
+            cmd = "awww img '" + path + "' --transition-type simple --transition-step 255" + outputArg
         } else {
-            cmd = "nohup awww img '" + path + "' --transition-type " + root.transitionType + " --transition-duration " + root.transitionDuration + " --transition-fps " + root.transitionFps + " --transition-step 90" + outputArg + " </dev/null >/dev/null 2>&1 &"
+            cmd = "awww img '" + path + "' --transition-type " + root.transitionType + " --transition-duration " + root.transitionDuration + " --transition-fps " + root.transitionFps + " --transition-step 90" + outputArg
         }
 
         applyProcess.exec(["sh", "-c", cmd])
 
         // Re-apply matugen theme with new wallpaper
-        var matugenCmd = "sleep 1 && " + Quickshell.env("HOME") + "/.config/matugen/apply-theme.sh dark '" + path + "' &"
+        var matugenCmd = "sleep 1 && " + Quickshell.env("HOME") + "/.config/matugen/apply-theme.sh dark '" + path + "'"
         Quickshell.execDetached({ command: ["sh", "-c", matugenCmd] })
     }
 

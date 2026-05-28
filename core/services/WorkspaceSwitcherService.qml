@@ -127,6 +127,8 @@ Item {
         return windowsForWorkspace(panelWorkspace);
     }
 
+    signal closeRequested()
+
     function activateWorkspace(id) {
         if (id < 1) return;
         wsService.focusedId = id;

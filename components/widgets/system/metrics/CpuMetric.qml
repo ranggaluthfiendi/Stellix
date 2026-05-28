@@ -12,7 +12,7 @@ Item {
         stateKey: "Cpu"
         valueText: {
             if (!sysSvc) return "0%"
-            return (Math.round(sysSvc.cpuCount * 4) + "%")
+            return Math.round(sysSvc.cpuUsage) + "%"
         }
     }
 }

@@ -64,6 +64,13 @@ PanelWindow {
         target: Hyprland
     }
 
+    Connections {
+        target: wsService
+        function onCloseRequested() {
+            root.closeRequested();
+        }
+    }
+
     // ── Background click to close ──
     MouseArea {
         anchors {

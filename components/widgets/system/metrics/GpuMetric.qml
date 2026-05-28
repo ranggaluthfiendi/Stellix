@@ -13,12 +13,16 @@ Item {
         valueText: {
             if (!sysSvc || sysSvc.gpus.length === 0) return "N/A"
             for (var i = 0; i < sysSvc.gpus.length; i++) {
-                if (sysSvc.gpus[i].includes("%")) return sysSvc.gpus[i]
+                var gpu = sysSvc.gpus[i]
+                if (gpu.includes("NVIDIA") && gpu.includes("%")) {
+                    var parts = gpu.split(":")
+                    if (parts.length >= 2) return parts[1].trim()
+                }
             }
-            var first = sysSvc.gpus[0].trim()
-            if (first.endsWith(")")) first = first.substring(0, first.length - 1)
-            var parts = first.split(' ')
-            return parts[parts.length - 1]
+            for (var j = 0; j < sysSvc.gpus.length; j++) {
+                if (sysSvc.gpus[j].includes("%")) return sysSvc.gpus[j]
+            }
+            return "N/A"
         }
     }
 }

@@ -100,7 +100,7 @@ Item {
                     visible: BarLayoutState.desktopStatsShowCpu
                     Text { text: "CPU"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
                     Text {
-                        text: sysSvc ? (Math.round(sysSvc.cpuCount * 4) + "%") : "0%"
+                        text: sysSvc ? (Math.round(sysSvc.cpuUsage) + "%") : "0%"
                         color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
                     }
                 }
@@ -116,12 +116,16 @@ Item {
                         text: {
                             if (!sysSvc || sysSvc.gpus.length === 0) return "N/A"
                             for (var i = 0; i < sysSvc.gpus.length; i++) {
-                                if (sysSvc.gpus[i].includes("%")) return sysSvc.gpus[i]
+                                var gpu = sysSvc.gpus[i]
+                                if (gpu.includes("NVIDIA") && gpu.includes("%")) {
+                                    var parts = gpu.split(":")
+                                    if (parts.length >= 2) return parts[1].trim()
+                                }
                             }
-                            var first = sysSvc.gpus[0].trim()
-                            if (first.endsWith(")")) first = first.substring(0, first.length - 1)
-                            var parts = first.split(' ')
-                            return parts[parts.length - 1]
+                            for (var j = 0; j < sysSvc.gpus.length; j++) {
+                                if (sysSvc.gpus[j].includes("%")) return sysSvc.gpus[j]
+                            }
+                            return "N/A"
                         }
                         color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
                         elide: Text.ElideRight
@@ -136,7 +140,7 @@ Item {
                     visible: BarLayoutState.desktopStatsShowMem
                     Text { text: "MEMORY"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
                     Text {
-                        text: sysSvc ? (Math.round(sysSvc.memUsed / 1024) + " GB") : "0 GB"
+                        text: sysSvc ? (Math.round(sysSvc.memUsage) + "%") : "0%"
                         color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
                     }
                 }

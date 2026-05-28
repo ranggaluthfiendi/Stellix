@@ -36,7 +36,12 @@ Item {
             MouseArea {
                 id: firstWsMouse
                 anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
-                onClicked: { wsService.activateWorkspace(1); wsService.pageStart = 1 }
+                onClicked: {
+                    wsService.focusedId = 1;
+                    wsService.pageStart = 1;
+                    wsService.activateWorkspace(1);
+                    wsService.closeRequested();
+                }
             }
         }
 
