@@ -312,6 +312,128 @@ Item {
     property string desktopNetUpLabel: "UPLOAD"
     onDesktopNetUpLabelChanged: save()
 
+    // New stats: Battery, Swap, GPU Mem, Load, Process, Fan, IP
+    property bool desktopStatsShowBattery: false
+    onDesktopStatsShowBatteryChanged: save()
+    property bool desktopStatsShowSwap: false
+    onDesktopStatsShowSwapChanged: save()
+    property bool desktopStatsShowGpuMem: false
+    onDesktopStatsShowGpuMemChanged: save()
+    property bool desktopStatsShowLoad: false
+    onDesktopStatsShowLoadChanged: save()
+    property bool desktopStatsShowProcess: false
+    onDesktopStatsShowProcessChanged: save()
+    property bool desktopStatsShowFan: false
+    onDesktopStatsShowFanChanged: save()
+    property bool desktopStatsShowIp: false
+    onDesktopStatsShowIpChanged: save()
+
+    // Individual new metrics
+    property bool desktopBatteryShow: false
+    onDesktopBatteryShowChanged: save()
+    property real desktopBatteryX: 840
+    onDesktopBatteryXChanged: save()
+    property real desktopBatteryY: 760
+    onDesktopBatteryYChanged: save()
+    property real desktopBatteryRotation: 0
+    onDesktopBatteryRotationChanged: save()
+    property real desktopBatteryScale: 1.0
+    onDesktopBatteryScaleChanged: save()
+    property string desktopBatteryColorMode: "accent"
+    onDesktopBatteryColorModeChanged: save()
+    property real desktopBatteryOpacity: 1.0
+    onDesktopBatteryOpacityChanged: save()
+
+    property bool desktopSwapShow: false
+    onDesktopSwapShowChanged: save()
+    property real desktopSwapX: 940
+    onDesktopSwapXChanged: save()
+    property real desktopSwapY: 760
+    onDesktopSwapYChanged: save()
+    property real desktopSwapRotation: 0
+    onDesktopSwapRotationChanged: save()
+    property real desktopSwapScale: 1.0
+    onDesktopSwapScaleChanged: save()
+    property string desktopSwapColorMode: "accent"
+    onDesktopSwapColorModeChanged: save()
+    property real desktopSwapOpacity: 1.0
+    onDesktopSwapOpacityChanged: save()
+
+    property bool desktopGpuMemShow: false
+    onDesktopGpuMemShowChanged: save()
+    property real desktopGpuMemX: 1040
+    onDesktopGpuMemXChanged: save()
+    property real desktopGpuMemY: 760
+    onDesktopGpuMemYChanged: save()
+    property real desktopGpuMemRotation: 0
+    onDesktopGpuMemRotationChanged: save()
+    property real desktopGpuMemScale: 1.0
+    onDesktopGpuMemScaleChanged: save()
+    property string desktopGpuMemColorMode: "accent"
+    onDesktopGpuMemColorModeChanged: save()
+    property real desktopGpuMemOpacity: 1.0
+    onDesktopGpuMemOpacityChanged: save()
+
+    property bool desktopLoadShow: false
+    onDesktopLoadShowChanged: save()
+    property real desktopLoadX: 1140
+    onDesktopLoadXChanged: save()
+    property real desktopLoadY: 760
+    onDesktopLoadYChanged: save()
+    property real desktopLoadRotation: 0
+    onDesktopLoadRotationChanged: save()
+    property real desktopLoadScale: 1.0
+    onDesktopLoadScaleChanged: save()
+    property string desktopLoadColorMode: "accent"
+    onDesktopLoadColorModeChanged: save()
+    property real desktopLoadOpacity: 1.0
+    onDesktopLoadOpacityChanged: save()
+
+    property bool desktopProcessShow: false
+    onDesktopProcessShowChanged: save()
+    property real desktopProcessX: 1240
+    onDesktopProcessXChanged: save()
+    property real desktopProcessY: 760
+    onDesktopProcessYChanged: save()
+    property real desktopProcessRotation: 0
+    onDesktopProcessRotationChanged: save()
+    property real desktopProcessScale: 1.0
+    onDesktopProcessScaleChanged: save()
+    property string desktopProcessColorMode: "accent"
+    onDesktopProcessColorModeChanged: save()
+    property real desktopProcessOpacity: 1.0
+    onDesktopProcessOpacityChanged: save()
+
+    property bool desktopFanShow: false
+    onDesktopFanShowChanged: save()
+    property real desktopFanX: 1340
+    onDesktopFanXChanged: save()
+    property real desktopFanY: 760
+    onDesktopFanYChanged: save()
+    property real desktopFanRotation: 0
+    onDesktopFanRotationChanged: save()
+    property real desktopFanScale: 1.0
+    onDesktopFanScaleChanged: save()
+    property string desktopFanColorMode: "accent"
+    onDesktopFanColorModeChanged: save()
+    property real desktopFanOpacity: 1.0
+    onDesktopFanOpacityChanged: save()
+
+    property bool desktopIpShow: false
+    onDesktopIpShowChanged: save()
+    property real desktopIpX: 1440
+    onDesktopIpXChanged: save()
+    property real desktopIpY: 760
+    onDesktopIpYChanged: save()
+    property real desktopIpRotation: 0
+    onDesktopIpRotationChanged: save()
+    property real desktopIpScale: 1.0
+    onDesktopIpScaleChanged: save()
+    property string desktopIpColorMode: "accent"
+    onDesktopIpColorModeChanged: save()
+    property real desktopIpOpacity: 1.0
+    onDesktopIpOpacityChanged: save()
+
     // Stats display mode: "combined" or "individual"
     property string statsDisplayMode: "combined"
     onStatsDisplayModeChanged: save()
@@ -1028,6 +1150,15 @@ Item {
         desktopTempShow = false; desktopTempX = 540; desktopTempY = 760; desktopTempRotation = 0; desktopTempScale = 1.0; desktopTempColorMode = "accent"
         desktopNetDownShow = true; desktopNetDownX = 640; desktopNetDownY = 760; desktopNetDownRotation = 0; desktopNetDownScale = 1.0; desktopNetDownColorMode = "accent"; desktopNetDownLabel = "DOWNLOAD"
         desktopNetUpShow = true; desktopNetUpX = 740; desktopNetUpY = 760; desktopNetUpRotation = 0; desktopNetUpScale = 1.0; desktopNetUpColorMode = "accent"; desktopNetUpLabel = "UPLOAD"
+
+        desktopStatsShowBattery = false; desktopStatsShowSwap = false; desktopStatsShowGpuMem = false; desktopStatsShowLoad = false; desktopStatsShowProcess = false; desktopStatsShowFan = false; desktopStatsShowIp = false
+        desktopBatteryShow = false; desktopBatteryX = 840; desktopBatteryY = 760; desktopBatteryRotation = 0; desktopBatteryScale = 1.0; desktopBatteryColorMode = "accent"
+        desktopSwapShow = false; desktopSwapX = 940; desktopSwapY = 760; desktopSwapRotation = 0; desktopSwapScale = 1.0; desktopSwapColorMode = "accent"
+        desktopGpuMemShow = false; desktopGpuMemX = 1040; desktopGpuMemY = 760; desktopGpuMemRotation = 0; desktopGpuMemScale = 1.0; desktopGpuMemColorMode = "accent"
+        desktopLoadShow = false; desktopLoadX = 1140; desktopLoadY = 760; desktopLoadRotation = 0; desktopLoadScale = 1.0; desktopLoadColorMode = "accent"
+        desktopProcessShow = false; desktopProcessX = 1240; desktopProcessY = 760; desktopProcessRotation = 0; desktopProcessScale = 1.0; desktopProcessColorMode = "accent"
+        desktopFanShow = false; desktopFanX = 1340; desktopFanY = 760; desktopFanRotation = 0; desktopFanScale = 1.0; desktopFanColorMode = "accent"
+        desktopIpShow = false; desktopIpX = 1440; desktopIpY = 760; desktopIpRotation = 0; desktopIpScale = 1.0; desktopIpColorMode = "accent"
 
         showScreenWeather = true
         desktopWeatherX = 703

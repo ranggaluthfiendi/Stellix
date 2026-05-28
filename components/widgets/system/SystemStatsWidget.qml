@@ -209,6 +209,97 @@ Item {
                 }
             }
 
+            Component {
+                id: batteryComp
+                ColumnLayout {
+                    spacing: 2 * s
+                    visible: BarLayoutState.desktopStatsShowBattery
+                    Text { text: "BATTERY"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
+                    Text {
+                        text: sysSvc ? (Math.round(sysSvc.batteryLevel) + "%") : "0%"
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
+                    }
+                }
+            }
+
+            Component {
+                id: swapComp
+                ColumnLayout {
+                    spacing: 2 * s
+                    visible: BarLayoutState.desktopStatsShowSwap
+                    Text { text: "SWAP"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
+                    Text {
+                        text: sysSvc ? (Math.round(sysSvc.swapUsage) + "%") : "0%"
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
+                    }
+                }
+            }
+
+            Component {
+                id: gpuMemComp
+                ColumnLayout {
+                    spacing: 2 * s
+                    visible: BarLayoutState.desktopStatsShowGpuMem
+                    Text { text: "GPU MEM"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
+                    Text {
+                        text: sysSvc && sysSvc.gpuMemTotal > 0 ? (Math.round(sysSvc.gpuMemUsage) + "%") : "N/A"
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
+                    }
+                }
+            }
+
+            Component {
+                id: loadComp
+                ColumnLayout {
+                    spacing: 2 * s
+                    visible: BarLayoutState.desktopStatsShowLoad
+                    Text { text: "LOAD"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
+                    Text {
+                        text: sysSvc ? sysSvc.loadAvg1 : "0.00"
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
+                    }
+                }
+            }
+
+            Component {
+                id: processComp
+                ColumnLayout {
+                    spacing: 2 * s
+                    visible: BarLayoutState.desktopStatsShowProcess
+                    Text { text: "PROCESS"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
+                    Text {
+                        text: sysSvc ? sysSvc.processCount.toString() : "0"
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
+                    }
+                }
+            }
+
+            Component {
+                id: fanComp
+                ColumnLayout {
+                    spacing: 2 * s
+                    visible: BarLayoutState.desktopStatsShowFan
+                    Text { text: "FAN"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
+                    Text {
+                        text: sysSvc ? sysSvc.fanSpeedText : "0 RPM"
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
+                    }
+                }
+            }
+
+            Component {
+                id: ipComp
+                ColumnLayout {
+                    spacing: 2 * s
+                    visible: BarLayoutState.desktopStatsShowIp
+                    Text { text: "IP"; color: container.labelColor; font.pixelSize: 10 * s; font.weight: Font.Bold }
+                    Text {
+                        text: sysSvc ? sysSvc.ipAddress : "N/A"
+                        color: container.valueColor; font.pixelSize: 18 * s; font.weight: Font.Bold
+                    }
+                }
+            }
+
             GridLayout {
                 id: mainLayout
                 anchors.left: parent.left
@@ -226,6 +317,13 @@ Item {
                 Loader { sourceComponent: uptimeComp; visible: BarLayoutState.desktopStatsShowUptime }
                 Loader { sourceComponent: tempComp; visible: BarLayoutState.desktopStatsShowTemp }
                 Loader { sourceComponent: netComp; visible: BarLayoutState.desktopStatsShowNet; Layout.columnSpan: BarLayoutState.desktopStatsLayout === "compact" ? 2 : 2; active: BarLayoutState.desktopStatsShowNet }
+                Loader { sourceComponent: batteryComp; visible: BarLayoutState.desktopStatsShowBattery }
+                Loader { sourceComponent: swapComp; visible: BarLayoutState.desktopStatsShowSwap }
+                Loader { sourceComponent: gpuMemComp; visible: BarLayoutState.desktopStatsShowGpuMem }
+                Loader { sourceComponent: loadComp; visible: BarLayoutState.desktopStatsShowLoad }
+                Loader { sourceComponent: processComp; visible: BarLayoutState.desktopStatsShowProcess }
+                Loader { sourceComponent: fanComp; visible: BarLayoutState.desktopStatsShowFan }
+                Loader { sourceComponent: ipComp; visible: BarLayoutState.desktopStatsShowIp }
             }
 
             Draggable {
@@ -264,6 +362,13 @@ Item {
         TempMetric { visible: BarLayoutState.desktopTempShow && BarLayoutState.showScreenSystemStats }
         NetDownMetric { visible: BarLayoutState.desktopNetDownShow && BarLayoutState.showScreenSystemStats }
         NetUpMetric { visible: BarLayoutState.desktopNetUpShow && BarLayoutState.showScreenSystemStats }
+        BatteryMetric { visible: BarLayoutState.desktopBatteryShow && BarLayoutState.showScreenSystemStats }
+        SwapMetric { visible: BarLayoutState.desktopSwapShow && BarLayoutState.showScreenSystemStats }
+        GpuMemMetric { visible: BarLayoutState.desktopGpuMemShow && BarLayoutState.showScreenSystemStats }
+        LoadMetric { visible: BarLayoutState.desktopLoadShow && BarLayoutState.showScreenSystemStats }
+        ProcessMetric { visible: BarLayoutState.desktopProcessShow && BarLayoutState.showScreenSystemStats }
+        FanMetric { visible: BarLayoutState.desktopFanShow && BarLayoutState.showScreenSystemStats }
+        IpMetric { visible: BarLayoutState.desktopIpShow && BarLayoutState.showScreenSystemStats }
     }
 
     Component.onCompleted: {

@@ -242,6 +242,13 @@ Item {
                             VabNavItem { label: "Temp"; index: 18; active: !root.isSearching && root.currentCategory === 18; visible: settingsData.metricsExp }
                             VabNavItem { label: "Net Down"; index: 19; active: !root.isSearching && root.currentCategory === 19; visible: settingsData.metricsExp }
                             VabNavItem { label: "Net Up"; index: 20; active: !root.isSearching && root.currentCategory === 20; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Battery"; index: 21; active: !root.isSearching && root.currentCategory === 21; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Swap"; index: 22; active: !root.isSearching && root.currentCategory === 22; visible: settingsData.metricsExp }
+                            VabNavItem { label: "GPU Mem"; index: 23; active: !root.isSearching && root.currentCategory === 23; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Load"; index: 24; active: !root.isSearching && root.currentCategory === 24; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Process"; index: 25; active: !root.isSearching && root.currentCategory === 25; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Fan"; index: 26; active: !root.isSearching && root.currentCategory === 26; visible: settingsData.metricsExp }
+                            VabNavItem { label: "IP"; index: 27; active: !root.isSearching && root.currentCategory === 27; visible: settingsData.metricsExp }
 
                             // --- Connectivity ---
                             VabSidebarHeader { title: "Connectivity"; expanded: settingsData.connectivityExp; onToggled: settingsData.connectivityExp = !settingsData.connectivityExp; Layout.topMargin: Theme.dp(8) }
@@ -374,6 +381,13 @@ Item {
                     TempMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     NetDownMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     NetUpMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    BatteryMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    SwapMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    GpuMemMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    LoadMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    ProcessMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    FanMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    IpMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                 }
 
                 Rectangle { // Hint bar

@@ -12,16 +12,16 @@ import "../components"
 VabContentPage {
     id: page
 
-    property int currentCategory: 10
+    property int currentCategory: 21
     property bool focusInContent: false
     property int contentFocusIndex: 0
 
     active: page.focusInContent && page.currentCategory === 10
     focusIndex: page.contentFocusIndex
 
-    readonly property string metricKey: "Cpu"
-    readonly property string metricLabel: "CPU"
-    readonly property string metricValue: sysSvc ? (Math.round(sysSvc.cpuUsage) + "%") : "0%"
+    readonly property string metricKey: "Battery"
+    readonly property string metricLabel: "BATTERY"
+    readonly property string metricValue: sysSvc ? (Math.round(sysSvc.batteryLevel) + "%") : "0%"
 
     property var sysSvc: BarLayoutState.getItem("systemInfo")
 
@@ -89,7 +89,7 @@ VabContentPage {
             headerActions: VabButton {
                 text: "Reset Position"
                 onClicked: {
-                    BarLayoutState["desktop" + page.metricKey + "X"] = 40
+                    BarLayoutState["desktop" + page.metricKey + "X"] = 840
                     BarLayoutState["desktop" + page.metricKey + "Y"] = 760
                     BarLayoutState["desktop" + page.metricKey + "Rotation"] = 0
                 }

@@ -465,7 +465,14 @@ VabContentPage {
                                 { key: "Net", label: "Show Network" },
                                 { key: "Disk", label: "Show Disk" },
                                 { key: "Uptime", label: "Show Uptime" },
-                                { key: "Temp", label: "Show Temperature" }
+                                { key: "Temp", label: "Show Temperature" },
+                                { key: "Battery", label: "Show Battery" },
+                                { key: "Swap", label: "Show Swap" },
+                                { key: "GpuMem", label: "Show GPU Memory" },
+                                { key: "Load", label: "Show Load Avg" },
+                                { key: "Process", label: "Show Process" },
+                                { key: "Fan", label: "Show Fan" },
+                                { key: "Ip", label: "Show IP" }
                             ]
                             delegate: RowLayout {
                                 spacing: Theme.dp(8)
