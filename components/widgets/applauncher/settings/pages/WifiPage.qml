@@ -58,12 +58,12 @@ VabContentPage {
                 spacing: Theme.dp(20)
                 ColumnLayout {
                     spacing: 0
-                    Text { text: "▼ DOWNLOAD"; color: Theme.accent; font.pixelSize: Theme.dp(8); font.weight: Font.Bold; font.capitalization: Font.AllUppercase }
+                    Text { text: "↓ DOWNLOAD"; color: Theme.accent; font.pixelSize: Theme.dp(8); font.weight: Font.Bold; font.capitalization: Font.AllUppercase }
                     Text { text: page.systemInfo ? page.systemInfo.netDown : "0 B/s"; color: Theme.textPrimary; font.pixelSize: Theme.dp(11); font.family: "Monospace" }
                 }
                 ColumnLayout {
                     spacing: 0
-                    Text { text: "▲ UPLOAD"; color: Theme.warning; font.pixelSize: Theme.dp(8); font.weight: Font.Bold; font.capitalization: Font.AllUppercase }
+                    Text { text: "↑ UPLOAD"; color: Theme.warning; font.pixelSize: Theme.dp(8); font.weight: Font.Bold; font.capitalization: Font.AllUppercase }
                     Text { text: page.systemInfo ? page.systemInfo.netUp : "0 B/s"; color: Theme.textPrimary; font.pixelSize: Theme.dp(11); font.family: "Monospace" }
                 }
             }

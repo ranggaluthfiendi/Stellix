@@ -68,14 +68,14 @@ Item {
                     Rectangle { width: 1; height: Theme.dp(14); color: Theme.border; Layout.leftMargin: Theme.dp(2); Layout.rightMargin: Theme.dp(2) }
 
                     NavBtn { 
-                        text: "◀"
-                        enabled: wsService.panelWorkspace > 1
+                        text: "arrow_left"
+                                        enabled: wsService.panelWorkspace > 1
                         onClicked: wsService.panelWorkspace--
                     }
                     
                     NavBtn { 
-                        text: "▶"
-                        enabled: wsService.panelWorkspace < wsService.maxWorkspaceId
+                        text: "arrow_right"
+                                        enabled: wsService.panelWorkspace < wsService.maxWorkspaceId
                         onClicked: wsService.panelWorkspace++
                     }
                 }

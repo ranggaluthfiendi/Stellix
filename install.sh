@@ -159,6 +159,16 @@ if [ "$CHECK_MODE" = true ]; then
     fi
     
     echo ""
+    echo -e "${CYAN}=== Step 2.5: Material Symbols Fonts ===${NC}"
+    
+    if fc-list | grep -q "Material Symbols"; then
+        MS_COUNT=$(fc-list | grep "Material Symbols" | wc -l)
+        echo -e "  ${GREEN}✓ Installed:${NC} Material Symbols ($MS_COUNT variants)"
+    else
+        echo -e "  ${RED}✗ Missing:${NC} Material Symbols fonts (Outlined, Rounded, Sharp)"
+    fi
+    
+    echo ""
     echo -e "${CYAN}=== Step 3: Optional Applications ===${NC}"
     
     OPTIONAL_PACKAGES=("brave-bin" "visual-studio-code-bin" "discord" "ferdium-bin")
@@ -404,6 +414,25 @@ AUR_PACKAGES=(
 )
 
 install_packages "${AUR_PACKAGES[@]}"
+
+# ============================================================
+# Step 2.5: Install Material Symbols fonts
+# ============================================================
+echo ""
+echo -e "${CYAN}=== Step 2.5: Material Symbols Fonts ===${NC}"
+
+if fc-list | grep -q "Material Symbols"; then
+    echo -e "${GREEN}Material Symbols fonts already installed${NC}"
+else
+    echo "Installing Material Symbols fonts..."
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+    if [ -x "$SCRIPT_DIR/scripts/install-material-symbols-user.sh" ]; then
+        bash "$SCRIPT_DIR/scripts/install-material-symbols-user.sh"
+        echo -e "${GREEN}Material Symbols fonts installed${NC}"
+    else
+        echo -e "${YELLOW}Install script not found, skipping${NC}"
+    fi
+fi
 
 # ============================================================
 # Step 3: Check and install optional apps

@@ -413,7 +413,9 @@ Item {
 
                         Text {
                             anchors.centerIn: parent
-                            text: "✕"
+                            text: "close"
+                            font.family: Typography.materialSymbols
+                            font.styleName: "Regular"
                             color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
                             font.pixelSize: Theme.dp(10)
                         }

@@ -142,7 +142,7 @@ Rectangle {
 
     MarqueeText {
         id: titleMarquee; x: root.rightX; y: root.pad; width: root.rightW; height: root.rowH
-        text: root.hasMedia ? (mprisService ? mprisService.title : "") : "🎵 Play something!"
+        text: root.hasMedia ? (mprisService ? mprisService.title : "") : "Play something!"
         textColor: root.hasMedia ? resolveColor(BarLayoutState.desktopNowPlayingTextColorMode, Theme.textPrimary) : resolveColor(BarLayoutState.desktopNowPlayingAccentColorMode, Theme.accent)
         fontSize: 10; fontScale: s; scrolling: true
     }

@@ -9,6 +9,11 @@ Singleton {
 
     property string fontFamily: "JetBrainsMono Nerd Font"
 
+    // Material Symbols icon font (like Clairova-Shell Appearance.qml)
+    readonly property string materialSymbols: "Material Symbols Rounded"
+    readonly property string materialSymbolsOutlined: "Material Symbols Outlined"
+    readonly property string materialSymbolsSharp: "Material Symbols Sharp"
+
     property int sizeXXSBase: 7
     property int sizeXSBase: 10
     property int sizeSMBase: 12

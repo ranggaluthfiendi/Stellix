@@ -181,7 +181,9 @@ Rectangle {
                 spacing: Theme.dp(8)
 
                 Text {
-                    text: "🔍"
+                    text: "search"
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     color: searchField.activeFocus ? Theme.accent : Theme.textMuted
                     font.pixelSize: Math.round(12 * s)
                     opacity: 0.7
@@ -227,7 +229,9 @@ Rectangle {
                     
                     Text {
                         anchors.centerIn: parent
-                        text: "✕"
+                        text: "close"
+                        font.family: Typography.materialSymbols
+                        font.styleName: "Regular"
                         color: Theme.textMuted
                         font.pixelSize: Math.round(10 * s)
                     }
@@ -469,7 +473,9 @@ Rectangle {
                 spacing: Theme.dp(8)
                 
                 Text {
-                    text: "📭"
+                    text: "inbox"
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     font.pixelSize: Math.round(32 * s)
                     Layout.alignment: Qt.AlignHCenter
                     opacity: 0.5

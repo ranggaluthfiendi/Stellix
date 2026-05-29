@@ -171,7 +171,10 @@ Item {
             border.width: 1; border.color: closeWsMouse.containsMouse ? Theme.danger : Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.2); radius: 0
             RowLayout {
                 anchors.centerIn: parent; spacing: Theme.dp(3)
-                Text { text: "✕"; color: Theme.danger; font.pixelSize: Theme.dp(9) }
+                Text { text: "close"; color: Theme.danger; font.pixelSize: Theme.dp(9) 
+                font.family: Typography.materialSymbols
+                font.styleName: "Regular"
+                                                       }
                 Text { text: "Close WS"; color: Theme.danger; font.pixelSize: Theme.dp(8); font.weight: Font.Bold }
             }
             MouseArea {

@@ -219,9 +219,10 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.sinkAudio && root.sinkAudio.muted ? "U" : "M"
+                    text: root.sinkAudio && root.sinkAudio.muted ? "volume_off" : "volume_up"
                     color: root.sinkAudio && root.sinkAudio.muted ? Theme.bgPrimary : Theme.textPrimary
-                    font.family: Typography.fontFamily
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                     font.weight: Typography.weightBold || Font.Bold
                 }
@@ -249,9 +250,10 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: root.volumeExpanded ? "▲" : "▼"
+                    text: root.volumeExpanded ? "arrow_drop_up" : "arrow_drop_down"
                     color: expandMouse.containsMouse ? Theme.textPrimary : Theme.textMuted
-                    font.family: Typography.fontFamily
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                 }
 
@@ -340,7 +342,9 @@ Rectangle {
                                 spacing: Theme.dp(3)
 
                                 Text {
-                                    text: "▾"
+                                    text: "arrow_drop_down"
+                                    font.family: Typography.materialSymbols
+                                    font.styleName: "Regular"
                                     color: outDevMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted
                                     font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                                     font.weight: Typography.weightBold || Font.Bold
@@ -492,9 +496,10 @@ Rectangle {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: root.sinkAudio && root.sinkAudio.muted ? "U" : "M"
+                                    text: root.sinkAudio && root.sinkAudio.muted ? "volume_off" : "volume_up"
                                     color: root.sinkAudio && root.sinkAudio.muted ? Theme.bgPrimary : Theme.textPrimary
-                                    font.family: Typography.fontFamily
+                                    font.family: Typography.materialSymbols
+                                    font.styleName: "Regular"
                                     font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                                     font.weight: Typography.weightBold || Font.Bold
                                 }
@@ -553,7 +558,9 @@ Rectangle {
                                 spacing: Theme.dp(3)
 
                                 Text {
-                                    text: "▾"
+                                    text: "arrow_drop_down"
+                                    font.family: Typography.materialSymbols
+                                    font.styleName: "Regular"
                                     color: inDevSelMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted
                                     font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
                                     font.weight: Typography.weightBold || Font.Bold
@@ -705,9 +712,10 @@ Rectangle {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: root.sourceAudio && root.sourceAudio.muted ? "U" : "M"
+                                    text: root.sourceAudio && root.sourceAudio.muted ? "mic_off" : "mic"
                                     color: root.sourceAudio && root.sourceAudio.muted ? "white" : Theme.textPrimary
-                                    font.family: Typography.fontFamily
+                                    font.family: Typography.materialSymbols
+                                    font.styleName: "Regular"
                                     font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                                     font.weight: Typography.weightBold || Font.Bold
                                 }
@@ -1015,9 +1023,10 @@ Rectangle {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: itemData.audio && itemData.audio.muted ? "U" : "M"
+                                    text: itemData.audio && itemData.audio.muted ? "volume_off" : "volume_up"
                                     color: itemData.audio && itemData.audio.muted ? "white" : Theme.textPrimary
-                                    font.family: Typography.fontFamily
+                                    font.family: Typography.materialSymbols
+                                    font.styleName: "Regular"
                                     font.pixelSize: Math.round((Typography.sizeXXS || 7) * s)
                                 }
 
@@ -1305,7 +1314,9 @@ Rectangle {
                 spacing: Theme.dp(4)
 
                 Text {
-                    text: "🔊"
+                    text: "speaker"
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
                 }
 
@@ -1319,7 +1330,9 @@ Rectangle {
                 }
 
                 Text {
-                    text: "✕"
+                    text: "close"
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     color: outPopupCloseMouse.containsMouse ? Theme.danger : Theme.textMuted
                     font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
 
@@ -1362,7 +1375,9 @@ Rectangle {
                         spacing: Theme.dp(6)
 
                         Text {
-                            text: root.sink && modelData.id === root.sink.id ? "✓" : "○"
+                            text: root.sink && modelData.id === root.sink.id ? "check_circle" : "radio_button_unchecked"
+                            font.family: Typography.materialSymbols
+                            font.styleName: "Regular"
                             color: root.sink && modelData.id === root.sink.id ? Theme.bgPrimary : (outDevItemMouse.containsMouse ? Theme.bgPrimary : Theme.accent)
                             font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
                             font.weight: Typography.weightBold || Font.Bold
@@ -1431,7 +1446,9 @@ Rectangle {
                 spacing: Theme.dp(4)
 
                 Text {
-                    text: "🎤"
+                    text: "mic"
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
                 }
 
@@ -1445,7 +1462,9 @@ Rectangle {
                 }
 
                 Text {
-                    text: "✕"
+                    text: "close"
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     color: inPopupCloseMouse.containsMouse ? Theme.danger : Theme.textMuted
                     font.pixelSize: Math.round((Typography.sizeXXS || 8) * s)
 
@@ -1488,7 +1507,9 @@ Rectangle {
                         spacing: Theme.dp(6)
 
                         Text {
-                            text: root.source && modelData.id === root.source.id ? "✓" : "○"
+                            text: root.source && modelData.id === root.source.id ? "check_circle" : "radio_button_unchecked"
+                            font.family: Typography.materialSymbols
+                            font.styleName: "Regular"
                             color: root.source && modelData.id === root.source.id ? Theme.bgPrimary : (inDevItemMouse.containsMouse ? Theme.bgPrimary : Theme.accent)
                             font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
                             font.weight: Typography.weightBold || Font.Bold

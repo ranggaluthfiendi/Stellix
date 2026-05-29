@@ -325,7 +325,10 @@ VabContentPage {
                                                     color: leftMouse.containsMouse ? Theme.accent : "transparent"
                                                     radius: 0
                                                     visible: sectionCol.index > 0
-                                                    Text { anchors.centerIn: parent; text: "◀"; color: leftMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                                    Text { anchors.centerIn: parent; text: "arrow_left"; color: leftMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(14) 
+                                                    font.family: Typography.materialSymbols
+                                                    font.styleName: "Regular"
+                                                                                           }
                                                     MouseArea { id: leftMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: page.moveLeft(sectionCol.sectionName, itemCard.index) }
                                                 }
 
@@ -334,7 +337,10 @@ VabContentPage {
                                                     color: upMouse.containsMouse ? Theme.accent : "transparent"
                                                     radius: 0
                                                     visible: itemCard.index > 0
-                                                    Text { anchors.centerIn: parent; text: "▲"; color: upMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                                    Text { anchors.centerIn: parent; text: "arrow_drop_up"; color: upMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(14) 
+                                                    font.family: Typography.materialSymbols
+                                                    font.styleName: "Regular"
+                                                                                           }
                                                     MouseArea { id: upMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: page.moveUp(sectionCol.sectionName, itemCard.index) }
                                                 }
 
@@ -343,7 +349,10 @@ VabContentPage {
                                                     color: downMouse.containsMouse ? Theme.accent : "transparent"
                                                     radius: 0
                                                     visible: itemCard.index < sectionCol.items.length - 1
-                                                    Text { anchors.centerIn: parent; text: "▼"; color: downMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                                    Text { anchors.centerIn: parent; text: "arrow_drop_down"; color: downMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(14) 
+                                                    font.family: Typography.materialSymbols
+                                                    font.styleName: "Regular"
+                                                                                           }
                                                     MouseArea { id: downMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: page.moveDown(sectionCol.sectionName, itemCard.index) }
                                                 }
 
@@ -352,7 +361,10 @@ VabContentPage {
                                                     color: rightMouse.containsMouse ? Theme.accent : "transparent"
                                                     radius: 0
                                                     visible: sectionCol.index < page.sectionNames.length - 1
-                                                    Text { anchors.centerIn: parent; text: "▶"; color: rightMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                                    Text { anchors.centerIn: parent; text: "arrow_right"; color: rightMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(14) 
+                                                    font.family: Typography.materialSymbols
+                                                    font.styleName: "Regular"
+                                                                                           }
                                                     MouseArea { id: rightMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: page.moveRight(sectionCol.sectionName, itemCard.index) }
                                                 }
                                             }
@@ -374,7 +386,7 @@ VabContentPage {
                                 visible: sectionCol.items.length === 0
                                 text: "Empty"
                                 color: Theme.textMuted
-                                font.pixelSize: Theme.dp(8)
+                                font.pixelSize: Theme.dp(14)
                                 font.italic: true
                                 Layout.alignment: Qt.AlignHCenter
                             }
@@ -470,7 +482,7 @@ VabContentPage {
                 Text {
                     text: "When icons exceed this limit, they will be hidden behind an arrow."
                     color: Theme.textMuted
-                    font.pixelSize: Theme.dp(8)
+                    font.pixelSize: Theme.dp(14)
                     font.italic: true
                 }
 
@@ -714,7 +726,7 @@ VabContentPage {
 
                                 readonly property string elementType: index < BarLayoutState.barMediaElementOrder.length ? BarLayoutState.barMediaElementOrder[index] : ""
                                 readonly property string elementLabel: BarLayoutState.barMediaElementLabels[elementType] || elementType
-                                readonly property string elementSymbol: elementType==="art"?"♪":(elementType==="text"?"T":"?")
+                                readonly property string elementSymbol: elementType==="art"?"image":(elementType==="text"?"title":"help")
 
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: Theme.dp(32)
@@ -731,20 +743,28 @@ VabContentPage {
 
                                     Text {
                                         text: mediaElementCard.elementSymbol
-                                        font.pixelSize: Theme.dp(12)
-                                        Layout.preferredWidth: Theme.dp(20)
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                        font.pixelSize: Theme.dp(14)
+                                        color: Theme.accent
+                                        Layout.preferredWidth: Theme.dp(24)
                                         horizontalAlignment: Text.AlignHCenter
                                     }
 
                                     Text { text: mediaElementCard.elementLabel; color: Theme.textPrimary; font.pixelSize: Theme.dp(9); font.weight: Font.Medium; Layout.fillWidth: true }
 
                                     Rectangle {
-                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
+                                        width: Theme.dp(24); height: Theme.dp(24); color: upM.containsMouse ? Theme.accent : "transparent"; radius: Theme.radiusSmall
                                         visible: mediaElementCard.index > 0
-                                        Text { anchors.centerIn: parent; text: "▲"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        Text { anchors.centerIn: parent; text: "arrow_drop_up"; color: upM.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(16)
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                                                               }
                                         MouseArea {
+                                            id: upM
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
                                             onClicked: {
                                                 var a=BarLayoutState.barMediaElementOrder.slice(); var p=mediaElementCard.index; if(p>0){var t=a[p];a[p]=a[p-1];a[p-1]=t;BarLayoutState.barMediaElementOrder=a}
                                             }
@@ -753,7 +773,10 @@ VabContentPage {
                                     Rectangle {
                                         width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
                                         visible: mediaElementCard.index < BarLayoutState.barMediaElementOrder.length-1
-                                        Text { anchors.centerIn: parent; text: "▼"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        Text { anchors.centerIn: parent; text: "arrow_drop_down"; color: Theme.textMuted; font.pixelSize: Theme.dp(14) 
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                                                               }
                                         MouseArea {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
@@ -890,7 +913,7 @@ VabContentPage {
                 Text {
                     text: "Left: text expands to left. Right: text expands to right (default)."
                     color: Theme.textMuted
-                    font.pixelSize: Theme.dp(8)
+                    font.pixelSize: Theme.dp(14)
                     font.italic: true
                 }
             }
@@ -967,7 +990,7 @@ VabContentPage {
 
                                 readonly property string elementType: index < BarLayoutState.batteryElements.length ? BarLayoutState.batteryElements[index] : ""
                                 readonly property string elementLabel: elementType==="charging"?"Charging Indicator":(elementType==="percentage"?"Percentage":"Battery Icon")
-                                readonly property string elementSymbol: elementType==="charging"?"⚡":(elementType==="percentage"?"%":"🔋")
+                                readonly property string elementSymbol: elementType==="charging"?"bolt":(elementType==="percentage"?"%":"battery_full")
 
                                 Layout.fillWidth: true
                                 Layout.preferredHeight: Theme.dp(32)
@@ -984,20 +1007,28 @@ VabContentPage {
 
                                     Text {
                                         text: batteryElementCard.elementSymbol
-                                        font.pixelSize: Theme.dp(12)
-                                        Layout.preferredWidth: Theme.dp(20)
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                        font.pixelSize: Theme.dp(14)
+                                        color: Theme.accent
+                                        Layout.preferredWidth: Theme.dp(24)
                                         horizontalAlignment: Text.AlignHCenter
                                     }
 
                                     Text { text: batteryElementCard.elementLabel; color: Theme.textPrimary; font.pixelSize: Theme.dp(9); font.weight: Font.Medium; Layout.fillWidth: true }
 
                                     Rectangle {
-                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
+                                        width: Theme.dp(24); height: Theme.dp(24); color: upM.containsMouse ? Theme.accent : "transparent"; radius: Theme.radiusSmall
                                         visible: batteryElementCard.index > 0
-                                        Text { anchors.centerIn: parent; text: "▲"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        Text { anchors.centerIn: parent; text: "arrow_drop_up"; color: upM.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(16)
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                                                               }
                                         MouseArea {
+                                            id: upM
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
                                             onClicked: {
                                                 var a=BarLayoutState.batteryElements.slice(); var p=batteryElementCard.index; if(p>0){var t=a[p];a[p]=a[p-1];a[p-1]=t;BarLayoutState.batteryElements=a}
                                             }
@@ -1006,7 +1037,10 @@ VabContentPage {
                                     Rectangle {
                                         width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
                                         visible: batteryElementCard.index < BarLayoutState.batteryElements.length-1
-                                        Text { anchors.centerIn: parent; text: "▼"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                        Text { anchors.centerIn: parent; text: "arrow_drop_down"; color: Theme.textMuted; font.pixelSize: Theme.dp(14) 
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                                                               }
                                         MouseArea {
                                             anchors.fill: parent
                                             cursorShape: Qt.PointingHandCursor
@@ -1048,7 +1082,9 @@ VabContentPage {
                             model: batteryPreviewBox._batteryPreviewKey > 0 ? BarLayoutState.batteryElements : []
                             delegate: Text {
                                 required property string modelData
-                                text: modelData==="charging"?"⚡":(modelData==="percentage"?"85%":"🔋")
+                                text: modelData==="charging"?"bolt":(modelData==="percentage"?"85%":"battery_full")
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
                                 color: Theme.accent
                                 font.pixelSize: Theme.dp(10)
                             }
@@ -1107,7 +1143,7 @@ VabContentPage {
                             Column {
                                 Layout.fillWidth: true
                                 Text { text: modelData.name; color: Theme.textPrimary; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
-                                Text { text: modelData.desc; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
+                                Text { text: modelData.desc; color: Theme.textMuted; font.pixelSize: Theme.dp(14) }
                             }
                             VabButton { text: "Apply"; onClicked: BarLayoutState.applyPreset(presetRow.index) }
                         }

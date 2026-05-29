@@ -139,6 +139,62 @@ Item {
     property string desktopClockBorderColorMode: "transparent"
     onDesktopClockBorderColorModeChanged: save()
 
+    // --- Lockscreen ---
+    property bool lockscreenShowMedia: true
+    onLockscreenShowMediaChanged: save()
+    property bool lockscreenShowKeyboard: true
+    onLockscreenShowKeyboardChanged: save()
+    property bool lockscreenShowPowerButtons: true
+    onLockscreenShowPowerButtonsChanged: save()
+    property bool lockscreenShowStatusBar: true
+    onLockscreenShowStatusBarChanged: save()
+    property int lockscreenPowerConfirmTime: 5
+    onLockscreenPowerConfirmTimeChanged: save()
+    property bool lockscreenHotCorners: true
+    onLockscreenHotCornersChanged: save()
+    property bool lockscreenIdleBlur: true
+    onLockscreenIdleBlurChanged: save()
+    property int lockscreenIdleTimeout: 10
+    onLockscreenIdleTimeoutChanged: save()
+    property string lockscreenWallpaperPath: ""
+    onLockscreenWallpaperPathChanged: save()
+
+    // --- Lockscreen Colors ---
+    property string lockscreenBgColorMode: "bg_primary"
+    onLockscreenBgColorModeChanged: save()
+    property string lockscreenOverlayColorMode: "black"
+    onLockscreenOverlayColorModeChanged: save()
+    property real lockscreenOverlayOpacity: 0.65
+    onLockscreenOverlayOpacityChanged: save()
+    property string lockscreenTextColorMode: "text_primary"
+    onLockscreenTextColorModeChanged: save()
+    property string lockscreenAccentColorMode: "accent"
+    onLockscreenAccentColorModeChanged: save()
+    property string lockscreenBorderColorMode: "border"
+    onLockscreenBorderColorModeChanged: save()
+
+    // --- Lockscreen Media Widget ---
+    property string lockscreenMediaBgColorMode: "bg_secondary"
+    onLockscreenMediaBgColorModeChanged: save()
+    property string lockscreenMediaTextColorMode: "text_primary"
+    onLockscreenMediaTextColorModeChanged: save()
+    property string lockscreenMediaAccentColorMode: "accent"
+    onLockscreenMediaAccentColorModeChanged: save()
+    property string lockscreenMediaBorderColorMode: "border"
+    onLockscreenMediaBorderColorModeChanged: save()
+    property string lockscreenMediaStyle: "compact"
+    onLockscreenMediaStyleChanged: save()
+    property int lockscreenMediaRadius: 12
+    onLockscreenMediaRadiusChanged: save()
+    property bool lockscreenMediaShowAlbumArt: true
+    onLockscreenMediaShowAlbumArtChanged: save()
+    property bool lockscreenMediaShowControls: true
+    onLockscreenMediaShowControlsChanged: save()
+    property bool lockscreenMediaShowProgress: true
+    onLockscreenMediaShowProgressChanged: save()
+    property bool lockscreenMediaBlurBackground: false
+    onLockscreenMediaBlurBackgroundChanged: save()
+
     property bool showScreenSystemStats: true
 
     // --- Combined Stats Widget ---
@@ -1111,6 +1167,34 @@ Item {
         desktopClockDateColorMode = "text_muted"
         desktopClockBorderColorMode = "transparent"
 
+        lockscreenShowMedia = true
+        lockscreenShowKeyboard = true
+        lockscreenShowPowerButtons = true
+        lockscreenShowStatusBar = true
+        lockscreenPowerConfirmTime = 5
+        lockscreenHotCorners = true
+        lockscreenIdleBlur = true
+        lockscreenIdleTimeout = 10
+        lockscreenWallpaperPath = ""
+
+        lockscreenBgColorMode = "bg_primary"
+        lockscreenOverlayColorMode = "black"
+        lockscreenOverlayOpacity = 0.65
+        lockscreenTextColorMode = "text_primary"
+        lockscreenAccentColorMode = "accent"
+        lockscreenBorderColorMode = "border"
+
+        lockscreenMediaBgColorMode = "bg_secondary"
+        lockscreenMediaTextColorMode = "text_primary"
+        lockscreenMediaAccentColorMode = "accent"
+        lockscreenMediaBorderColorMode = "border"
+        lockscreenMediaStyle = "compact"
+        lockscreenMediaRadius = 12
+        lockscreenMediaShowAlbumArt = true
+        lockscreenMediaShowControls = true
+        lockscreenMediaShowProgress = true
+        lockscreenMediaBlurBackground = false
+
         showScreenSystemStats = true
         desktopStatsX = 511.5
         desktopStatsY = 891.8
@@ -1346,6 +1430,34 @@ Item {
             desktopClockTextColorMode: root.desktopClockTextColorMode,
             desktopClockDateColorMode: root.desktopClockDateColorMode,
             desktopClockBorderColorMode: root.desktopClockBorderColorMode,
+
+            lockscreenShowMedia: root.lockscreenShowMedia,
+            lockscreenShowKeyboard: root.lockscreenShowKeyboard,
+            lockscreenShowPowerButtons: root.lockscreenShowPowerButtons,
+            lockscreenShowStatusBar: root.lockscreenShowStatusBar,
+            lockscreenPowerConfirmTime: root.lockscreenPowerConfirmTime,
+            lockscreenHotCorners: root.lockscreenHotCorners,
+            lockscreenIdleBlur: root.lockscreenIdleBlur,
+            lockscreenIdleTimeout: root.lockscreenIdleTimeout,
+            lockscreenWallpaperPath: root.lockscreenWallpaperPath,
+
+            lockscreenBgColorMode: root.lockscreenBgColorMode,
+            lockscreenOverlayColorMode: root.lockscreenOverlayColorMode,
+            lockscreenOverlayOpacity: root.lockscreenOverlayOpacity,
+            lockscreenTextColorMode: root.lockscreenTextColorMode,
+            lockscreenAccentColorMode: root.lockscreenAccentColorMode,
+            lockscreenBorderColorMode: root.lockscreenBorderColorMode,
+
+            lockscreenMediaBgColorMode: root.lockscreenMediaBgColorMode,
+            lockscreenMediaTextColorMode: root.lockscreenMediaTextColorMode,
+            lockscreenMediaAccentColorMode: root.lockscreenMediaAccentColorMode,
+            lockscreenMediaBorderColorMode: root.lockscreenMediaBorderColorMode,
+            lockscreenMediaStyle: root.lockscreenMediaStyle,
+            lockscreenMediaRadius: root.lockscreenMediaRadius,
+            lockscreenMediaShowAlbumArt: root.lockscreenMediaShowAlbumArt,
+            lockscreenMediaShowControls: root.lockscreenMediaShowControls,
+            lockscreenMediaShowProgress: root.lockscreenMediaShowProgress,
+            lockscreenMediaBlurBackground: root.lockscreenMediaBlurBackground,
 
             showScreenSystemStats: root.showScreenSystemStats,
             desktopStatsX: root.desktopStatsX,
@@ -1631,6 +1743,34 @@ Item {
                     if (data.hasOwnProperty("desktopClockTextColorMode")) root.desktopClockTextColorMode = data.desktopClockTextColorMode
                     if (data.hasOwnProperty("desktopClockDateColorMode")) root.desktopClockDateColorMode = data.desktopClockDateColorMode
                     if (data.hasOwnProperty("desktopClockBorderColorMode")) root.desktopClockBorderColorMode = data.desktopClockBorderColorMode
+
+                    if (data.hasOwnProperty("lockscreenShowMedia")) root.lockscreenShowMedia = data.lockscreenShowMedia
+                    if (data.hasOwnProperty("lockscreenShowKeyboard")) root.lockscreenShowKeyboard = data.lockscreenShowKeyboard
+                    if (data.hasOwnProperty("lockscreenShowPowerButtons")) root.lockscreenShowPowerButtons = data.lockscreenShowPowerButtons
+                    if (data.hasOwnProperty("lockscreenShowStatusBar")) root.lockscreenShowStatusBar = data.lockscreenShowStatusBar
+                    if (data.hasOwnProperty("lockscreenPowerConfirmTime")) root.lockscreenPowerConfirmTime = data.lockscreenPowerConfirmTime
+                    if (data.hasOwnProperty("lockscreenHotCorners")) root.lockscreenHotCorners = data.lockscreenHotCorners
+                    if (data.hasOwnProperty("lockscreenIdleBlur")) root.lockscreenIdleBlur = data.lockscreenIdleBlur
+                    if (data.hasOwnProperty("lockscreenIdleTimeout")) root.lockscreenIdleTimeout = data.lockscreenIdleTimeout
+                    if (data.hasOwnProperty("lockscreenWallpaperPath")) root.lockscreenWallpaperPath = data.lockscreenWallpaperPath
+
+                    if (data.hasOwnProperty("lockscreenBgColorMode")) root.lockscreenBgColorMode = data.lockscreenBgColorMode
+                    if (data.hasOwnProperty("lockscreenOverlayColorMode")) root.lockscreenOverlayColorMode = data.lockscreenOverlayColorMode
+                    if (data.hasOwnProperty("lockscreenOverlayOpacity")) root.lockscreenOverlayOpacity = data.lockscreenOverlayOpacity
+                    if (data.hasOwnProperty("lockscreenTextColorMode")) root.lockscreenTextColorMode = data.lockscreenTextColorMode
+                    if (data.hasOwnProperty("lockscreenAccentColorMode")) root.lockscreenAccentColorMode = data.lockscreenAccentColorMode
+                    if (data.hasOwnProperty("lockscreenBorderColorMode")) root.lockscreenBorderColorMode = data.lockscreenBorderColorMode
+
+                    if (data.hasOwnProperty("lockscreenMediaBgColorMode")) root.lockscreenMediaBgColorMode = data.lockscreenMediaBgColorMode
+                    if (data.hasOwnProperty("lockscreenMediaTextColorMode")) root.lockscreenMediaTextColorMode = data.lockscreenMediaTextColorMode
+                    if (data.hasOwnProperty("lockscreenMediaAccentColorMode")) root.lockscreenMediaAccentColorMode = data.lockscreenMediaAccentColorMode
+                    if (data.hasOwnProperty("lockscreenMediaBorderColorMode")) root.lockscreenMediaBorderColorMode = data.lockscreenMediaBorderColorMode
+                    if (data.hasOwnProperty("lockscreenMediaStyle")) root.lockscreenMediaStyle = data.lockscreenMediaStyle
+                    if (data.hasOwnProperty("lockscreenMediaRadius")) root.lockscreenMediaRadius = data.lockscreenMediaRadius
+                    if (data.hasOwnProperty("lockscreenMediaShowAlbumArt")) root.lockscreenMediaShowAlbumArt = data.lockscreenMediaShowAlbumArt
+                    if (data.hasOwnProperty("lockscreenMediaShowControls")) root.lockscreenMediaShowControls = data.lockscreenMediaShowControls
+                    if (data.hasOwnProperty("lockscreenMediaShowProgress")) root.lockscreenMediaShowProgress = data.lockscreenMediaShowProgress
+                    if (data.hasOwnProperty("lockscreenMediaBlurBackground")) root.lockscreenMediaBlurBackground = data.lockscreenMediaBlurBackground
 
                     if (data.hasOwnProperty("showScreenSystemStats")) root.showScreenSystemStats = data.showScreenSystemStats
                     if (data.hasOwnProperty("desktopStatsX")) root.desktopStatsX = data.desktopStatsX

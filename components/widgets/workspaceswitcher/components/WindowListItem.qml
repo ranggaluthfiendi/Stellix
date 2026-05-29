@@ -115,8 +115,8 @@ Item {
             }
 
             IconButton {
-                text: "✕"
-                onClicked: Hyprland.dispatch("closewindow address:" + listItem.winAddr)
+                text: "close"
+                                    onClicked: Hyprland.dispatch("closewindow address:" + listItem.winAddr)
                 isDanger: true
             }
         }

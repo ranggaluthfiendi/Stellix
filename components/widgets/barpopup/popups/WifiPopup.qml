@@ -366,9 +366,10 @@ PopupWindow {
 
                                 Text {
                                     anchors.centerIn: parent
-                                    text: "✕"
+                                    text: "close"
+                                    font.family: Typography.materialSymbols
+                                    font.styleName: "Regular"
                                     color: forgetNetMouse.containsMouse ? "#ffffff" : Theme.danger
-                                    font.family: Typography.fontFamily
                                     font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
                                     font.weight: Font.Bold
                                 }
@@ -563,9 +564,10 @@ PopupWindow {
 
                                         Text {
                                             anchors.centerIn: parent
-                                            text: "✕"
+                                            text: "close"
+                                            font.family: Typography.materialSymbols
+                                            font.styleName: "Regular"
                                             color: forgetAvailMouse.containsMouse ? "#ffffff" : Theme.danger
-                                            font.family: Typography.fontFamily
                                             font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
                                             font.weight: Font.Bold
                                         }

@@ -93,7 +93,7 @@ VabContentPage {
                 Text {
                     text: "Supports worldwide locations: villages, cities, districts, or landmarks."
                     color: Theme.textMuted
-                    font.pixelSize: Theme.dp(8)
+                    font.pixelSize: Theme.dp(14)
                     font.italic: true
                     Layout.leftMargin: Theme.dp(112)
                 }
@@ -242,6 +242,43 @@ VabContentPage {
                                     anchors.rightMargin: Theme.dp(4)
                                     spacing: Theme.dp(4)
 
+                                    // Arrows on LEFT
+                                    Rectangle {
+                                        width: Theme.dp(22); height: Theme.dp(22); color: upMouse.containsMouse ? Theme.accent : "transparent"; radius: Theme.radiusSmall
+                                        visible: barWeatherCard.index > 0
+                                        Text { anchors.centerIn: parent; text: "arrow_drop_up"; color: upMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(16)
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                                                               }
+                                        MouseArea {
+                                            id: upMouse
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
+                                            onClicked: {
+                                                var a=BarLayoutState.weatherElements.slice(); var p=barWeatherCard.index; if(p>0){var t=a[p];a[p]=a[p-1];a[p-1]=t;BarLayoutState.weatherElements=a}
+                                            }
+                                        }
+                                    }
+                                    Rectangle {
+                                        width: Theme.dp(22); height: Theme.dp(22); color: downMouse.containsMouse ? Theme.accent : "transparent"; radius: Theme.radiusSmall
+                                        visible: barWeatherCard.index < BarLayoutState.weatherElements.length-1
+                                        Text { anchors.centerIn: parent; text: "arrow_drop_down"; color: downMouse.containsMouse ? Theme.bgPrimary : Theme.textMuted; font.pixelSize: Theme.dp(16)
+                                        font.family: Typography.materialSymbols
+                                        font.styleName: "Regular"
+                                                                               }
+                                        MouseArea {
+                                            id: downMouse
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            hoverEnabled: true
+                                            onClicked: {
+                                                var a=BarLayoutState.weatherElements.slice(); var p=barWeatherCard.index; if(p>=0&&p<a.length-1){var t=a[p];a[p]=a[p+1];a[p+1]=t;BarLayoutState.weatherElements=a}
+                                            }
+                                        }
+                                    }
+
+                                    // Icon and label
                                     Rectangle {
                                         Layout.preferredWidth: Theme.dp(14); Layout.preferredHeight: Theme.dp(14)
                                         radius: width/2; color: barWeatherCard.isDisabled ? Theme.textMuted : barWeatherCard.elementColor
@@ -250,7 +287,7 @@ VabContentPage {
                                             anchors.centerIn: parent
                                             text: barWeatherCard.elementType === "icon" ? "" : barWeatherCard.elementSymbol
                                             color: "white"
-                                            font.pixelSize: Theme.dp(8)
+                                            font.pixelSize: Theme.dp(14)
                                             visible: text !== ""
                                         }
                                         Loader {
@@ -264,6 +301,7 @@ VabContentPage {
 
                                     Text { text: barWeatherCard.elementLabel; color: barWeatherCard.isDisabled ? Theme.textMuted : Theme.textPrimary; font.pixelSize: Theme.dp(9); font.weight: Font.Medium; Layout.fillWidth: true }
 
+                                    // Switch on RIGHT
                                     VabSwitch {
                                         checked: !barWeatherCard.isDisabled
                                         onToggled: {
@@ -272,31 +310,6 @@ VabContentPage {
                                             if (idx === -1) d.push(barWeatherCard.elementType)
                                             else d.splice(idx, 1)
                                             BarLayoutState.weatherElementsDisabled = d
-                                        }
-                                    }
-
-                                    Rectangle {
-                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
-                                        visible: barWeatherCard.index > 0
-                                        Text { anchors.centerIn: parent; text: "▲"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                var a=BarLayoutState.weatherElements.slice(); var p=barWeatherCard.index; if(p>0){var t=a[p];a[p]=a[p-1];a[p-1]=t;BarLayoutState.weatherElements=a}
-                                            }
-                                        }
-                                    }
-                                    Rectangle {
-                                        width: Theme.dp(18); height: Theme.dp(18); color: "transparent"; radius: 0
-                                        visible: barWeatherCard.index < BarLayoutState.weatherElements.length-1
-                                        Text { anchors.centerIn: parent; text: "▼"; color: Theme.textMuted; font.pixelSize: Theme.dp(8) }
-                                        MouseArea {
-                                            anchors.fill: parent
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: {
-                                                var a=BarLayoutState.weatherElements.slice(); var p=barWeatherCard.index; if(p>=0&&p<a.length-1){var t=a[p];a[p]=a[p+1];a[p+1]=t;BarLayoutState.weatherElements=a}
-                                            }
                                         }
                                     }
                                 }
@@ -346,7 +359,7 @@ VabContentPage {
                                 font.pixelSize: Theme.dp(9); font.weight: modelData==="temp"?Font.Bold:Font.Normal
                             }
                         }
-                        Text { text: barWeatherPreviewBox.activeElements.length===0?"No elements enabled":""; color: Theme.textMuted; font.pixelSize: Theme.dp(8); font.italic: true }
+                        Text { text: barWeatherPreviewBox.activeElements.length===0?"No elements enabled":""; color: Theme.textMuted; font.pixelSize: Theme.dp(14); font.italic: true }
                     }
                 }
             }

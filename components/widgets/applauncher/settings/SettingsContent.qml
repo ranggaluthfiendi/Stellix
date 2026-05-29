@@ -231,24 +231,7 @@ Item {
                             VabNavItem { label: "Screen Widgets"; index: 10; active: !root.isSearching && root.currentCategory === 10; visible: settingsData.appearanceExp }
                             VabNavItem { label: "Weather"; index: 11; active: !root.isSearching && root.currentCategory === 11; visible: settingsData.appearanceExp }
                             VabNavItem { label: "Clock"; index: 12; active: !root.isSearching && root.currentCategory === 12; visible: settingsData.appearanceExp }
-                            
-                            // --- Metrics ---
-                            VabSidebarHeader { title: "Metric Widgets"; expanded: settingsData.metricsExp; onToggled: settingsData.metricsExp = !settingsData.metricsExp; Layout.topMargin: Theme.dp(8) }
-                            VabNavItem { label: "CPU"; index: 13; active: !root.isSearching && root.currentCategory === 13; visible: settingsData.metricsExp }
-                            VabNavItem { label: "GPU"; index: 14; active: !root.isSearching && root.currentCategory === 14; visible: settingsData.metricsExp }
-                            VabNavItem { label: "RAM"; index: 15; active: !root.isSearching && root.currentCategory === 15; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Disk"; index: 16; active: !root.isSearching && root.currentCategory === 16; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Uptime"; index: 17; active: !root.isSearching && root.currentCategory === 17; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Temp"; index: 18; active: !root.isSearching && root.currentCategory === 18; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Net Down"; index: 19; active: !root.isSearching && root.currentCategory === 19; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Net Up"; index: 20; active: !root.isSearching && root.currentCategory === 20; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Battery"; index: 21; active: !root.isSearching && root.currentCategory === 21; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Swap"; index: 22; active: !root.isSearching && root.currentCategory === 22; visible: settingsData.metricsExp }
-                            VabNavItem { label: "GPU Mem"; index: 23; active: !root.isSearching && root.currentCategory === 23; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Load"; index: 24; active: !root.isSearching && root.currentCategory === 24; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Process"; index: 25; active: !root.isSearching && root.currentCategory === 25; visible: settingsData.metricsExp }
-                            VabNavItem { label: "Fan"; index: 26; active: !root.isSearching && root.currentCategory === 26; visible: settingsData.metricsExp }
-                            VabNavItem { label: "IP"; index: 27; active: !root.isSearching && root.currentCategory === 27; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Lockscreen"; index: 13; active: !root.isSearching && root.currentCategory === 13; visible: settingsData.appearanceExp }
 
                             // --- Connectivity ---
                             VabSidebarHeader { title: "Connectivity"; expanded: settingsData.connectivityExp; onToggled: settingsData.connectivityExp = !settingsData.connectivityExp; Layout.topMargin: Theme.dp(8) }
@@ -260,11 +243,29 @@ Item {
                             VabSidebarHeader { title: "Workspace"; expanded: settingsData.workspaceExp; onToggled: settingsData.workspaceExp = !settingsData.workspaceExp; Layout.topMargin: Theme.dp(8) }
                             VabNavItem { label: "General"; index: 1; active: !root.isSearching && root.currentCategory === 1; visible: settingsData.workspaceExp }
                             VabNavItem { label: "Keybindings"; index: 4; active: !root.isSearching && root.currentCategory === 4; visible: settingsData.workspaceExp }
-                            
+
                             // --- System ---
                             VabSidebarHeader { title: "System"; expanded: settingsData.systemExp; onToggled: settingsData.systemExp = !settingsData.systemExp; Layout.topMargin: Theme.dp(8) }
                             VabNavItem { label: "System Status"; index: 5; active: !root.isSearching && root.currentCategory === 5; visible: settingsData.systemExp }
                             VabNavItem { label: "About Stellix"; index: 6; active: !root.isSearching && root.currentCategory === 6; visible: settingsData.systemExp }
+
+                            // --- Metrics ---
+                            VabSidebarHeader { title: "Metric Widgets"; expanded: settingsData.metricsExp; onToggled: settingsData.metricsExp = !settingsData.metricsExp; Layout.topMargin: Theme.dp(8) }
+                            VabNavItem { label: "CPU"; index: 14; active: !root.isSearching && root.currentCategory === 14; visible: settingsData.metricsExp }
+                            VabNavItem { label: "GPU"; index: 15; active: !root.isSearching && root.currentCategory === 15; visible: settingsData.metricsExp }
+                            VabNavItem { label: "RAM"; index: 16; active: !root.isSearching && root.currentCategory === 16; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Disk"; index: 17; active: !root.isSearching && root.currentCategory === 17; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Uptime"; index: 18; active: !root.isSearching && root.currentCategory === 18; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Temp"; index: 19; active: !root.isSearching && root.currentCategory === 19; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Net Down"; index: 20; active: !root.isSearching && root.currentCategory === 20; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Net Up"; index: 21; active: !root.isSearching && root.currentCategory === 21; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Battery"; index: 22; active: !root.isSearching && root.currentCategory === 22; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Swap"; index: 23; active: !root.isSearching && root.currentCategory === 23; visible: settingsData.metricsExp }
+                            VabNavItem { label: "GPU Mem"; index: 24; active: !root.isSearching && root.currentCategory === 24; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Load"; index: 25; active: !root.isSearching && root.currentCategory === 25; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Process"; index: 26; active: !root.isSearching && root.currentCategory === 26; visible: settingsData.metricsExp }
+                            VabNavItem { label: "Fan"; index: 27; active: !root.isSearching && root.currentCategory === 27; visible: settingsData.metricsExp }
+                            VabNavItem { label: "IP"; index: 28; active: !root.isSearching && root.currentCategory === 28; visible: settingsData.metricsExp }
 
                             Item { Layout.preferredHeight: Theme.dp(20) }
                         }
@@ -291,7 +292,40 @@ Item {
                     RowLayout {
                         anchors.fill: parent; anchors.leftMargin: Theme.dp(20); anchors.rightMargin: Theme.dp(20); spacing: Theme.dp(16)
                         Text {
-                            text: root.isSearching ? "Search Results" : ["Personalization", "Workspaces", "Audio", "Wi-Fi", "Keybindings", "System", "About", "Search", "Bluetooth", "Bar Layout", "Screen Widgets", "Weather", "Clock", "CPU", "GPU", "RAM", "Disk", "Uptime", "Temp", "Net Down", "Net Up"][root.currentCategory]
+                            text: {
+                                if (root.isSearching) return "Search Results"
+                                var titles = []
+                                titles[0] = "Personalization"
+                                titles[1] = "Workspaces"
+                                titles[2] = "Audio"
+                                titles[3] = "Wi-Fi"
+                                titles[4] = "Keybindings"
+                                titles[5] = "System"
+                                titles[6] = "About"
+                                titles[7] = "Search"
+                                titles[8] = "Bluetooth"
+                                titles[9] = "Bar Layout"
+                                titles[10] = "Screen Widgets"
+                                titles[11] = "Weather"
+                                titles[12] = "Clock"
+                                titles[13] = "Lockscreen"
+                                titles[14] = "CPU"
+                                titles[15] = "GPU"
+                                titles[16] = "RAM"
+                                titles[17] = "Disk"
+                                titles[18] = "Uptime"
+                                titles[19] = "Temp"
+                                titles[20] = "Net Down"
+                                titles[21] = "Net Up"
+                                titles[22] = "Battery"
+                                titles[23] = "Swap"
+                                titles[24] = "GPU Mem"
+                                titles[25] = "Load"
+                                titles[26] = "Process"
+                                titles[27] = "Fan"
+                                titles[28] = "IP"
+                                return titles[root.currentCategory] || ""
+                            }
                             color: Theme.textPrimary; font.pixelSize: Theme.dp(16); font.weight: Font.Bold; Layout.preferredWidth: Theme.dp(140)
                         }
                         Rectangle {
@@ -320,12 +354,15 @@ Item {
                                         }
                                     }
                                 }
-                                Text { text: "✕"; visible: searchInput.text !== ""; color: Theme.textMuted; font.pixelSize: Theme.dp(10); MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { searchInput.text = ""; root.searchQuery = "" } } }
+                                Text { text: "close"; visible: searchInput.text !== ""; color: Theme.textMuted; font.pixelSize: Theme.dp(10); MouseArea { anchors.fill: parent; cursorShape: Qt.PointingHandCursor; onClicked: { searchInput.text = ""; root.searchQuery = "" } } }
                             }
                         }
                         Rectangle {
                             Layout.preferredWidth: Theme.dp(32); Layout.preferredHeight: Theme.dp(32); color: closeMouse.containsMouse ? Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.1) : "transparent"; radius: 0
-                            Text { anchors.centerIn: parent; text: "✕"; color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted; font.pixelSize: Theme.dp(12) }
+                            Text { anchors.centerIn: parent; text: "close"; color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted; font.pixelSize: Theme.dp(12) 
+                            font.family: Typography.materialSymbols
+                            font.styleName: "Regular"
+                                                                   }
                             MouseArea { id: closeMouse; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: BarPopupState.settingsOpen = false }
                         }
                     }
@@ -373,6 +410,7 @@ Item {
                     ScreenPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     WeatherPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     ClockPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
+                    LockscreenPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     CpuMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     GpuMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
                     MemMetricPage { currentCategory: root.currentCategory; focusInContent: root.focusInContent; contentFocusIndex: root.contentFocusIndex; onActiveChanged: if(active && root.highlightTitle !== "") { triggerHighlight(root.highlightTitle); root.highlightTitle = "" } }
@@ -431,7 +469,7 @@ Item {
                 if (root.subFocusActive) root.subFocusActive = false; else if (root.focusInContent) root.focusInContent = false; else BarPopupState.settingsOpen = false
                 event.accepted = true; return
             }
-            var navOrder = [0, 9, 10, 11, 12, 3, 8, 2, 1, 4, 5, 6, 13, 14, 15, 16, 17, 18, 19, 20]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
+            var navOrder = [0, 1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]; var currentIdx = navOrder.indexOf(root.focusedNavItem)
             if (event.key === Qt.Key_Right && !root.focusInContent) { root.focusInContent = true; root.contentFocusIndex = 0; event.accepted = true; return }
             if (event.key === Qt.Key_Left && root.focusInContent && !root.subFocusActive) { root.focusInContent = false; event.accepted = true; return }
             if (event.key === Qt.Key_Up) {
@@ -465,7 +503,9 @@ Item {
         RowLayout {
             anchors.fill: parent; spacing: Theme.dp(10)
             Text {
-                text: expanded ? "▾" : "▸"
+                text: expanded ? "arrow_drop_down" : "arrow_right"
+                font.family: Typography.materialSymbols
+                font.styleName: "Regular"
                 color: Theme.accent; font.pixelSize: Theme.dp(22); font.weight: Font.Bold
                 Layout.preferredWidth: Theme.dp(26); Layout.alignment: Qt.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter

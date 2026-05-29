@@ -162,12 +162,14 @@ Scope {
         if (name === "wifi") {
             wifiPopupOpen  = !wifiPopupOpen
             if (wifiPopupOpen) {
+                btPopupOpen = false
                 powerPopupOpen = false
                 root.notifPopupOpen = false
             }
         } else if (name === "bluetooth") {
             btPopupOpen = !btPopupOpen
             if (btPopupOpen) {
+                wifiPopupOpen = false
                 powerPopupOpen = false
                 root.notifPopupOpen = false
             }

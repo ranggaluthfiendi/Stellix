@@ -59,7 +59,9 @@ VabContentPage {
                         spacing: Theme.dp(8)
 
                         Text {
-                            text: "🕐"
+                            text: "schedule"
+                            font.family: Typography.materialSymbols
+                            font.styleName: "Regular"
                             font.pixelSize: Theme.dp(10)
                         }
 
@@ -79,7 +81,9 @@ VabContentPage {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: "✕"
+                                text: "close"
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
                                 color: clearRecentMouse.containsMouse ? Theme.danger : Theme.textMuted
                                 font.pixelSize: Theme.dp(8)
                             }

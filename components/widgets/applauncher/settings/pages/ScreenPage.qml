@@ -592,7 +592,7 @@ VabContentPage {
                                 RowLayout {
                                     spacing: Theme.dp(4)
                                     Repeater {
-                                        model: netLabelContainer._netLabelKey > 0 ? ["DOWN/UP", "DOWNLOAD/UPLOAD", "RX/TX", "IN/OUT", "▼/▲", "↓/↑"] : []
+                                        model: netLabelContainer._netLabelKey > 0 ? ["DOWN/UP", "DOWNLOAD/UPLOAD", "RX/TX", "IN/OUT", "D/U", "↓/↑"] : []
                                         delegate: VabButton {
                                             required property string modelData
                                             text: modelData
@@ -964,7 +964,10 @@ VabContentPage {
                                 color: Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.1)
                                 border.width: 1; border.color: Theme.danger; radius: Theme.dp(4)
                                 visible: BarLayoutState.desktopQuickActionsInstances.length > 1
-                                Text { anchors.centerIn: parent; text: "✕"; color: Theme.danger; font.pixelSize: Theme.dp(10); font.weight: Font.Bold }
+                                Text { anchors.centerIn: parent; text: "close"; color: Theme.danger; font.pixelSize: Theme.dp(10); font.weight: Font.Bold 
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
+                                                                       }
                                 MouseArea {
                                     anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                     onClicked: {
@@ -1163,7 +1166,10 @@ VabContentPage {
                                             }
                                             Rectangle {
                                                 width: Theme.dp(30); height: Theme.dp(30); color: Qt.rgba(Theme.danger.r, Theme.danger.g, Theme.danger.b, 0.1); border.width: 1; border.color: Theme.danger; radius: Theme.dp(4)
-                                                Text { anchors.centerIn: parent; text: "✕"; color: Theme.danger; font.pixelSize: Theme.dp(12); font.weight: Font.Bold }
+                                                Text { anchors.centerIn: parent; text: "close"; color: Theme.danger; font.pixelSize: Theme.dp(12); font.weight: Font.Bold 
+                                                font.family: Typography.materialSymbols
+                                                font.styleName: "Regular"
+                                                                                       }
                                                 MouseArea {
                                                     anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
                                                     onClicked: {
@@ -1292,7 +1298,7 @@ VabContentPage {
                                             }
                                         }
                                         VabButton {
-                                            text: "🎨"
+                                            text: "palette"
                                             Layout.preferredHeight: Theme.dp(28)
                                             Layout.preferredWidth: Theme.dp(28)
                                             onClicked: {
@@ -1356,7 +1362,7 @@ VabContentPage {
                                     var c = JSON.parse(JSON.stringify(getQaCfg()))
                                     c.model = [
                                         { textIcon: "📸", action: "screenshot", label: "Shot", type: "action" },
-                                        { textIcon: "🔒", action: "lock", label: "Lock", type: "action" },
+                                        { textIcon: "lock", action: "lock", label: "Lock", type: "action" },
                                         { textIcon: "☾", action: "sleep", label: "Sleep", type: "action" },
                                         { textIcon: "↻", action: "restart", label: "Reboot", type: "action" },
                                         { textIcon: "⏻", action: "power", label: "Off", type: "action" }
@@ -1947,12 +1953,12 @@ VabContentPage {
                                 spacing: Theme.dp(4)
                                 Layout.alignment: Qt.AlignRight
                                 VabButton {
-                                    text: "▲"
+                                    text: "arrow_drop_up"
                                     enabled: elemIdx > 0
                                     onClicked: BarLayoutState.moveIndicatorElement(elemIdx, elemIdx - 1)
                                 }
                                 VabButton {
-                                    text: "▼"
+                                    text: "arrow_drop_down"
                                     enabled: elemIdx < BarLayoutState.indicatorElementOrder.length - 1
                                     onClicked: BarLayoutState.moveIndicatorElement(elemIdx, elemIdx + 1)
                                 }
@@ -2667,7 +2673,7 @@ VabContentPage {
                 RowLayout {
                     Layout.fillWidth: true
                     Text { text: "Select Application"; color: Theme.accent; font.pixelSize: Theme.dp(14); font.weight: Font.Bold; Layout.fillWidth: true }
-                    VabButton { text: "✕"; onClicked: screenPageRoot.showingAppPicker = false }
+                    VabButton { text: "close"; onClicked: screenPageRoot.showingAppPicker = false }
                 }
 
                 Rectangle {
@@ -2760,7 +2766,7 @@ VabContentPage {
                 RowLayout {
                     Layout.fillWidth: true
                     Text { text: "Select Action"; color: Theme.accent; font.pixelSize: Theme.dp(14); font.weight: Font.Bold; Layout.fillWidth: true }
-                    VabButton { text: "✕"; onClicked: screenPageRoot.showingActionPicker = false }
+                    VabButton { text: "close"; onClicked: screenPageRoot.showingActionPicker = false }
                 }
 
                 ListView {
@@ -2770,7 +2776,7 @@ VabContentPage {
                     spacing: Theme.dp(4)
                     model: [
                         { label: "Screenshot", action: "screenshot", icon: "📸", iconComp: "" },
-                        { label: "Lock Screen", action: "lock", icon: "🔒", iconComp: "" },
+                        { label: "Lock Screen", action: "lock", icon: "lock", iconComp: "" },
                         { label: "Sleep/Suspend", action: "sleep", icon: "☾", iconComp: "" },
                         { label: "Restart System", action: "restart", icon: "↻", iconComp: "" },
                         { label: "Power Off", action: "power", icon: "⏻", iconComp: "" }

@@ -114,7 +114,7 @@ Item {
             id: checkIndicator
             visible: isCheckbox || isRadio
             text: {
-                if (isCheckbox) return entry.checkState === Qt.Checked ? "✓" : ""
+                if (isCheckbox) return entry.checkState === Qt.Checked ? "check_circle" : ""
                 if (isRadio) return entry.checkState === Qt.Checked ? "●" : ""
                 return ""
             }
@@ -125,10 +125,11 @@ Item {
         }
 
         Text {
-            text: hasSubmenu ? "▶" : ""
+            text: hasSubmenu ? "arrow_right" : ""
+            font.family: Typography.materialSymbols
+            font.styleName: "Regular"
             color: isActiveSubmenu ? Theme.accent : Theme.textMuted
             visible: hasSubmenu
-            font.family: Typography.fontFamily
             font.pixelSize: Math.round((Typography.sizeXXS || 9) * root.s)
         }
     }

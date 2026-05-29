@@ -12,7 +12,7 @@ import "../components"
 VabContentPage {
     id: page
 
-    property int currentCategory: 10
+    property int currentCategory: 21
     property bool focusInContent: false
     property int contentFocusIndex: 0
 
@@ -155,7 +155,7 @@ VabContentPage {
                                 { label: "UPLOAD", value: "UPLOAD" },
                                 { label: "TX", value: "TX" },
                                 { label: "OUT", value: "OUT" },
-                                { label: "▲", value: "▲" },
+                                { label: "arrow_drop_up", value: "arrow_drop_up" },
                                 { label: "↑", value: "↑" }
                             ]
                             delegate: VabButton {

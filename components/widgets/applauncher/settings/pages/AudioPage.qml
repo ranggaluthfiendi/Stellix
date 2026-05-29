@@ -102,7 +102,10 @@ VabContentPage {
                             RowLayout {
                                 anchors.fill: parent; anchors.margins: Theme.dp(10); spacing: 10
                                 Text { text: page.pwService ? page.pwService.nodeName(modelData) : ""; color: (page.pwService && page.pwService.sink === modelData) ? Theme.accent : Theme.textPrimary; font.pixelSize: Theme.dp(9); Layout.fillWidth: true; elide: Text.ElideRight }
-                                Text { text: "✓"; visible: (page.pwService && page.pwService.sink === modelData); color: Theme.accent; font.pixelSize: Theme.dp(10) }
+                                Text { text: "check_circle"; visible: (page.pwService && page.pwService.sink === modelData); color: Theme.accent; font.pixelSize: Theme.dp(10) 
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
+                                                                       }
                             }
                             MouseArea { id: m; anchors.fill: parent; hoverEnabled: true; onClicked: { Pipewire.preferredDefaultAudioSink = modelData } }
                         }
@@ -180,7 +183,10 @@ VabContentPage {
                             RowLayout {
                                 anchors.fill: parent; anchors.margins: Theme.dp(10); spacing: 10
                                 Text { text: page.pwService ? page.pwService.nodeName(modelData) : ""; color: (page.pwService && page.pwService.source === modelData) ? Theme.accent : Theme.textPrimary; font.pixelSize: Theme.dp(9); Layout.fillWidth: true; elide: Text.ElideRight }
-                                Text { text: "✓"; visible: (page.pwService && page.pwService.source === modelData); color: Theme.accent; font.pixelSize: Theme.dp(10) }
+                                Text { text: "check_circle"; visible: (page.pwService && page.pwService.source === modelData); color: Theme.accent; font.pixelSize: Theme.dp(10) 
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
+                                                                       }
                             }
                             MouseArea { id: ms; anchors.fill: parent; hoverEnabled: true; onClicked: { Pipewire.preferredDefaultAudioSource = modelData } }
                         }

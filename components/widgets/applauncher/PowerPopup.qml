@@ -75,10 +75,10 @@ Rectangle {
                     { icon: "⏻", label: "Shutdown", action: function() { power.shutdown(); root.closeRequested() } },
                     { icon: "↻", label: "Reboot", action: function() { power.reboot(); root.closeRequested() } },
                     { icon: "↩", label: "Logout", action: function() { power.logout(); root.closeRequested() } },
-                    { icon: "🔒", label: "Lock", action: function() { power.lock(); root.closeRequested() } },
+                    { icon: "lock", label: "Lock", action: function() { power.lock(); root.closeRequested() } },
                     { icon: "☾", label: "Suspend", action: function() { power.suspend(); root.closeRequested() } },
                     { icon: "👤", label: "Switch User", action: function() { power.logout(); root.closeRequested() } },
-                    { icon: "❄", label: "Hibernate", action: function() { power.hibernate(); root.closeRequested() } }
+                    { icon: "ac_unit", label: "Hibernate", action: function() { power.hibernate(); root.closeRequested() } }
                 ]
 
                 delegate: Rectangle {

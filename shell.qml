@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Io
+import Quickshell.Wayland
 import QtQuick
 import qs.screens
 import qs.core.services
@@ -12,6 +13,7 @@ import qs.components.widgets.barpopup
 import qs.components.widgets.workspaceswitcher
 import qs.components.widgets.applauncher
 import qs.components.ui.bar
+import qs.components.lockscreen
 
 ShellRoot {
     Bar {}
@@ -348,7 +350,39 @@ ShellRoot {
         }
     }
 
-    // IPC Handler untuk Volume/Brightness Indicator
+    LockContext {
+        id: lockContext
+        onUnlocked: unlockExitAnim.start()
+    }
+
+    Timer {
+        id: unlockExitAnim
+        interval: 400
+        repeat: false
+        onTriggered: sessionLock.locked = false
+    }
+
+    WlSessionLock {
+        id: sessionLock
+        locked: false
+
+        WlSessionLockSurface {
+            LockSurface {
+                anchors.fill: parent
+                context: lockContext
+                mprisService: mprisService
+                brightnessService: brightnessService
+            }
+        }
+    }
+
+    GlobalShortcut {
+        id: toggleLockShortcut
+        name: "toggle-lock"
+        description: "Toggle lockscreen"
+        onPressed: sessionLock.locked = !sessionLock.locked
+    }
+
     IpcHandler {
         target: "indicator"
         function show(type: string, value: real, muted: bool): void {

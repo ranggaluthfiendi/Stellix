@@ -331,7 +331,9 @@ Item {
 
                             Text {
                                 anchors.centerIn: parent
-                                text: "✕"
+                                text: "close"
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
                                 color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
                                 font.pixelSize: Theme.dp(10)
                             }
@@ -416,12 +418,12 @@ Item {
                     columnSpacing: Theme.dp(8)
                     rowSpacing: Theme.dp(8)
 
-                    WeatherDetailCard { icon: "💧"; label: "Humidity"; value: "72%"; desc: "Moisture in the air" }
-                    WeatherDetailCard { icon: "💨"; label: "Wind"; value: "12 km/h"; desc: "Air speed & direction" }
-                    WeatherDetailCard { icon: "☀️"; label: "UV Index"; value: "5"; desc: "UV radiation level" }
-                    WeatherDetailCard { icon: "🌡️"; label: "Pressure"; value: "1013 hPa"; desc: "Atmospheric pressure" }
-                    WeatherDetailCard { icon: "👁️"; label: "Visibility"; value: "10 km"; desc: "Clear sight distance" }
-                    WeatherDetailCard { icon: "🌅"; label: "Sunrise"; value: "05:42"; desc: "Sun appears today" }
+                    WeatherDetailCard { icon: "water_drop"; label: "Humidity"; value: "72%"; desc: "Moisture in the air" }
+                    WeatherDetailCard { icon: "air"; label: "Wind"; value: "12 km/h"; desc: "Air speed & direction" }
+                    WeatherDetailCard { icon: "light_mode"; label: "UV Index"; value: "5"; desc: "UV radiation level" }
+                    WeatherDetailCard { icon: "speed"; label: "Pressure"; value: "1013 hPa"; desc: "Atmospheric pressure" }
+                    WeatherDetailCard { icon: "visibility"; label: "Visibility"; value: "10 km"; desc: "Clear sight distance" }
+                    WeatherDetailCard { icon: "wb_sunny"; label: "Sunrise"; value: "05:42"; desc: "Sun appears today" }
                 }
 
                 Rectangle {
@@ -507,7 +509,10 @@ Item {
                 spacing: Theme.dp(4)
                 Text {
                     text: detailCard.icon
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     font.pixelSize: Theme.dp(12)
+                    color: Theme.accent
                 }
                 Text {
                     text: detailCard.label

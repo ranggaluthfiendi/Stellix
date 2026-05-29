@@ -12,7 +12,7 @@ import "../components"
 VabContentPage {
     id: page
 
-    property int currentCategory: 10
+    property int currentCategory: 15
     property bool focusInContent: false
     property int contentFocusIndex: 0
 

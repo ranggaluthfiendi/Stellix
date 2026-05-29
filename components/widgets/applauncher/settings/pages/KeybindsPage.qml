@@ -54,7 +54,10 @@ VabContentPage {
 
                 RowLayout {
                     anchors.fill: parent; anchors.leftMargin: Theme.dp(16); anchors.rightMargin: Theme.dp(12)
-                    Text { text: page.uiMessage !== "" ? (page.uiMessageColor === Theme.danger ? "❌" : "✅") : "💡"; font.pixelSize: Theme.dp(11) }
+                    Text { text: page.uiMessage !== "" ? (page.uiMessageColor === Theme.danger ? "close" : "check_circle") : "lightbulb"; font.pixelSize: Theme.dp(11) 
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
+                                                           }
                     Text {
                         text: page.uiMessage !== "" ? page.uiMessage : (page.isRecording ? "Press a key to record... (ESC to cancel)" : "Click on a keybind to change it. Press ESC to cancel recording.")
                         color: page.uiMessage !== "" ? page.uiMessageColor : (page.isRecording ? Theme.accent : Theme.textMuted)

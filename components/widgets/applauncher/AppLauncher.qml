@@ -1351,7 +1351,10 @@ PanelWindow {
                                 anchors.margins: Theme.dp(10)
                                 spacing: Theme.dp(8)
 
-                                Text { text: "▶"; color: Theme.accent; font.pixelSize: Math.round(14 * s) }
+                                Text { text: "arrow_right"; color: Theme.accent; font.pixelSize: Math.round(14 * s) 
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
+                                                                       }
                                 Text {
                                     Layout.fillWidth: true
                                     text: "Launch"
@@ -1389,7 +1392,10 @@ PanelWindow {
                                 anchors.margins: Theme.dp(10)
                                 spacing: Theme.dp(8)
 
-                                Text { text: "📁"; color: Theme.accent; font.pixelSize: Math.round(14 * s) }
+                                Text { text: "folder"; color: Theme.accent; font.pixelSize: Math.round(14 * s) 
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
+                                                                       }
                                 Text {
                                     Layout.fillWidth: true
                                     text: root.contextMenuApp ? launcher.getAppCategories(root.contextMenuApp) : ""
@@ -1426,7 +1432,10 @@ PanelWindow {
                                 anchors.margins: Theme.dp(10)
                                 spacing: Theme.dp(8)
 
-                                Text { text: "🗑"; color: Theme.danger; font.pixelSize: Math.round(14 * s) }
+                                Text { text: "delete"; color: Theme.danger; font.pixelSize: Math.round(14 * s) 
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
+                                                                       }
                                 Text {
                                     Layout.fillWidth: true
                                     text: "Delete"
@@ -1463,7 +1472,10 @@ PanelWindow {
                                 anchors.margins: Theme.dp(10)
                                 spacing: Theme.dp(8)
 
-                                Text { text: "✕"; color: Theme.textPrimary; font.pixelSize: Math.round(14 * s) }
+                                Text { text: "close"; color: Theme.textPrimary; font.pixelSize: Math.round(14 * s) 
+                                font.family: Typography.materialSymbols
+                                font.styleName: "Regular"
+                                                                       }
                                 Text {
                                     Layout.fillWidth: true
                                     text: "Cancel"

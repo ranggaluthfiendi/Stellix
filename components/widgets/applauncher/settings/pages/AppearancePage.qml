@@ -289,7 +289,10 @@ VabContentPage {
                                         Text { text: modelData.name; color: (page.colorService && page.colorService.currentType === modelData.value) ? Theme.accent : Theme.textPrimary; font.pixelSize: Theme.dp(9); font.weight: Font.Bold }
                                         Text { text: modelData.desc; color: Theme.textMuted; font.pixelSize: Theme.dp(7) }
                                     }
-                                    Text { text: "✓"; visible: (page.colorService && page.colorService.currentType === modelData.value); color: Theme.accent; font.pixelSize: Theme.dp(10) }
+                                    Text { text: "check_circle"; visible: (page.colorService && page.colorService.currentType === modelData.value); color: Theme.accent; font.pixelSize: Theme.dp(10) 
+                                    font.family: Typography.materialSymbols
+                                    font.styleName: "Regular"
+                                                                           }
                                 }
                                 MouseArea { 
                                     id: tm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor

@@ -331,9 +331,10 @@ PopupWindow {
                 }
 
                 Text {
-                    text: "✕"
+                    text: "close"
+                    font.family: Typography.materialSymbols
+                    font.styleName: "Regular"
                     color: closeMouse.containsMouse ? Theme.danger : Theme.textMuted
-                    font.family: Typography.fontFamily
                     font.pixelSize: Math.round((Typography.sizeXXS || 9) * s)
                     Layout.alignment: Qt.AlignVCenter
 
@@ -676,9 +677,10 @@ PopupWindow {
 
                                         Text {
                                             anchors.centerIn: parent
-                                            text: isExpanded ? "▾" : "⋯"
+                                            text: isExpanded ? "arrow_drop_down" : "more_horiz"
+                                            font.family: Typography.materialSymbols
+                                            font.styleName: "Regular"
                                             color: actionsBtnMouse.containsMouse || isExpanded ? Theme.bgPrimary : Theme.textMuted
-                                            font.family: Typography.fontFamily
                                             font.pixelSize: Math.round((Typography.sizeSM || 12) * s)
                                             font.weight: Typography.weightBold || Font.Bold
                                         }
@@ -749,7 +751,9 @@ PopupWindow {
                                                 spacing: Theme.dp(6)
 
                                                 Text {
-                                                    text: "▸"
+                                                    text: "arrow_right"
+                                                    font.family: Typography.materialSymbols
+                                                    font.styleName: "Regular"
                                                     color: actionItemMouse.containsMouse ? Theme.bgPrimary : Theme.accent
                                                     font.pixelSize: Math.round((Typography.sizeXXS || 10) * s)
                                                     font.weight: Typography.weightBold || Font.Bold
